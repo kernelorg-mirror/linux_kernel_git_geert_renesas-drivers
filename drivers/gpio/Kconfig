@@ -288,6 +288,12 @@ config GPIO_RCAR
 	help
 	  Say yes here to support GPIO on Renesas R-Car SoCs.
 
+config GPIO_RZ
+	tristate "Renesas RZ GPIO"
+	depends on ARM
+	help
+	  Say yes here to support GPIO on Renesas RZ SoCs.
+
 config GPIO_SAMSUNG
 	bool
 	depends on PLAT_SAMSUNG
