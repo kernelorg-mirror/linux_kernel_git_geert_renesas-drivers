@@ -72,8 +72,31 @@
 };
 
 &pfc {
-	pinctrl-0 = <&scif2_pins>;
+	pinctrl-0 = <&ethernet_pins &scif2_pins>;
 	pinctrl-names = "default";
+
+	ethernet_pins: ethernet {
+		renesas,groups = "ethernet_rxdv_p3_6",
+				 "ethernet_rxer_p3_5",
+				 "ethernet_rxclk_p3_4",
+				 "ethernet_mdio_p3_3",
+				 "ethernet_rxd_p2_11",
+				 "ethernet_rxd_p2_10",
+				 "ethernet_rxd_p2_9",
+				 "ethernet_rxd_p2_8",
+				 "ethernet_txd_p2_7",
+				 "ethernet_txd_p2_6",
+				 "ethernet_txd_p2_5",
+				 "ethernet_txd_p2_4",
+				 "ethernet_txcrs_p2_3",
+				 "ethernet_txen_p2_2",
+				 "ethernet_txer_p2_1",
+				 "ethernet_txclk_p2_0",
+				 "ethernet_mdc_p5_9",
+				 "ethernet_col_p1_14",
+				 "ethernet_int_p1_15";
+		renesas,function = "ethernet";
+	};
 
 	scif2_pins: serial2 {
 		renesas,groups = "scif2_txd_p3_0", "scif2_rxd_p3_2";
