@@ -250,6 +250,63 @@ SCIF5(RZ_PIN_AND_MUX)
 SCIF6(RZ_PIN_AND_MUX)
 SCIF7(RZ_PIN_AND_MUX)
 
+#define ETHERNET(fn)			\
+	fn(ethernet, col,    1,  3, 3)		\
+	fn(ethernet, col,    1, 14, 4)		\
+	fn(ethernet, int,    1, 15, 1)		\
+	fn(ethernet, txclk,  2,  0, 2)		\
+	fn(ethernet, txer,   2,  1, 2)		\
+	fn(ethernet, txen,   2,  2, 2)		\
+	fn(ethernet, txcrs,  2,  3, 2)		\
+	fn(ethernet, txd,    2,  4, 2)		\
+	fn(ethernet, txd,    2,  5, 2)		\
+	fn(ethernet, txd,    2,  6, 2)		\
+	fn(ethernet, txd,    2,  7, 2)		\
+	fn(ethernet, rxd,    2,  8, 2)		\
+	fn(ethernet, rxd,    2,  9, 2)		\
+	fn(ethernet, rxd,    2, 10, 2)		\
+	fn(ethernet, rxd,    2, 11, 2)		\
+	fn(ethernet, txclk,  3,  0, 2)		\
+	fn(ethernet, txer,   3,  1, 2)		\
+	fn(ethernet, txen,   3,  2, 2)		\
+	fn(ethernet, mdio,   3,  3, 2)		\
+	fn(ethernet, rxclk,  3,  4, 2)		\
+	fn(ethernet, rxer,   3,  5, 2)		\
+	fn(ethernet, rxdv,   3,  6, 2)		\
+	fn(ethernet, mdc,    5,  9, 2)		\
+	fn(ethernet, mdc,    7,  0, 3)		\
+	fn(ethernet, txclk,  7,  1, 3)		\
+	fn(ethernet, txer,   7,  2, 3)		\
+	fn(ethernet, txen,   7,  3, 3)		\
+	fn(ethernet, txd,    7,  4, 3)		\
+	fn(ethernet, txd,    7,  5, 3)		\
+	fn(ethernet, txd,    7,  6, 3)		\
+	fn(ethernet, txd,    7,  7, 3)		\
+	fn(ethernet, rxd,    7,  9, 3)		\
+	fn(ethernet, rxd,    7, 10, 3)		\
+	fn(ethernet, rxd,    7, 11, 2)		\
+	fn(ethernet, rxd,    7, 12, 3)		\
+	fn(ethernet, mdio,   7, 13, 3)		\
+	fn(ethernet, crs,    7, 14, 3)		\
+	fn(ethernet, rxclk,  7, 15, 3)		\
+	fn(ethernet, rxer,   8,  0, 3)		\
+	fn(ethernet, rxd,    8,  1, 3)		\
+	fn(ethernet, col,    8,  7, 5)		\
+	fn(ethernet, txclk, 10,  0, 4)		\
+	fn(ethernet, txer,  10,  1, 4)		\
+	fn(ethernet, txen,  10,  2, 4)		\
+	fn(ethernet, crs,   10,  3, 4)		\
+	fn(ethernet, txd,   10,  4, 4)		\
+	fn(ethernet, txd,   10,  5, 4)		\
+	fn(ethernet, txd,   10,  6, 4)		\
+	fn(ethernet, txd,   10,  7, 4)		\
+	fn(ethernet, txd,   10,  8, 4)		\
+	fn(ethernet, txd,   10,  9, 4)		\
+	fn(ethernet, txd,   10, 10, 4)		\
+	fn(ethernet, txd,   10, 11, 4)		\
+
+ETHERNET(RZ_PIN_AND_MUX)
+
 static const struct sh_pfc_pin_group pinmux_groups[] = {
 	RIIC0(RZ_PMX_GROUP)
 	RIIC1(RZ_PMX_GROUP)
@@ -263,6 +320,7 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SCIF5(RZ_PMX_GROUP)
 	SCIF6(RZ_PMX_GROUP)
 	SCIF7(RZ_PMX_GROUP)
+	ETHERNET(RZ_PMX_GROUP)
 };
 
 static const char * const riic0_groups[] = {
@@ -313,6 +371,10 @@ static const char * const scif7_groups[] = {
 	SCIF7(RZ_GROUPS)
 };
 
+static const char * const ethernet_groups[] = {
+	ETHERNET(RZ_GROUPS)
+};
+
 static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(riic0),
 	SH_PFC_FUNCTION(riic1),
@@ -326,6 +388,7 @@ static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(scif5),
 	SH_PFC_FUNCTION(scif6),
 	SH_PFC_FUNCTION(scif7),
+	SH_PFC_FUNCTION(ethernet),
 };
 
 #define PFC_REG(idx, name, reg)						\
