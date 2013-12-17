@@ -45,6 +45,24 @@
 			gpios = <&port4 11 GPIO_ACTIVE_LOW>;
 		};
 	};
+
+	i2c@0 {
+		compatible = "i2c-gpio";
+		gpios = <&port1 5 GPIO_ACTIVE_HIGH /* sda */
+			 &port1 4 GPIO_ACTIVE_HIGH /* scl */
+			>;
+		i2c-gpio,sda-open-drain;
+		i2c-gpio,scl-open-drain;
+		i2c-gpio,delay-us = <5>;	/* ~100 kHz */
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		flash@50 {
+			compatible = "renesas,24c128";
+			reg = <0x50>;
+			pagesize = <64>;
+		};
+	};
 };
 
 &extal_clk {
