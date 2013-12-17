@@ -98,9 +98,30 @@ static struct sh_pfc_pin pinmux_pins[] = {
 
 #define RZ_PORT_PIN(bank, pin) (((bank) * 16) + (pin))
 
+#define __RZ_STR(pfx, hw, bank, pin, sfx)		\
+	pfx##_##hw##_p##bank##_##pin####sfx
+
+#define RZ_PIN_AND_MUX(pfx, hw, bank, pin, fn)				\
+static const unsigned int __RZ_STR(pfx, hw, bank, pin, _pins)[] = {	\
+	RZ_PORT_PIN(bank, pin),						\
+};									\
+static const unsigned int __RZ_STR(pfx, hw, bank, pin, _mux)[] = {	\
+	P_##bank##_##pin##_MARK_FN##fn,					\
+};
+
+#define RZ_PMX_GROUP(pfx, hw, bank, pin, fn) \
+	SH_PFC_PIN_GROUP(pfx##_##hw##_p##bank##_##pin),
+
+#define __RZ_GROUPS(x) #x
+
+#define RZ_GROUPS(pfx, hw, bank, pin, fn) \
+	__RZ_GROUPS(pfx##_##hw##_p##bank##_##pin),
+
 static const struct sh_pfc_pin_group pinmux_groups[] = {
 };
 
+static const char * const scif2_groups[] = {
+};
 static const struct sh_pfc_function pinmux_functions[] = {
 };
 
