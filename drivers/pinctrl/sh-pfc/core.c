@@ -439,6 +439,12 @@ static int sh_pfc_init_ranges(struct sh_pfc *pfc)
 
 #ifdef CONFIG_OF
 static const struct of_device_id sh_pfc_of_table[] = {
+#ifdef CONFIG_PINCTRL_PFC_R7S72100
+	{
+		.compatible = "renesas,pfc-r7s72100",
+		.data = &r7s72100_pinmux_info,
+	},
+#endif
 #ifdef CONFIG_PINCTRL_PFC_R8A73A4
 	{
 		.compatible = "renesas,pfc-r8a73a4",
@@ -579,6 +585,9 @@ static int sh_pfc_remove(struct platform_device *pdev)
 }
 
 static const struct platform_device_id sh_pfc_id_table[] = {
+#ifdef CONFIG_PINCTRL_PFC_R7S72100
+	{ "pfc-r7s72100", (kernel_ulong_t)&r7s72100_pinmux_info },
+#endif
 #ifdef CONFIG_PINCTRL_PFC_R8A73A4
 	{ "pfc-r8a73a4", (kernel_ulong_t)&r8a73a4_pinmux_info },
 #endif
