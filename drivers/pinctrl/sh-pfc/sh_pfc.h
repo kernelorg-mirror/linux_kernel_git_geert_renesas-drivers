@@ -219,13 +219,14 @@ struct sh_pfc_soc_info {
 #define GP_ALL(str)			CPU_ALL_PORT(_GP_ALL, str)
 
 /* PINMUX_GPIO_GP_ALL - Expand to a list of sh_pfc_pin entries */
-#define _GP_GPIO(bank, _pin, _name, sfx)				\
-	[(bank * 32) + _pin] = {					\
-		.pin = (bank * 32) + _pin,				\
+#define _GP_GPIO(banksize, bank, _pin, _name, sfx)			\
+	[(bank * banksize) + _pin] = {					\
+		.pin = (bank * banksize) + _pin,			\
 		.name = __stringify(_name),				\
 		.enum_id = _name##_DATA,				\
 	}
-#define PINMUX_GPIO_GP_ALL()		CPU_ALL_PORT(_GP_GPIO, unused)
+#define _GP_GPIO32(bank, _pin, _name, sfx) _GP_GPIO(32, bank, _pin, _name, sfx)
+#define PINMUX_GPIO_GP_ALL()		CPU_ALL_PORT(_GP_GPIO32, unused)
 
 /* PINMUX_DATA_GP_ALL -  Expand to a list of name_DATA, name_FN marks */
 #define _GP_DATA(bank, pin, name, sfx)	PINMUX_DATA(name##_DATA, name##_FN)
