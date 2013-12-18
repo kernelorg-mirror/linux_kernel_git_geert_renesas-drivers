@@ -117,6 +117,27 @@ static const unsigned int __RZ_STR(pfx, hw, bank, pin, _mux)[] = {	\
 #define RZ_GROUPS(pfx, hw, bank, pin, fn) \
 	__RZ_GROUPS(pfx##_##hw##_p##bank##_##pin),
 
+#define RIIC0(fn)			\
+	fn(riic0, scl, 1, 0, 1)		\
+	fn(riic0, sda, 1, 1, 1)
+
+#define RIIC1(fn)			\
+	fn(riic1, scl, 1, 2, 1)		\
+	fn(riic1, sda, 1, 3, 1)
+
+#define RIIC2(fn)			\
+	fn(riic2, scl, 1, 4, 1)		\
+	fn(riic2, sda, 1, 5, 1)
+
+#define RIIC3(fn)			\
+	fn(riic3, scl, 1, 6, 1)		\
+	fn(riic3, sda, 1, 7, 1)
+
+RIIC0(RZ_PIN_AND_MUX)
+RIIC1(RZ_PIN_AND_MUX)
+RIIC2(RZ_PIN_AND_MUX)
+RIIC3(RZ_PIN_AND_MUX)
+
 #define SCIF0(fn)			\
 	fn(scif0, clk, 2, 13, 6)	\
 	fn(scif0, txd, 2, 14, 6)	\
@@ -230,6 +251,10 @@ SCIF6(RZ_PIN_AND_MUX)
 SCIF7(RZ_PIN_AND_MUX)
 
 static const struct sh_pfc_pin_group pinmux_groups[] = {
+	RIIC0(RZ_PMX_GROUP)
+	RIIC1(RZ_PMX_GROUP)
+	RIIC2(RZ_PMX_GROUP)
+	RIIC3(RZ_PMX_GROUP)
 	SCIF0(RZ_PMX_GROUP)
 	SCIF1(RZ_PMX_GROUP)
 	SCIF2(RZ_PMX_GROUP)
@@ -238,6 +263,22 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SCIF5(RZ_PMX_GROUP)
 	SCIF6(RZ_PMX_GROUP)
 	SCIF7(RZ_PMX_GROUP)
+};
+
+static const char * const riic0_groups[] = {
+	RIIC0(RZ_GROUPS)
+};
+
+static const char * const riic1_groups[] = {
+	RIIC1(RZ_GROUPS)
+};
+
+static const char * const riic2_groups[] = {
+	RIIC2(RZ_GROUPS)
+};
+
+static const char * const riic3_groups[] = {
+	RIIC3(RZ_GROUPS)
 };
 
 static const char * const scif0_groups[] = {
@@ -273,6 +314,10 @@ static const char * const scif7_groups[] = {
 };
 
 static const struct sh_pfc_function pinmux_functions[] = {
+	SH_PFC_FUNCTION(riic0),
+	SH_PFC_FUNCTION(riic1),
+	SH_PFC_FUNCTION(riic2),
+	SH_PFC_FUNCTION(riic3),
 	SH_PFC_FUNCTION(scif0),
 	SH_PFC_FUNCTION(scif1),
 	SH_PFC_FUNCTION(scif2),
