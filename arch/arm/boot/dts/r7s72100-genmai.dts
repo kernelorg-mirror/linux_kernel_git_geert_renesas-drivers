@@ -72,7 +72,7 @@
 };
 
 &pfc {
-	pinctrl-0 = <&ethernet_pins &scif2_pins>;
+	pinctrl-0 = <&ethernet_pins &rspi4_pins &scif2_pins>;
 	pinctrl-names = "default";
 
 	ethernet_pins: ethernet {
@@ -96,6 +96,12 @@
 				 "ethernet_col_p1_14",
 				 "ethernet_int_p1_15";
 		renesas,function = "ethernet";
+	};
+
+	rspi4_pins: spi4 {
+		renesas,groups = "rspi4_rspck_p4_0", "rspi4_ssl0_p4_1",
+				 "rspi4_mosi_p4_2", "rspi4_miso_p4_3";
+		renesas,function = "rspi4";
 	};
 
 	scif2_pins: serial2 {
