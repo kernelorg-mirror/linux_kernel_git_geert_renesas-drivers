@@ -79,6 +79,7 @@ static int cpg_mstp_clock_endisable(struct clk_hw *hw, bool enable)
 	unsigned int i;
 	u32 value;
 
+	pr_debug("MSTP %pC %s\n", hw->clk, enable ? "ON" : "OFF");
 	spin_lock_irqsave(&group->lock, flags);
 
 	value = cpg_mstp_read(group, group->smstpcr);
