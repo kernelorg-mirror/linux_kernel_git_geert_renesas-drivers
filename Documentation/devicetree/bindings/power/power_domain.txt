@@ -19,16 +19,26 @@ Required properties:
    providing multiple PM domains (e.g. power controllers), but can be any value
    as specified by device tree binding documentation of particular provider.
 
+Optional properties:
+ - power-on-latency: List of power-on latencies (in ns), one for each PM
+   domain. If all power-on latencies are identical, the list may be shortened
+   to a single value.
+ - power-off-latency: List of power-off latencies (in ns), one for each PM
+   domain. If all power-off latencies are identical, the list may be shortened
+   to a single value.
+
 Example:
 
 	power: power-controller@12340000 {
 		compatible = "foo,power-controller";
 		reg = <0x12340000 0x1000>;
 		#power-domain-cells = <1>;
+		power-on-latency = <250000 400000 180000>;
+		power-off-latency = <250000 400000 300000>;
 	};
 
-The node above defines a power controller that is a PM domain provider and
-expects one cell as its phandle argument.
+The node above defines a power controller that is a PM domain provider for
+3 PM domains, and expects one cell as its phandle argument.
 
 ==PM domain consumers==
 
