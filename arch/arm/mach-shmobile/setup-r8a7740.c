@@ -16,6 +16,7 @@
 #include <asm/mach/time.h>
 
 #include "common.h"
+#include "r8a7740.h"
 
 /*
  * r8a7740 chip has lasting errata on MERAM buffer.
@@ -68,6 +69,7 @@ static void __init r8a7740_init_irq_of(void)
 static void __init r8a7740_generic_init(void)
 {
 	r8a7740_meram_workaround();
+	r8a7740_disable_mstp_clocks();
 }
 
 static const char *const r8a7740_boards_compat_dt[] __initconst = {
