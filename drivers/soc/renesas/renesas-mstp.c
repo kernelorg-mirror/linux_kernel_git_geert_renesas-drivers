@@ -622,6 +622,10 @@ static int __init proc_mstp_init(void)
 	if (of_machine_is_compatible("renesas,r8a7790"))
 		error = renesas_mstp_setup(&r8a7790_mstp_info);
 #endif
+#ifdef CONFIG_ARCH_R8A7791
+	if (of_machine_is_compatible("renesas,r8a7791"))
+		error = renesas_mstp_setup(&r8a7791_mstp_info);
+#endif
 	if (error)
 		return error;
 
