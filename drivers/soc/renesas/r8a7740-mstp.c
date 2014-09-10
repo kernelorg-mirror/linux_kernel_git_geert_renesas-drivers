@@ -1,0 +1,335 @@
+#include <linux/bitops.h>
+#include <linux/bug.h>
+#include <linux/init.h>
+#include <linux/io.h>
+#include <linux/kernel.h>
+
+#include "renesas-mstp.h"
+
+#define MSTP_BASE	0xe6150000
+
+#define MSTPSR0		0xe6150030
+#define MSTPSR1		0xe6150038
+#define MSTPSR2		0xe6150040
+#define MSTPSR3		0xe6150048
+#define MSTPSR4		0xe615004C
+#define MSTPSR5		0xe615003C
+
+#define SMSTPCR0	0xe6150130
+#define SMSTPCR1	0xe6150134
+#define SMSTPCR2	0xe6150138
+#define SMSTPCR3	0xe615013C
+#define SMSTPCR4	0xe6150140
+#define SMSTPCR5	0xe6150144
+
+#define RMSTPCR0	0xe6150110
+#define RMSTPCR1	0xe6150114
+#define RMSTPCR2	0xe6150118
+#define RMSTPCR3	0xe615011C
+#define RMSTPCR4	0xe6150120
+#define RMSTPCR5	0xe6150124
+
+#define MSTP0_RT_CPUTLB	BIT(31)
+#define MSTP0_RT_CPUIC	BIT(30)
+#define MSTP0_RT_CPUOC	BIT(29)
+#define MSTP0_RT_CPUFPU	BIT(25)
+#define MSTP0_RT_DMAC2	BIT(23)
+#define MSTP0_INTCS	BIT(22)
+#define MSTP0_RT_DMAC1	BIT(21)
+#define MSTP0_H_UDI	BIT(19)
+#define MSTP0_DEBUG0	BIT(18)
+#define MSTP0_UBC	BIT(17)
+#define MSTP0_DEBUG1	BIT(16)
+#define MSTP0_ILRAM	BIT(15)
+#define MSTP0_ICB	BIT(7)
+#define MSTP0_A2S	BIT(4)
+#define MSTP0_S2A	BIT(3)
+#define MSTP0_MSIOF0	BIT(0)
+
+#define MSTP1_CORESIGHT	BIT(31)
+#define MSTP1_2DG	BIT(30)
+#define MSTP1_SSP	BIT(29)
+#define MSTP1_CEU21	BIT(28)
+#define MSTP1_CEU20	BIT(27)
+#define MSTP1_TMU0	BIT(25)
+#define MSTP1_CMT0	BIT(24)
+#define MSTP1_LCDC1	BIT(17)
+#define MSTP1_IIC0	BIT(16)
+#define MSTP1_2D_DMAC	BIT(15)
+#define MSTP1_MERAM	BIT(13)
+#define MSTP1_SGX540	BIT(12)
+#define MSTP1_TMU1	BIT(11)
+#define MSTP1_VPC	BIT(7)
+#define MSTP1_JPU	BIT(6)
+#define MSTP1_DISP_DSRV	BIT(4)
+#define MSTP1_VIO6C	BIT(3)
+#define MSTP1_VPU5F	BIT(2)
+#define MSTP1_VCP1	BIT(1)
+#define MSTP1_LCDC0	BIT(0)
+
+#define MSTP2_SCIFA6	BIT(30)
+#define MSTP2_INTCA	BIT(29)
+#define MSTP2_BBIF1	BIT(26)
+#define MSTP2_BBIF2	BIT(25)
+#define MSTP2_SPU	BIT(23)
+#define MSTP2_SCIFA7	BIT(22)
+#define MSTP2_SY_DMAC1	BIT(18)
+#define MSTP2_SY_DMAC2	BIT(17)
+#define MSTP2_SY_DMAC3	BIT(16)
+#define MSTP2_DDM	BIT(15)
+#define MSTP2_USB_DMAC	BIT(14)
+#define MSTP2_MFIS	BIT(13)
+#define MSTP2_MFIM	BIT(12)
+#define MSTP2_MMFROM	BIT(10)
+#define MSTP2_SMFRAM	BIT(9)
+#define MSTP2_MSIOF1	BIT(8)
+#define MSTP2_SCIFA5	BIT(7)
+#define MSTP2_SCIFB	BIT(6)
+#define MSTP2_MSIOF2	BIT(5)
+#define MSTP2_SCIFA0	BIT(4)
+#define MSTP2_SCIFA1	BIT(3)
+#define MSTP2_SCIFA2	BIT(2)
+#define MSTP2_SCIFA3	BIT(1)
+#define MSTP2_SCIFA4	BIT(0)
+
+#define MSTP3_VOU	BIT(31)
+#define MSTP3_ATAPI	BIT(30)
+#define MSTP3_CMT1	BIT(29)
+#define MSTP3_FSI	BIT(28)
+#define MSTP3_FMSI	BIT(27)
+#define MSTP3_IRDA	BIT(25)
+#define MSTP3_IIC1	BIT(23)
+#define MSTP3_USBF	BIT(20)
+#define MSTP3_SHWYSTAT	BIT(16)
+#define MSTP3_FLCTL	BIT(15)
+#define MSTP3_SDHI0	BIT(14)
+#define MSTP3_SDHI1	BIT(13)
+#define MSTP3_MMC	BIT(12)
+#define MSTP3_RSPI	BIT(11)
+#define MSTP3_SIM	BIT(10)
+#define MSTP3_GETHER	BIT(9)
+#define MSTP3_MFIMMERAM	BIT(8)
+#define MSTP3_TPU0	BIT(4)
+
+#define MSTP4_SDENC	BIT(28)
+#define MSTP4_USBH	BIT(16)
+#define MSTP4_SDHI2	BIT(15)
+#define MSTP4_USB_FUNC	BIT(7)
+#define MSTP4_USB_PHY	BIT(6)
+#define MSTP4_CMT4	BIT(5)
+#define MSTP4_CMT3	BIT(4)
+#define MSTP4_KEYSC	BIT(3)
+#define MSTP4_RWDT0	BIT(2)
+#define MSTP4_CMT2	BIT(0)
+
+#define MSTP5_AXI	BIT(25)
+#define MSTP5_INTA	BIT(24)
+
+// FIXME MSTP1_TMU0 is not automatically enabled on multi-platform kernels
+// FIXME MSTP0_ICB and MSTP1_MERAM are needed by sh_mobile_lcdc_fb
+#define SMSTP0_DISABLE	\
+	MSTP0_RT_CPUTLB | MSTP0_RT_CPUIC | MSTP0_RT_CPUOC | MSTP0_RT_CPUFPU | \
+	MSTP0_RT_DMAC2 | MSTP0_INTCS | MSTP0_RT_DMAC1 | MSTP0_H_UDI | \
+	MSTP0_DEBUG0 | MSTP0_UBC | MSTP0_DEBUG1 | MSTP0_ILRAM | \
+	MSTP0_S2A | MSTP0_MSIOF0
+
+#define SMSTP1_DISABLE	\
+	MSTP1_CORESIGHT | MSTP1_2DG | MSTP1_SSP | MSTP1_CEU21 | MSTP1_CEU20 | \
+	MSTP1_TMU0 | MSTP1_CMT0 | MSTP1_LCDC1 | MSTP1_IIC0 | MSTP1_2D_DMAC | \
+	MSTP1_SGX540 | MSTP1_TMU1 | MSTP1_VPC | MSTP1_JPU | \
+	MSTP1_DISP_DSRV | MSTP1_VIO6C | MSTP1_VPU5F | MSTP1_VCP1 | MSTP1_LCDC0
+
+#define SMSTP2_DISABLE	\
+	MSTP2_SCIFA6 | MSTP2_INTCA | MSTP2_BBIF1 | MSTP2_BBIF2 | MSTP2_SPU | \
+	MSTP2_SCIFA7 | MSTP2_SY_DMAC1 | MSTP2_SY_DMAC2 | MSTP2_SY_DMAC3 | \
+	MSTP2_DDM | MSTP2_USB_DMAC | MSTP2_MFIS | MSTP2_MFIM | MSTP2_MMFROM | \
+	MSTP2_SMFRAM | MSTP2_MSIOF1 | MSTP2_SCIFA5 | MSTP2_SCIFB | \
+	MSTP2_MSIOF2 | MSTP2_SCIFA0 | MSTP2_SCIFA2 | MSTP2_SCIFA3 | \
+	MSTP2_SCIFA4
+
+#define SMSTP3_DISABLE	\
+	MSTP3_VOU | MSTP3_ATAPI | MSTP3_CMT1 | MSTP3_FSI | MSTP3_FMSI | \
+	MSTP3_IRDA | MSTP3_IIC1 | MSTP3_USBF | MSTP3_SHWYSTAT | MSTP3_FLCTL | \
+	MSTP3_SDHI0 | MSTP3_SDHI1 | MSTP3_MMC | MSTP3_RSPI | MSTP3_SIM | \
+	MSTP3_GETHER | MSTP3_MFIMMERAM | MSTP3_TPU0
+
+#define SMSTP4_DISABLE	\
+	MSTP4_SDENC | MSTP4_USBH | MSTP4_SDHI2 | MSTP4_USB_FUNC | \
+	MSTP4_USB_PHY | MSTP4_CMT4 | MSTP4_CMT3 | MSTP4_KEYSC | MSTP4_RWDT0 | \
+	MSTP4_CMT2
+
+#define SMSTP5_DISABLE	\
+	0
+
+#define RMSTP0_DISABLE	SMSTP0_DISABLE | MSTP0_A2S | MSTP0_ICB    // FIXME
+#define RMSTP1_DISABLE	SMSTP1_DISABLE | MSTP1_TMU0 | MSTP1_MERAM // FIXME
+#define RMSTP2_DISABLE	SMSTP2_DISABLE | MSTP2_SCIFA1
+#define RMSTP3_DISABLE	SMSTP3_DISABLE
+#define RMSTP4_DISABLE	SMSTP4_DISABLE
+#define RMSTP5_DISABLE	SMSTP5_DISABLE | MSTP5_AXI | MSTP5_INTA
+
+static const struct mstp_disable smstp_disable[] __initconst = {
+	{ SMSTPCR0, SMSTP0_DISABLE },
+	{ SMSTPCR1, SMSTP1_DISABLE },
+	{ SMSTPCR2, SMSTP2_DISABLE },
+	{ SMSTPCR3, SMSTP3_DISABLE },
+	{ SMSTPCR4, SMSTP4_DISABLE },
+	{ SMSTPCR5, SMSTP5_DISABLE },
+};
+
+static const struct mstp_disable rmstp_disable[] __initconst = {
+	{ RMSTPCR0, RMSTP0_DISABLE },
+	{ RMSTPCR1, RMSTP1_DISABLE },
+	{ RMSTPCR2, RMSTP2_DISABLE },
+	{ RMSTPCR3, RMSTP3_DISABLE },
+	{ RMSTPCR4, RMSTP4_DISABLE },
+	{ RMSTPCR5, RMSTP5_DISABLE },
+};
+
+static const struct mstp_clock mstp_clocks[] = {
+	MSTP_BIT(2D_DMAC, 1),
+	MSTP_BIT(2DG, 1),
+	MSTP_BIT(A2S, 0),
+	MSTP_BIT(ATAPI, 3),
+	MSTP_BIT(AXI, 5),
+	MSTP_BIT(BBIF1, 2),
+	MSTP_BIT(BBIF2, 2),
+	MSTP_BIT(CEU20, 1),
+	MSTP_BIT(CEU21, 1),
+	MSTP_BIT(CMT0, 1),
+	MSTP_BIT(CMT1, 3),
+	MSTP_BIT(CMT2, 4),
+	MSTP_BIT(CMT3, 4),
+	MSTP_BIT(CMT4, 4),
+	MSTP_BIT(CORESIGHT, 1),
+	MSTP_BIT(DDM, 2),
+	MSTP_BIT(DEBUG0, 0),
+	MSTP_BIT(DEBUG1, 0),
+	MSTP_BIT(DISP_DSRV, 1),
+	MSTP_BIT(FLCTL, 3),
+	MSTP_BIT(FMSI, 3),
+	MSTP_BIT(FSI, 3),
+	MSTP_BIT(GETHER, 3),
+	MSTP_BIT(H_UDI, 0),
+	MSTP_BIT(ICB, 0),
+	MSTP_BIT(IIC0, 1),
+	MSTP_BIT(IIC1, 3),
+	MSTP_BIT(ILRAM, 0),
+	MSTP_BIT(INTA, 5),
+	MSTP_BIT(INTCA, 2),
+	MSTP_BIT(INTCS, 0),
+	MSTP_BIT(IRDA, 3),
+	MSTP_BIT(JPU, 1),
+	MSTP_BIT(KEYSC, 4),
+	MSTP_BIT(LCDC0, 1),
+	MSTP_BIT(LCDC1, 1),
+	MSTP_BIT(MERAM, 1),
+	MSTP_BIT(MFIM, 2),
+	MSTP_BIT(MFIMMERAM, 3),
+	MSTP_BIT(MFIS, 2),
+	MSTP_BIT(MMC, 3),
+	MSTP_BIT(MMFROM, 2),
+	MSTP_BIT(MSIOF0, 0),
+	MSTP_BIT(MSIOF1, 2),
+	MSTP_BIT(MSIOF2, 2),
+	MSTP_BIT(RSPI, 3),
+	MSTP_BIT(RT_CPUFPU, 0),
+	MSTP_BIT(RT_CPUIC, 0),
+	MSTP_BIT(RT_CPUOC, 0),
+	MSTP_BIT(RT_CPUTLB, 0),
+	MSTP_BIT(RT_DMAC1, 0),
+	MSTP_BIT(RT_DMAC2, 0),
+	MSTP_BIT(RWDT0, 4),
+	MSTP_BIT(S2A, 0),
+	MSTP_BIT(SCIFA0, 2),
+	MSTP_BIT(SCIFA1, 2),
+	MSTP_BIT(SCIFA2, 2),
+	MSTP_BIT(SCIFA3, 2),
+	MSTP_BIT(SCIFA4, 2),
+	MSTP_BIT(SCIFA5, 2),
+	MSTP_BIT(SCIFA6, 2),
+	MSTP_BIT(SCIFA7, 2),
+	MSTP_BIT(SCIFB, 2),
+	MSTP_BIT(SDENC, 4),
+	MSTP_BIT(SDHI0, 3),
+	MSTP_BIT(SDHI1, 3),
+	MSTP_BIT(SDHI2, 4),
+	MSTP_BIT(SGX540, 1),
+	MSTP_BIT(SHWYSTAT, 3),
+	MSTP_BIT(SIM, 3),
+	MSTP_BIT(SMFRAM, 2),
+	MSTP_BIT(SPU, 2),
+	MSTP_BIT(SSP, 1),
+	MSTP_BIT(SY_DMAC1, 2),
+	MSTP_BIT(SY_DMAC2, 2),
+	MSTP_BIT(SY_DMAC3, 2),
+	MSTP_BIT(TMU0, 1),
+	MSTP_BIT(TMU1, 1),
+	MSTP_BIT(TPU0, 3),
+	MSTP_BIT(UBC, 0),
+	MSTP_BIT(USB_DMAC, 2),
+	MSTP_BIT(USBF, 3),
+	MSTP_BIT(USB_FUNC, 4),
+	MSTP_BIT(USBH, 4),
+	MSTP_BIT(USB_PHY, 4),
+	MSTP_BIT(VCP1, 1),
+	MSTP_BIT(VIO6C, 1),
+	MSTP_BIT(VOU, 3),
+	MSTP_BIT(VPC, 1),
+	MSTP_BIT(VPU5F, 1),
+};
+
+static const struct mstp_regs mstp_regs[] = {
+	{ MSTPSR0, SMSTPCR0, RMSTPCR0 },
+	{ MSTPSR1, SMSTPCR1, RMSTPCR1 },
+	{ MSTPSR2, SMSTPCR2, RMSTPCR2 },
+	{ MSTPSR3, SMSTPCR3, RMSTPCR3 },
+	{ MSTPSR4, SMSTPCR4, RMSTPCR4 },
+	{ MSTPSR5, SMSTPCR5, RMSTPCR5 },
+};
+
+static const struct mstp_do_not_touch mstp_do_not_touch[] = {
+	{ 0, 4, "A2S" },
+	{ 4, 20, "MSTP420" },
+	{ 4, 19, "MSTP419" },		// Locks up sometimes
+	{ 5, 25, "AXI" },
+};
+
+const struct renesas_mstp_info r8a7740_mstp_info = {
+	.mstp_base		= MSTP_BASE,
+
+	.regs			= mstp_regs,
+	.clocks			= mstp_clocks,
+	.smstp_disable		= smstp_disable,
+	.rmstp_disable		= rmstp_disable,
+	.do_not_touch		= mstp_do_not_touch,
+
+	.num_regs		= ARRAY_SIZE(mstp_regs),
+	.num_clocks		= ARRAY_SIZE(mstp_clocks),
+	.num_smstp_disable	= ARRAY_SIZE(smstp_disable),
+	.num_rmstp_disable	= ARRAY_SIZE(rmstp_disable),
+	.num_do_not_touch	= ARRAY_SIZE(mstp_do_not_touch),
+};
+
+#define SYSC_BASE2	0xe6188000
+
+#define RESCNT		0x01c
+
+#define RESCNT_MD2	BIT(28)
+#define RESCNT_MD3	BIT(29)
+#define RESCNT_MD4	BIT(30)
+#define RESCNT_MD6	BIT(27)
+#define RESCNT_MD7	BIT(26)
+
+void __init r8a7740_disable_mstp_clocks(void)
+{
+	void __iomem *sysc2 = ioremap(SYSC_BASE2, PAGE_SIZE);
+
+	/* Do not touch the RMSTP clocks when booted from the Realtime Core */
+	if (readl(sysc2 + RESCNT) & RESCNT_MD7) {
+		pr_warn("Booted from Realtime Core. Skipping MSTP disable\n");
+		return;
+	}
+
+	renesas_disable_mstp_clocks(&r8a7740_mstp_info);
+}
