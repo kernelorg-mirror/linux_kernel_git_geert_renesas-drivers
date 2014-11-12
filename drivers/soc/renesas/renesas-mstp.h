@@ -64,3 +64,4 @@ struct renesas_mstp_info {
 struct seq_file;
 
 extern int renesas_disable_mstp_clocks(const struct renesas_mstp_info *info);
+extern const struct renesas_mstp_info r8a73a4_mstp_info;
