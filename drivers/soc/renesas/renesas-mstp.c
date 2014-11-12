@@ -569,6 +569,12 @@ static int __init proc_mstp_init(void)
 {
 	int error = -ENODEV;
 
+#ifdef CONFIG_ARCH_R8A73A4
+	if (of_machine_is_compatible("renesas,r8a73a4")) {
+		extern const struct renesas_mstp_info r8a73a4_mstp_info;
+		error = renesas_mstp_setup(&r8a73a4_mstp_info);
+	}
+#endif
 	if (error)
 		return error;
 
