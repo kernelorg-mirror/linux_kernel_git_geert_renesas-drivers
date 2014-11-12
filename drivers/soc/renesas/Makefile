@@ -37,3 +37,4 @@ obj-$(CONFIG_ARCH_R8A7791)	+= renesas-mstp.o r8a7791-mstp.o
 obj-$(CONFIG_ARCH_R8A7793)	+= renesas-mstp.o r8a7791-mstp.o
 obj-$(CONFIG_ARCH_R8A7795)	+= renesas-mstp.o r8a7795-mstp.o
 obj-$(CONFIG_ARCH_R8A7796)	+= renesas-mstp.o r8a7796-mstp.o
+obj-$(CONFIG_ARCH_SH73A0)	+= renesas-mstp.o sh73a0-mstp.o
