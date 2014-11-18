@@ -4,4 +4,6 @@
 
 extern const struct smp_operations sh73a0_smp_ops;
 
+void sh73a0_disable_mstp_clocks(void);
+
 #endif /* __ASM_SH73A0_H__ */

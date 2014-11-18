@@ -46,6 +46,7 @@ static void __init sh73a0_generic_init(void)
 	/* Shared attribute override enable, 64K*8way */
 	l2x0_init(IOMEM(0xf0100000), 0x00400000, 0xc20f0fff);
 #endif
+	sh73a0_disable_mstp_clocks();
 }
 
 static const char *const sh73a0_boards_compat_dt[] __initconst = {
