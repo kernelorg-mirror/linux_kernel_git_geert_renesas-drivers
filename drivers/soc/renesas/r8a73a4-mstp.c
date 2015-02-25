@@ -4,6 +4,7 @@
 #include <linux/init.h>
 #include <linux/io.h>
 #include <linux/kernel.h>
+#include <linux/of.h>
 
 #include "renesas-mstp.h"
 
@@ -484,9 +485,16 @@ const struct renesas_mstp_info r8a73a4_mstp_info = {
 #define MD7		BIT(26)
 #define MD8		BIT(25)
 
-void __init r8a73a4_disable_mstp_clocks(void)
+static int __init r8a73a4_disable_mstp_clocks(void)
 {
-	void __iomem *sysc2 = ioremap(SYSC_BASE2, PAGE_SIZE);
+	void __iomem *sysc2;
+
+	if (!of_machine_is_compatible("renesas,r8a73a4"))
+		return -ENODEV;
+
+	sysc2 = ioremap(SYSC_BASE2, PAGE_SIZE);
+	if (!sysc2)
+		return -ENOMEM;
 
 	/*
 	 * Do not touch the RMSTP and MMSTP clocks when booted from the
@@ -494,8 +502,9 @@ void __init r8a73a4_disable_mstp_clocks(void)
 	 */
 	if ((readl(sysc2 + RESCNT) & (TST_N | MD4 | MD3)) == (MD4 | MD3)) {
 		pr_warn("Booted from Realtime Core. Skipping MSTP disable\n");
-		return;
+		return -ENODEV;
 	}
 
-	renesas_disable_mstp_clocks(&r8a73a4_mstp_info);
+	return renesas_disable_mstp_clocks(&r8a73a4_mstp_info);
 }
+arch_initcall(r8a73a4_disable_mstp_clocks);
