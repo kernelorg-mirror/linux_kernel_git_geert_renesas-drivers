@@ -1,0 +1,51 @@
+/*
+ * Device Tree Overlay for SCIFB on r8a7740/Armadillo-800 EVA Expansion
+ * Interface Connector
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = CON15 pin 40
+ *   - RXD = CON15 pin 41
+ *   - SCK = CON15 pin 42
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial8 = &scifb; */
+			serial8 = "/serial@e6c30000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			scifb_pins: scifb {
+				groups = "scifb_data_0", "scifb_clk_0";
+				function = "scifb";
+			};
+		};
+	};
+
+	fragment-scifb {
+		target = <&scifb>;
+
+		__overlay__ {
+			pinctrl-0 = <&scifb_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};
