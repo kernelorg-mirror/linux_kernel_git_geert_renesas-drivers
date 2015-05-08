@@ -1,0 +1,59 @@
+/*
+ * Device Tree Overlay for SCIFA5(b) on r8a7791/Koelsch EXIO Connector C
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = EXIO Connector C pin 38
+ *   - RXD = EXIO Connector C pin 40
+ *
+ * Notes:
+ *   - As these pins are shared with SDHI0, the latter is disabled first.
+ */
+
+/dts-v1/ /plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial11 = &scifa5; */
+			serial11 = "/serial@e6c80000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			scifa5_pins: scifa5 {
+				groups = "scifa5_data_b";
+				function = "scifa5";
+			};
+		};
+	};
+
+	fragment-sdhi0 {
+		target = <&sdhi0>;
+
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment-scifa5 {
+		target = <&scifa5>;
+
+		__overlay__ {
+			pinctrl-0 = <&scifa5_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};
