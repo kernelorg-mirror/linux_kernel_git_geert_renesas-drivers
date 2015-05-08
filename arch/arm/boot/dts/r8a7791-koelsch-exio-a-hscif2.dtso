@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for HSCIF2 on r8a7791/Koelsch EXIO Connector A
+//
+// Copyright (C) 2015 Glider bvba
+//
+// Pinout:
+//   - TXD = EXIO A pin 62
+//   - RXD = EXIO A pin 66
+//   - RTS = EXIO A pin 65
+//   - CTS = EXIO A pin 60
+//   - GND = EXIO A pin 73/77/78
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	hscif2_pins: hscif2 {
+		groups = "hscif2_data_b", "hscif2_ctrl_b";
+		function = "hscif2";
+	};
+};
+
+&hscif2 {
+	pinctrl-0 = <&hscif2_pins>;
+	pinctrl-names = "default";
+
+	uart-has-rtscts;
+	status = "okay";
+};
