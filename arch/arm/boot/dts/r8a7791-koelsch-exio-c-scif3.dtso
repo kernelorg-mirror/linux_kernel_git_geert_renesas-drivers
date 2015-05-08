@@ -1,0 +1,59 @@
+/*
+ * Device Tree Overlay for SCIF3 on r8a7791/Koelsch EXIO Connector C
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = EXIO Connector C pin 38
+ *   - RXD = EXIO Connector C pin 40
+ *
+ * Notes:
+ *   - As these pins are shared with SDHI0, the latter is disabled first.
+ */
+
+/dts-v1/ /plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial3 = &scif3; */
+			serial3 = "/serial@e6ea8000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			scif3_pins: scif3 {
+				groups = "scif3_data_c";
+				function = "scif3";
+			};
+		};
+	};
+
+	fragment-sdhi0 {
+		target = <&sdhi0>;
+
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment-scif3 {
+		target = <&scif3>;
+
+		__overlay__ {
+			pinctrl-0 = <&scif3_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};
