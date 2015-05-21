@@ -75,6 +75,7 @@ struct overlay_changeset {
 	bool symbols_fragment;
 	struct of_changeset cset;
 	struct kobject kobj;
+	char *indirect_id;
 };
 
 /* master enable switch; once set to 0 can't be re-enabled */
@@ -512,14 +513,8 @@ static int build_changeset(struct overlay_changeset *ovcs)
 	return 0;
 }
 
-/*
- * Find the target node using a number of different strategies
- * in order of preference:
- *
- * 1) "target" property containing the phandle of the target
- * 2) "target-path" property containing the path of the target
- */
-static struct device_node *find_target_node(struct device_node *info_node)
+static struct device_node *find_target_node_direct(
+		struct device_node *info_node)
 {
 	const char *path;
 	u32 val;
@@ -533,10 +528,59 @@ static struct device_node *find_target_node(struct device_node *info_node)
 	if (!ret)
 		return of_find_node_by_path(path);
 
-	pr_err("Failed to find target for node %p (%s)\n",
-		info_node, info_node->name);
-
 	return NULL;
+}
+
+/*
+ * Find the target node using a number of different strategies
+ * in order of preference. Respects the indirect id if available.
+ *
+ * "target" property containing the phandle of the target
+ * "target-path" property containing the path of the target
+ */
+static struct device_node *find_target_node(struct overlay_changeset *ovcs,
+		struct device_node *info_node)
+{
+	struct device_node *target;
+	struct device_node *target_indirect;
+	struct device_node *indirect;
+
+	/* try direct target */
+	target = find_target_node_direct(info_node);
+	if (target)
+		return target;
+
+	/* try indirect if there */
+	if (!ovcs->indirect_id)
+		return NULL;
+
+	target_indirect = of_get_child_by_name(info_node, "target-indirect");
+	if (!target_indirect) {
+		pr_err("%s: Failed to find target-indirect node at %s\n",
+				__func__,
+				of_node_full_name(info_node));
+		return NULL;
+	}
+
+	indirect = of_get_child_by_name(target_indirect, ovcs->indirect_id);
+	of_node_put(target_indirect);
+	if (!indirect) {
+		pr_err("%s: Failed to find indirect child node \"%s\" at %s\n",
+				__func__, ovcs->indirect_id,
+				of_node_full_name(info_node));
+		return NULL;
+	}
+
+	target = find_target_node_direct(indirect);
+
+	if (!target) {
+		pr_err("%s: Failed to find target for \"%s\" at %s\n",
+				__func__, ovcs->indirect_id,
+				of_node_full_name(indirect));
+	}
+	of_node_put(indirect);
+
+	return target;
 }
 
 static ssize_t target_show(struct kobject *kobj,
@@ -624,7 +668,7 @@ static int init_overlay_changeset(struct overlay_changeset *ovcs,
 
 		fragment = &fragments[cnt];
 		fragment->overlay = overlay_node;
-		fragment->target = find_target_node(node);
+		fragment->target = find_target_node(ovcs, node);
 		if (!fragment->target) {
 			of_node_put(fragment->overlay);
 			ret = -EINVAL;
@@ -735,6 +779,7 @@ void overlay_changeset_release(struct kobject *kobj)
 {
 	struct overlay_changeset *ovcs = kobj_to_ovcs(kobj);
 
+	kfree(ovcs->indirect_id);
 	kfree(ovcs);
 }
 
@@ -790,47 +835,8 @@ static struct kobj_type overlay_changeset_ktype = {
 
 static struct kset *ov_kset;
 
-/**
- * of_overlay_apply() - Create and apply an overlay changeset
- * @tree:	Expanded overlay device tree
- * @ovcs_id:	Pointer to overlay changeset id
- *
- * Creates and applies an overlay changeset.
- *
- * If an error occurs in a pre-apply notifier, then no changes are made
- * to the device tree.
- *
-
- * A non-zero return value will not have created the changeset if error is from:
- *   - parameter checks
- *   - building the changeset
- *   - overlay changeset pre-apply notifier
- *
- * If an error is returned by an overlay changeset pre-apply notifier
- * then no further overlay changeset pre-apply notifier will be called.
- *
- * A non-zero return value will have created the changeset if error is from:
- *   - overlay changeset entry notifier
- *   - overlay changeset post-apply notifier
- *
- * If an error is returned by an overlay changeset post-apply notifier
- * then no further overlay changeset post-apply notifier will be called.
- *
- * If more than one notifier returns an error, then the last notifier
- * error to occur is returned.
- *
- * If an error occurred while applying the overlay changeset, then an
- * attempt is made to revert any changes that were made to the
- * device tree.  If there were any errors during the revert attempt
- * then the state of the device tree can not be determined, and any
- * following attempt to apply or remove an overlay changeset will be
- * refused.
- *
- * Returns 0 on success, or a negative error number.  Overlay changeset
- * id is returned to *ovcs_id.
- */
-
-int of_overlay_apply(struct device_node *tree, int *ovcs_id)
+static int __of_overlay_apply(struct device_node *tree,
+	const char *indirect_id, int *ovcs_id)
 {
 	struct overlay_changeset *ovcs;
 	int ret = 0, ret_revert, ret_tmp;
@@ -857,6 +863,14 @@ int of_overlay_apply(struct device_node *tree, int *ovcs_id)
 
 	of_overlay_mutex_lock();
 	mutex_lock(&of_mutex);
+
+	if (indirect_id) {
+		ovcs->indirect_id = kstrdup(indirect_id, GFP_KERNEL);
+		if (!ovcs->indirect_id) {
+			ret = -ENOMEM;
+			goto err_free_overlay_changeset;
+		}
+	}
 
 	ret = of_resolve_phandles(tree);
 	if (ret)
@@ -939,7 +953,71 @@ out:
 
 	return ret;
 }
+
+/**
+ * of_overlay_apply() - Create and apply an overlay changeset
+ * @tree:	Expanded overlay device tree
+ * @ovcs_id:	Pointer to overlay changeset id
+ *
+ * Creates and applies an overlay changeset.
+ *
+ * If an error occurs in a pre-apply notifier, then no changes are made
+ * to the device tree.
+ *
+
+ * A non-zero return value will not have created the changeset if error is from:
+ *   - parameter checks
+ *   - building the changeset
+ *   - overlay changeset pre-apply notifier
+ *
+ * If an error is returned by an overlay changeset pre-apply notifier
+ * then no further overlay changeset pre-apply notifier will be called.
+ *
+ * A non-zero return value will have created the changeset if error is from:
+ *   - overlay changeset entry notifier
+ *   - overlay changeset post-apply notifier
+ *
+ * If an error is returned by an overlay changeset post-apply notifier
+ * then no further overlay changeset post-apply notifier will be called.
+ *
+ * If more than one notifier returns an error, then the last notifier
+ * error to occur is returned.
+ *
+ * If an error occurred while applying the overlay changeset, then an
+ * attempt is made to revert any changes that were made to the
+ * device tree.  If there were any errors during the revert attempt
+ * then the state of the device tree can not be determined, and any
+ * following attempt to apply or remove an overlay changeset will be
+ * refused.
+ *
+ * Returns 0 on success, or a negative error number.  Overlay changeset
+ * id is returned to *ovcs_id.
+ */
+
+int of_overlay_apply(struct device_node *tree, int *ovcs_id)
+{
+	return __of_overlay_apply(tree, NULL, ovcs_id);
+}
 EXPORT_SYMBOL_GPL(of_overlay_apply);
+
+/**
+ * of_overlay_apply_indirect() - Create and apply an overlay
+ * @tree:	Device node containing all the overlays
+ * @id:		Indirect property phandle
+ * @ovcs_id:	Pointer to overlay changeset id
+ *
+ * Creates and applies an overlay while also keeping track
+ * of the overlay in a list. This list can be used to prevent
+ * illegal overlay removals.
+ *
+ * Returns the id of the created overlay, or a negative error number
+ */
+int of_overlay_apply_indirect(struct device_node *tree, const char *id,
+			      int *ovcs_id)
+{
+	return __of_overlay_apply(tree, id, ovcs_id);
+}
+EXPORT_SYMBOL_GPL(of_overlay_apply_indirect);
 
 /*
  * Find @np in @tree.
