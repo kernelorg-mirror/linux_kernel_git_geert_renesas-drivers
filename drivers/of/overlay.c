@@ -76,6 +76,7 @@ struct overlay_changeset {
 	struct of_changeset cset;
 	struct kobject kobj;
 	char *indirect_id;
+	struct device_node *target_root;
 };
 
 /* master enable switch; once set to 0 can't be re-enabled */
@@ -514,20 +515,83 @@ static int build_changeset(struct overlay_changeset *ovcs)
 }
 
 static struct device_node *find_target_node_direct(
+		struct overlay_changeset *ovcs,
 		struct device_node *info_node)
 {
+	struct device_node *target = NULL, *np;
 	const char *path;
+	char *newpath;
 	u32 val;
 	int ret;
 
 	ret = of_property_read_u32(info_node, "target", &val);
-	if (!ret)
-		return of_find_node_by_phandle(val);
+	if (!ret) {
+		target = of_find_node_by_phandle(val);
+		if (!target) {
+			pr_err("%s: Could not find target phandle 0x%x\n",
+					__func__, val);
+			return NULL;
+		}
+		goto check_root;
+	}
 
 	ret = of_property_read_string(info_node, "target-path", &path);
-	if (!ret)
-		return of_find_node_by_path(path);
+	if (!ret) {
+		if (!ovcs->target_root) {
+			target = of_find_node_by_path(path);
+			if (!target)
+				pr_err("%s: Could not find target path \"%s\"\n",
+						__func__, path);
+			return target;
+		}
 
+		/* remove preceding '/' from path; relative path */
+		if (*path == '/') {
+			while (*path == '/')
+				path++;
+
+			newpath = kasprintf(GFP_KERNEL, "%s%s%s",
+					of_node_full_name(ovcs->target_root),
+					*path ? "/" : "", path);
+			if (!newpath) {
+				pr_err("%s: Could not allocate \"%s%s%s\"\n",
+					__func__,
+					of_node_full_name(ovcs->target_root),
+					*path ? "/" : "", path);
+				return NULL;
+			}
+			target = of_find_node_by_path(newpath);
+			kfree(newpath);
+
+			return target;
+
+		}
+		/* target is an alias, need to check */
+		target = of_find_node_by_path(path);
+		if (!target) {
+			pr_err("%s: Could not find alias \"%s\"\n",
+					__func__, path);
+			return NULL;
+		}
+		goto check_root;
+	}
+
+	return NULL;
+
+check_root:
+	if (!ovcs->target_root)
+		return target;
+
+	/* got a target, but we have to check it's under target root */
+	for (np = target; np; np = np->parent) {
+		if (np == ovcs->target_root)
+			return target;
+	}
+	pr_err("%s: target \"%s\" not under target_root \"%s\"\n",
+			__func__, of_node_full_name(target),
+			of_node_full_name(ovcs->target_root));
+	/* target is not under target_root */
+	of_node_put(target);
 	return NULL;
 }
 
@@ -546,7 +610,7 @@ static struct device_node *find_target_node(struct overlay_changeset *ovcs,
 	struct device_node *indirect;
 
 	/* try direct target */
-	target = find_target_node_direct(info_node);
+	target = find_target_node_direct(ovcs, info_node);
 	if (target)
 		return target;
 
@@ -571,7 +635,7 @@ static struct device_node *find_target_node(struct overlay_changeset *ovcs,
 		return NULL;
 	}
 
-	target = find_target_node_direct(indirect);
+	target = find_target_node_direct(ovcs, indirect);
 
 	if (!target) {
 		pr_err("%s: Failed to find target for \"%s\" at %s\n",
@@ -779,6 +843,7 @@ void overlay_changeset_release(struct kobject *kobj)
 {
 	struct overlay_changeset *ovcs = kobj_to_ovcs(kobj);
 
+	of_node_put(ovcs->target_root);
 	kfree(ovcs->indirect_id);
 	kfree(ovcs);
 }
@@ -836,7 +901,7 @@ static struct kobj_type overlay_changeset_ktype = {
 static struct kset *ov_kset;
 
 static int __of_overlay_apply(struct device_node *tree,
-	const char *indirect_id, int *ovcs_id)
+	const char *indirect_id, struct device_node *target_root, int *ovcs_id)
 {
 	struct overlay_changeset *ovcs;
 	int ret = 0, ret_revert, ret_tmp;
@@ -871,6 +936,7 @@ static int __of_overlay_apply(struct device_node *tree,
 			goto err_free_overlay_changeset;
 		}
 	}
+	ovcs->target_root = of_node_get(target_root);
 
 	ret = of_resolve_phandles(tree);
 	if (ret)
@@ -996,7 +1062,7 @@ out:
 
 int of_overlay_apply(struct device_node *tree, int *ovcs_id)
 {
-	return __of_overlay_apply(tree, NULL, ovcs_id);
+	return __of_overlay_apply(tree, NULL, NULL, ovcs_id);
 }
 EXPORT_SYMBOL_GPL(of_overlay_apply);
 
@@ -1015,9 +1081,30 @@ EXPORT_SYMBOL_GPL(of_overlay_apply);
 int of_overlay_apply_indirect(struct device_node *tree, const char *id,
 			      int *ovcs_id)
 {
-	return __of_overlay_apply(tree, id, ovcs_id);
+	return __of_overlay_apply(tree, id, NULL, ovcs_id);
 }
 EXPORT_SYMBOL_GPL(of_overlay_apply_indirect);
+
+/**
+ * of_overlay_apply_target_root() - Create and apply an overlay
+ *			under which will be limited to target_root
+ * @tree:		Device node containing all the overlays
+ * @target_root:	Target root for the overlay
+ * @ovcs_id:		Pointer to overlay changeset id
+ *
+ * Creates and applies an overlay while also keeping track
+ * of the overlay in a list. This list can be used to prevent
+ * illegal overlay removals. The overlay is only allowed to
+ * target nodes under the target_root node.
+ *
+ * Returns the id of the created overlay, or an negative error number
+ */
+int of_overlay_apply_target_root(struct device_node *tree,
+				 struct device_node *target_root, int *ovcs_id)
+{
+	return __of_overlay_apply(tree, NULL, target_root, ovcs_id);
+}
+EXPORT_SYMBOL_GPL(of_overlay_apply_target_root);
 
 /*
  * Find @np in @tree.
