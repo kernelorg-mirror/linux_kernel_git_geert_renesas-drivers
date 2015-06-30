@@ -338,6 +338,7 @@ extern int of_count_phandle_with_args(const struct device_node *np,
 
 extern void of_alias_create(struct property *pp,
 			    void * (*dt_alloc)(u64 size, u64 align));
+extern void of_alias_destroy(const char *name);
 extern void of_alias_scan(void * (*dt_alloc)(u64 size, u64 align));
 extern int of_alias_get_id(struct device_node *np, const char *stem);
 extern int of_alias_get_highest_id(const char *stem);
