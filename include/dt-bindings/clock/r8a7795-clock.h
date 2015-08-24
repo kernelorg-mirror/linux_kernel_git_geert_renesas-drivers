@@ -24,6 +24,7 @@
 /* MSTP2 */
 
 /* MSTP3 */
+#define R8A7795_CLK_SCIF2		10
 
 /* MSTP5 */
 
