@@ -1,0 +1,57 @@
+/*
+ * Device Tree Overlay for HSCIF1 on r8a7795/Salvator-X Debug Serial 1
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Notes:
+ *   - As these pins are shared with SCIF1, the latter is disabled first.
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial1 = &hscif1; */
+			serial1 = "/soc/serial@e6550000";
+		};
+	};
+
+	fragment@1 {
+		target = <&pfc>;
+
+		__overlay__ {
+			hscif1_pins: hscif1 {
+				renesas,groups = "hscif1_data_a",
+						 "hscif1_ctrl_a";
+				renesas,function = "hscif1";
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&scif1>;
+
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment@3 {
+		target = <&hscif1>;
+
+		__overlay__ {
+			pinctrl-0 = <&hscif1_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};
