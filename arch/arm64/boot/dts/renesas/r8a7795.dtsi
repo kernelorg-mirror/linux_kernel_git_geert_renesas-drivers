@@ -28,7 +28,7 @@
 		};
 	};
 
-	extal_clk: extal_clk {
+	extal_clk: extal {
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
 		clock-frequency = <0>;
