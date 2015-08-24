@@ -8,6 +8,7 @@ obj-$(CONFIG_ARCH_R8A7790)		+= clk-rcar-gen2.o
 obj-$(CONFIG_ARCH_R8A7791)		+= clk-rcar-gen2.o
 obj-$(CONFIG_ARCH_R8A7793)		+= clk-rcar-gen2.o
 obj-$(CONFIG_ARCH_R8A7794)		+= clk-rcar-gen2.o
+obj-$(CONFIG_ARCH_RCAR_GEN3)		+= clk-rcar-gen3.o
 obj-$(CONFIG_ARCH_SH73A0)		+= clk-sh73a0.o
 obj-$(CONFIG_ARCH_SHMOBILE_MULTI)	+= clk-div6.o
 obj-$(CONFIG_ARCH_SHMOBILE_MULTI)	+= clk-mstp.o
