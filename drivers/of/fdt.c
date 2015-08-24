@@ -28,6 +28,12 @@
 #include <asm/setup.h>  /* for COMMAND_LINE_SIZE */
 #include <asm/page.h>
 
+#ifdef CONFIG_ARM64
+#define fdt_crc_size_hack(_s)	min(fdt_totalsize(_s),(unsigned)0x200000)
+#else
+#define fdt_crc_size_hack(_s)	fdt_totalsize(_s)
+#endif
+
 /*
  * of_fdt_limit_memory - limit the number of regions in the /memory node
  * @limit: maximum entries
@@ -1059,7 +1065,7 @@ bool __init early_init_dt_verify(void *params)
 	/* Setup flat device-tree pointer */
 	initial_boot_params = params;
 	of_fdt_crc32 = crc32_be(~0, initial_boot_params,
-				fdt_totalsize(initial_boot_params));
+				fdt_crc_size_hack(initial_boot_params));
 	return true;
 }
 
@@ -1155,7 +1161,7 @@ static int __init of_fdt_raw_init(void)
 		return 0;
 
 	if (of_fdt_crc32 != crc32_be(~0, initial_boot_params,
-				     fdt_totalsize(initial_boot_params))) {
+				     fdt_crc_size_hack(initial_boot_params))) {
 		pr_warn("fdt: not creating '/sys/firmware/fdt': CRC check failed\n");
 		return 0;
 	}
