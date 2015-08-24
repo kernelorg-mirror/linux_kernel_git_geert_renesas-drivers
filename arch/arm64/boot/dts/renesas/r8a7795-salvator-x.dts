@@ -17,6 +17,7 @@
 
 	aliases {
 		serial0 = &scif2;
+		serial1 = &scif1;
 	};
 
 	chosen {
@@ -37,6 +38,10 @@
 };
 
 &pfc {
+	scif1_pins: scif1 {
+		renesas,groups = "scif1_data_a", "scif1_ctrl";
+		renesas,function = "scif1";
+	};
 	scif2_pins: scif2 {
 		renesas,groups = "scif2_data_a";
 		renesas,function = "scif2";
@@ -58,6 +63,13 @@
 		renesas,groups = "usb2";
 		renesas,function = "usb2";
 	};
+};
+
+&scif1 {
+	pinctrl-0 = <&scif1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
 };
 
 &scif2 {
