@@ -283,6 +283,7 @@
 			clocks = <&mstp3_clks R8A7795_CLK_SCIF2>;
 			clock-names = "sci_ick";
 			power-domains = <&cpg_clocks>;
+			status = "disabled";
 		};
 
 		usb2_phy0: usb-phy@ee080200 {
