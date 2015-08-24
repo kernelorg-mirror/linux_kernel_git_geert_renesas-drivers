@@ -31,6 +31,11 @@
 	};
 };
 
+&extal_clk {
+	clock-frequency = <16666600>;
+	clock-accuracy = <50000>;
+};
+
 &pfc {
 	scif2_pins: scif2 {
 		renesas,groups = "scif2_data";
