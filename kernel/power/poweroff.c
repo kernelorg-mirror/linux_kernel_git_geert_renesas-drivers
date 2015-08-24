@@ -39,7 +39,7 @@ static struct sysrq_key_op	sysrq_poweroff_op = {
 
 static int __init pm_sysrq_init(void)
 {
-	register_sysrq_key('o', &sysrq_poweroff_op);
+//	register_sysrq_key('o', &sysrq_poweroff_op);
 	return 0;
 }
 
