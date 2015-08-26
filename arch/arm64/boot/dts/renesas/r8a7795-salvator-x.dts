@@ -38,7 +38,7 @@
 
 &pfc {
 	scif2_pins: scif2 {
-		renesas,groups = "scif2_data";
+		renesas,groups = "scif2_data_a";
 		renesas,function = "scif2";
        };
 };
