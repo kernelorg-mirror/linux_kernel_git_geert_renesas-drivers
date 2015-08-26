@@ -2405,7 +2405,7 @@ static const unsigned int scif4_ctrl_c_mux[] = {
 /* - SCIF5 ------------------------------------------------------------------ */
 static const unsigned int scif5_data_pins[] = {
 	/* RX, TX */
-	RCAR_GP_PIN(2, 19), RCAR_GP_PIN(2, 21),
+	RCAR_GP_PIN(5, 19), RCAR_GP_PIN(5, 21),
 };
 static const unsigned int scif5_data_mux[] = {
 	RX5_MARK, TX5_MARK,
