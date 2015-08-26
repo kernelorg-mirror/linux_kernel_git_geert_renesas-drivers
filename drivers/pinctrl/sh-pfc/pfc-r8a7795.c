@@ -2288,11 +2288,11 @@ static const unsigned int scif1_data_b_mux[] = {
 	RX1_B_MARK, TX1_B_MARK,
 };
 /* - SCIF2 ------------------------------------------------------------------ */
-static const unsigned int scif2_data_pins[] = {
+static const unsigned int scif2_data_a_pins[] = {
 	/* RX, TX */
 	RCAR_GP_PIN(5, 11), RCAR_GP_PIN(5, 10),
 };
-static const unsigned int scif2_data_mux[] = {
+static const unsigned int scif2_data_a_mux[] = {
 	RX2_A_MARK, TX2_A_MARK,
 };
 static const unsigned int scif2_clk_pins[] = {
@@ -2301,6 +2301,13 @@ static const unsigned int scif2_clk_pins[] = {
 };
 static const unsigned int scif2_clk_mux[] = {
 	SCK2_MARK,
+};
+static const unsigned int scif2_data_b_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(5, 15), RCAR_GP_PIN(5, 16),
+};
+static const unsigned int scif2_data_b_mux[] = {
+	RX2_B_MARK, TX2_B_MARK,
 };
 /* - SCIF3 ------------------------------------------------------------------ */
 static const unsigned int scif3_data_a_pins[] = {
@@ -2793,8 +2800,9 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(scif1_clk),
 	SH_PFC_PIN_GROUP(scif1_ctrl),
 	SH_PFC_PIN_GROUP(scif1_data_b),
-	SH_PFC_PIN_GROUP(scif2_data),
+	SH_PFC_PIN_GROUP(scif2_data_a),
 	SH_PFC_PIN_GROUP(scif2_clk),
+	SH_PFC_PIN_GROUP(scif2_data_b),
 	SH_PFC_PIN_GROUP(scif3_data_a),
 	SH_PFC_PIN_GROUP(scif3_clk),
 	SH_PFC_PIN_GROUP(scif3_ctrl),
@@ -2992,8 +3000,9 @@ static const char * const scif1_groups[] = {
 };
 
 static const char * const scif2_groups[] = {
-	"scif2_data",
+	"scif2_data_a",
 	"scif2_clk",
+	"scif2_data_b",
 };
 
 static const char * const scif3_groups[] = {
