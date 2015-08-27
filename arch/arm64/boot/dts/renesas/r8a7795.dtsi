@@ -71,6 +71,15 @@
 			#clock-cells = <1>;
 			ranges;
 
+			pll1_div2_clk: pll1_div2 {
+				compatible = "fixed-factor-clock";
+				clocks = <&cpg_clocks R8A7795_CLK_PLL1>;
+				#clock-cells = <0>;
+				clock-div = <2>;
+				clock-mult = <1>;
+				clock-output-names = "pll1_div2";
+			};
+
 			zt_clk: zt {
 				compatible = "fixed-factor-clock";
 				clocks = <&cpg_clocks R8A7795_CLK_PLL1>;
