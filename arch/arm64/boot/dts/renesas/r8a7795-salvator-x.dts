@@ -63,6 +63,12 @@
 		renesas,groups = "usb2";
 		renesas,function = "usb2";
 	};
+
+	msiof0_pins: msiof0 {
+		renesas,groups = "msiof0_clk", "msiof0_sync", "msiof0_rxd",
+				 "msiof0_txd";
+		renesas,function = "msiof0";
+	};
 };
 
 &scif1 {
@@ -119,4 +125,17 @@
 
 &ohci2 {
 	status = "okay";
+};
+
+&msiof0 {
+	pinctrl-0 = <&msiof0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	dummy: dummy@0 {
+		spi-max-frequency = <6000000>;
+		compatible = "spidev";
+		reg = <0>;
+	};
 };
