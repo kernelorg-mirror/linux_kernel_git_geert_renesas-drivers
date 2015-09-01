@@ -14,8 +14,10 @@
 #include <linux/clk/shmobile.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/mfd/syscon.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
+#include <linux/regmap.h>
 #include <linux/slab.h>
 
 #define RCAR_GEN3_CLK_MAIN	0
@@ -48,28 +50,6 @@ struct rcar_gen3_cpg {
  * common function
  */
 #define rcar_clk_readl(cpg, _reg) readl(cpg->reg + _reg)
-
-/*
- * Reset register definitions.
- */
-#define MODEMR 0xe6160060
-
-static u32 rcar_gen3_read_mode_pins(void)
-{
-	static u32 mode;
-	static bool mode_valid;
-
-	if (!mode_valid) {
-		void __iomem *modemr = ioremap_nocache(MODEMR, 4);
-
-		BUG_ON(!modemr);
-		mode = ioread32(modemr);
-		iounmap(modemr);
-		mode_valid = true;
-	}
-
-	return mode;
-}
 
 /* -----------------------------------------------------------------------------
  * CPG Clock Data
@@ -188,11 +168,18 @@ static void __init rcar_gen3_cpg_clocks_init(struct device_node *np)
 {
 	const struct cpg_pll_config *config;
 	struct rcar_gen3_cpg *cpg;
-	u32 cpg_mode;
+	struct regmap *regmap;
+	u32 reg, cpg_mode;
 	unsigned int i;
 	int num_clks;
 
-	cpg_mode = rcar_gen3_read_mode_pins();
+	regmap = syscon_regmap_lookup_by_phandle(np, "renesas,modemr");
+	if (IS_ERR(regmap) ||
+	    of_property_read_u32_index(np, "renesas,modemr", 1, &reg) ||
+	    regmap_read(regmap, reg, &cpg_mode)) {
+		pr_err("%s: failed to parse renesas,modemr\n", np->full_name);
+		return;
+	}
 
 	num_clks = of_property_count_u32_elems(np, "clock-indices");
 	if (num_clks < 0) {
