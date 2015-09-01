@@ -358,6 +358,7 @@
 					R8A7795_CLK_PLL3 R8A7795_CLK_PLL4
 				>;
 				#power-domain-cells = <0>;
+				renesas,modemr = <&rst 0x60>;
 
 				mstp2_clks: mstp2@e6150138 {
 					compatible =
