@@ -410,6 +410,11 @@
 			reg = <0 0xe6060000 0 0x50c>;
 		};
 
+		rst: reset-controller@e6160000 {
+			compatible = "renesas,rst-r8a7795", "syscon";
+			reg = <0 0xe6160000 0 0x0200>;
+		};
+
 		dmac0: dma-controller@e6700000 {
 			/* Empty node for now */
 		};
