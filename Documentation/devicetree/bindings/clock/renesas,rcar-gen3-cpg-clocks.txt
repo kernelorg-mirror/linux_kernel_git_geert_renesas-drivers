@@ -17,6 +17,9 @@ Required Properties:
   - #clock-cells: Must be 1
   - clock-indices: Indices of the exported clocks
   - #power-domain-cells: Must be 0
+  - renesas,modemr: Reference to the RST module node, and register offset of
+		    the Mode Monitor Register (MODEMR) inside the RST module
+		    register block.
 
 SoC devices that are part of the CPG/MSTP Clock Domain and can be power-managed
 through an MSTP clock should refer to the CPG device node in their
@@ -40,6 +43,7 @@ Examples
 				R8A7795_CLK_PLL3 R8A7795_CLK_PLL4
 		>;
 		#power-domain-cells = <0>;
+		renesas,modemr = <&rst 0x60>;
 	};
 
   - CPG/MSTP Clock Domain member device node:
