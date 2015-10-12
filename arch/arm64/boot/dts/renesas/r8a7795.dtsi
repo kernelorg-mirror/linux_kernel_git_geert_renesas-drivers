@@ -8,7 +8,7 @@
  * kind, whether express or implied.
  */
 
-#include <dt-bindings/clock/r8a7795-clock.h>
+#include <dt-bindings/clock/r8a7795-cpg-mssr.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
 
 / {
@@ -44,6 +44,36 @@
 		clock-frequency = <0>;
 	};
 
+	extalr_clk: extalr {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		/* This value must be overridden by the board */
+		clock-frequency = <0>;
+	};
+
+	/*
+	 * The external audio clocks are configured as 0 Hz fixed frequency
+	 * clocks by default.
+	 * Boards that provide audio clocks should override them.
+	 */
+	audio_clk_a: audio_clk_a {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <0>;
+	};
+
+	audio_clk_b: audio_clk_b {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <0>;
+	};
+
+	audio_clk_c: audio_clk_c {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <0>;
+	};
+
 	soc {
 		compatible = "simple-bus";
 		interrupt-parent = <&gic>;
@@ -72,7 +102,8 @@
 			gpio-ranges = <&pfc 0 0 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO0>;
+			clocks = <&cpg CPG_MOD 912>;
+			power-domains = <&cpg>;
 		};
 
 		gpio1: gpio@e6051000 {
@@ -85,7 +116,8 @@
 			gpio-ranges = <&pfc 0 32 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO1>;
+			clocks = <&cpg CPG_MOD 911>;
+			power-domains = <&cpg>;
 		};
 
 		gpio2: gpio@e6052000 {
@@ -98,7 +130,8 @@
 			gpio-ranges = <&pfc 0 64 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO2>;
+			clocks = <&cpg CPG_MOD 910>;
+			power-domains = <&cpg>;
 		};
 
 		gpio3: gpio@e6053000 {
@@ -111,7 +144,8 @@
 			gpio-ranges = <&pfc 0 96 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO3>;
+			clocks = <&cpg CPG_MOD 909>;
+			power-domains = <&cpg>;
 		};
 
 		gpio4: gpio@e6054000 {
@@ -124,7 +158,8 @@
 			gpio-ranges = <&pfc 0 128 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO4>;
+			clocks = <&cpg CPG_MOD 908>;
+			power-domains = <&cpg>;
 		};
 
 		gpio5: gpio@e6055000 {
@@ -137,7 +172,8 @@
 			gpio-ranges = <&pfc 0 160 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO5>;
+			clocks = <&cpg CPG_MOD 907>;
+			power-domains = <&cpg>;
 		};
 
 		gpio6: gpio@e6055400 {
@@ -150,7 +186,8 @@
 			gpio-ranges = <&pfc 0 192 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO6>;
+			clocks = <&cpg CPG_MOD 906>;
+			power-domains = <&cpg>;
 		};
 
 		gpio7: gpio@e6055800 {
@@ -163,7 +200,8 @@
 			gpio-ranges = <&pfc 0 224 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mssr R8A7795_CLK_GPIO7>;
+			clocks = <&cpg CPG_MOD 905>;
+			power-domains = <&cpg>;
 		};
 
 		timer {
@@ -178,371 +216,14 @@
 					(GIC_CPU_MASK_SIMPLE(1) | IRQ_TYPE_LEVEL_LOW)>;
 		};
 
-		clock {
-			#address-cells = <2>;
-			#size-cells = <2>;
-			#clock-cells = <1>;
-			ranges;
-
-			/* Fixed factor clocks */
-			pll1_div2_clk: pll1_div2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&cpg_clocks R8A7795_CLK_PLL1>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			zt_clk: zt {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			ztr_clk: ztr {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <6>;
-				clock-mult = <1>;
-			};
-
-			ztrd2_clk: ztrd2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <12>;
-				clock-mult = <1>;
-			};
-
-			zx_clk: zx {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			s0_clk: s0 {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			s0d1_clk: s0d1 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s0_clk>;
-				#clock-cells = <0>;
-				clock-div = <1>;
-				clock-mult = <1>;
-			};
-
-			s0d4_clk: s0d4 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s0_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			s1_clk: s1 {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <3>;
-				clock-mult = <1>;
-			};
-
-			s1d1_clk: s1d1 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s1_clk>;
-				#clock-cells = <0>;
-				clock-div = <1>;
-				clock-mult = <1>;
-			};
-
-			s1d2_clk: s1d2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s1_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			s1d4_clk: s1d4 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s1_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			s2_clk: s2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			s2d1_clk: s2d1 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s2_clk>;
-				#clock-cells = <0>;
-				clock-div = <1>;
-				clock-mult = <1>;
-			};
-
-			s2d2_clk: s2d2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s2_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			s2d4_clk: s2d4 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s2_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			s3_clk: s3 {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <6>;
-				clock-mult = <1>;
-			};
-
-			s3d1_clk: s3d1 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s3_clk>;
-				#clock-cells = <0>;
-				clock-div = <1>;
-				clock-mult = <1>;
-			};
-
-			s3d2_clk: s3d2 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s3_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			s3d4_clk: s3d4 {
-				compatible = "fixed-factor-clock";
-				clocks = <&s3_clk>;
-				#clock-cells = <0>;
-				clock-div = <4>;
-				clock-mult = <1>;
-			};
-
-			cl_clk: cl {
-				compatible = "fixed-factor-clock";
-				clocks = <&pll1_div2_clk>;
-				#clock-cells = <0>;
-				clock-div = <48>;
-				clock-mult = <1>;
-			};
-
-			cp_clk: cp_clk {
-				compatible = "fixed-factor-clock";
-				clocks = <&extal_clk>;
-				#clock-cells = <0>;
-				clock-div = <2>;
-				clock-mult = <1>;
-			};
-
-			audio_clk_a: audio_clk_a {
-				compatible = "fixed-clock";
-				#clock-cells = <0>;
-				clock-frequency = <0>;
-			};
-
-			audio_clk_b: audio_clk_b {
-				compatible = "fixed-clock";
-				#clock-cells = <0>;
-				clock-frequency = <0>;
-			};
-
-			audio_clk_c: audio_clk_c {
-				compatible = "fixed-clock";
-				#clock-cells = <0>;
-				clock-frequency = <0>;
-			};
-
-			cpg_clocks: cpg_clocks@e6150000 {
-				#address-cells = <2>;
-				#size-cells = <2>;
-				#clock-cells = <1>;
-				ranges;
-
-				compatible = "renesas,r8a7795-cpg-clocks",
-					     "renesas,rcar-gen3-cpg-clocks";
-				reg = <0 0xe6150000 0 0x1000>;
-				clocks = <&extal_clk>;
-				clock-indices = <
-					R8A7795_CLK_MAIN R8A7795_CLK_PLL0
-					R8A7795_CLK_PLL1 R8A7795_CLK_PLL2
-					R8A7795_CLK_PLL3 R8A7795_CLK_PLL4
-				>;
-				clock-output-names = "main", "pll0", "pll1",
-						     "pll2", "pll3", "pll4";
-				#power-domain-cells = <0>;
-				renesas,modemr = <&rst 0x60>;
-
-				/* Module Standby and Software Reset */
-				mssr: mssr@e6150130 {
-					compatible =
-						"renesas,r8a7795-cpg-mssr";
-					reg = <0 0xe6150000 0 0x1000>;
-					#clock-cells = <1>;
-					clocks =
-						/* MSTP2 */
-						<&s3d4_clk>, <&s3d4_clk>,
-						<&s3d4_clk>, <&s3d4_clk>,
-						<&s3d4_clk>,
-						/* MSTP3 */
-						<&s3d4_clk>,
-						/* MSTP5 */
-						<&s3d4_clk>, <&s3d4_clk>,
-						/* MSTP8 */
-						<&s3d2_clk>,
-						/* MSTP9 */
-						<&cp_clk>, <&cp_clk>,
-						<&cp_clk>, <&cp_clk>,
-						<&cp_clk>, <&cp_clk>,
-						<&cp_clk>, <&cp_clk>,
-						<&s3d2_clk>, <&s3d2_clk>,
-						<&s3d2_clk>, <&s3d2_clk>,
-						<&s3d2_clk>, <&s3d2_clk>,
-						<&s3d2_clk>,
-						/* MSTP10 */
-						<&s3d4_clk>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&mssr R8A7795_CLK_SSI_ALL>,
-						<&s3d4_clk>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>,
-						<&mssr R8A7795_CLK_SCU_ALL>;
-					clock-indices = <
-						/* MSTP2 */
-						R8A7795_CLK_SCIF5
-						R8A7795_CLK_SCIF4
-						R8A7795_CLK_SCIF3
-						R8A7795_CLK_SCIF1
-						R8A7795_CLK_SCIF0
-						/* MSTP3 */
-						R8A7795_CLK_SCIF2
-						/* MSTP5 */
-						R8A7795_CLK_AUDIO_DMAC0
-						R8A7795_CLK_AUDIO_DMAC1
-						/* MSTP8 */
-						R8A7795_CLK_ETHERAVB
-						/* MSTP9 */
-						R8A7795_CLK_GPIO7
-						R8A7795_CLK_GPIO6
-						R8A7795_CLK_GPIO5
-						R8A7795_CLK_GPIO4
-						R8A7795_CLK_GPIO3
-						R8A7795_CLK_GPIO2
-						R8A7795_CLK_GPIO1
-						R8A7795_CLK_GPIO0
-						R8A7795_CLK_I2C6
-						R8A7795_CLK_I2C5
-						R8A7795_CLK_I2C4
-						R8A7795_CLK_I2C3
-						R8A7795_CLK_I2C2
-						R8A7795_CLK_I2C1
-						R8A7795_CLK_I2C0
-						/* MSTP10 */
-						R8A7795_CLK_SSI_ALL
-						R8A7795_CLK_SSI9
-						R8A7795_CLK_SSI8
-						R8A7795_CLK_SSI7
-						R8A7795_CLK_SSI6
-						R8A7795_CLK_SSI5
-						R8A7795_CLK_SSI4
-						R8A7795_CLK_SSI3
-						R8A7795_CLK_SSI2
-						R8A7795_CLK_SSI1
-						R8A7795_CLK_SSI0
-						R8A7795_CLK_SCU_ALL
-						R8A7795_CLK_SCU_DVC1
-						R8A7795_CLK_SCU_DVC0
-						R8A7795_CLK_SCU_CTU1_MIX1
-						R8A7795_CLK_SCU_CTU0_MIX0
-						R8A7795_CLK_SCU_SRC9
-						R8A7795_CLK_SCU_SRC8
-						R8A7795_CLK_SCU_SRC7
-						R8A7795_CLK_SCU_SRC6
-						R8A7795_CLK_SCU_SRC5
-						R8A7795_CLK_SCU_SRC4
-						R8A7795_CLK_SCU_SRC3
-						R8A7795_CLK_SCU_SRC2
-						R8A7795_CLK_SCU_SRC1
-						R8A7795_CLK_SCU_SRC0
-					>;
-					clock-output-names =
-						/* MSTP2 */
-						"scif5", "scif4", "scif3",
-						"scif1", "scif0",
-						/* MSTP3 */
-						"scif2",
-						/* MSTP5 */
-						"audmac0", "audmac1",
-						/* MSTP8 */
-						"etheravb",
-						/* MSTP9 */
-						"gpio7", "gpio6", "gpio5",
-						"gpio4", "gpio3", "gpio2",
-						"gpio1", "gpio0",
-						"i2c6", "i2c5", "i2c4", "i2c3",
-						"i2c2", "i2c1", "i2c0",
-						/* MSTP10 */
-						"ssi-all",
-						"ssi9", "ssi8", "ssi7", "ssi6",
-						"ssi5", "ssi4", "ssi3", "ssi2",
-						"ssi1", "ssi0",
-						"scu-all",
-						"scu-dvc1", "scu-dvc0",
-						"scu-ctu1-mix1",
-						"scu-ctu0-mix0",
-						"scu-src9", "scu-src8",
-						"scu-src7", "scu-src6",
-						"scu-src5", "scu-src4",
-						"scu-src3", "scu-src2",
-						"scu-src1", "scu-src0";
-					#reset-cells = <1>;
-				};
-			};
+		cpg: clock-controller@e6150000 {
+			compatible = "renesas,r8a7795-cpg-mssr";
+			reg = <0 0xe6150000 0 0x1000>;
+			clocks = <&extal_clk>, <&extalr_clk>;
+			clock-names = "extal", "extalr";
+			#clock-cells = <2>;
+			#power-domain-cells = <0>;
+			renesas,modemr = <&rst 0x60>;
 		};
 
 		audma0: dma-controller@ec700000 {
@@ -570,9 +251,9 @@
 					"ch4", "ch5", "ch6", "ch7",
 					"ch8", "ch9", "ch10", "ch11",
 					"ch12", "ch13", "ch14", "ch15";
-			clocks = <&mssr R8A7795_CLK_AUDIO_DMAC0>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 502>;
 			clock-names = "fck";
+			power-domains = <&cpg>;
 			#dma-cells = <1>;
 			dma-channels = <16>;
 		};
@@ -602,9 +283,9 @@
 					"ch4", "ch5", "ch6", "ch7",
 					"ch8", "ch9", "ch10", "ch11",
 					"ch12", "ch13", "ch14", "ch15";
-			clocks = <&mssr R8A7795_CLK_AUDIO_DMAC1>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 501>;
 			clock-names = "fck";
+			power-domains = <&cpg>;
 			#dma-cells = <1>;
 			dma-channels = <16>;
 		};
@@ -658,8 +339,8 @@
 					  "ch16", "ch17", "ch18", "ch19",
 					  "ch20", "ch21", "ch22", "ch23",
 					  "ch24";
-			clocks = <&mssr R8A7795_CLK_ETHERAVB>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 812>;
+			power-domains = <&cpg>;
 			phy-mode = "rgmii-id";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -677,11 +358,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6e60000 0 64>;
 			interrupts = <GIC_SPI 152 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF0>;
+			clocks = <&cpg CPG_MOD 207>;
 			clock-names = "sci_ick";
 			dmas = <&dmac1 0x51>, <&dmac1 0x50>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -689,11 +370,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6e68000 0 64>;
 			interrupts = <GIC_SPI 153 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF1>;
+			clocks = <&cpg CPG_MOD 206>;
 			clock-names = "sci_ick";
 			dmas = <&dmac1 0x53>, <&dmac1 0x52>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -701,11 +382,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6e88000 0 64>;
 			interrupts = <GIC_SPI 164 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF2>;
+			clocks = <&cpg CPG_MOD 310>;
 			clock-names = "sci_ick";
 			dmas = <&dmac1 0x13>, <&dmac1 0x12>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -713,11 +394,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6c50000 0 64>;
 			interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF3>;
+			clocks = <&cpg CPG_MOD 204>;
 			clock-names = "sci_ick";
 			dmas = <&dmac0 0x57>, <&dmac0 0x56>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -725,11 +406,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6c40000 0 64>;
 			interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF4>;
+			clocks = <&cpg CPG_MOD 203>;
 			clock-names = "sci_ick";
 			dmas = <&dmac0 0x59>, <&dmac0 0x58>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -737,11 +418,11 @@
 			compatible = "renesas,scif-r8a7795", "renesas,scif";
 			reg = <0 0xe6f30000 0 64>;
 			interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_SCIF5>;
+			clocks = <&cpg CPG_MOD 202>;
 			clock-names = "sci_ick";
 			dmas = <&dmac1 0x5b>, <&dmac1 0x5a>;
 			dma-names = "tx", "rx";
-			power-domains = <&cpg_clocks>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -751,8 +432,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6500000 0 0x40>;
 			interrupts = <GIC_SPI 287 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C0>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 931>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -762,8 +443,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6508000 0 0x40>;
 			interrupts = <GIC_SPI 288 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C1>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 930>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -773,8 +454,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6510000 0 0x40>;
 			interrupts = <GIC_SPI 286 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C2>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 929>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -784,8 +465,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66d0000 0 0x40>;
 			interrupts = <GIC_SPI 290 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C3>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 928>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -795,8 +476,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66d8000 0 0x40>;
 			interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C4>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 927>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -806,8 +487,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66e0000 0 0x40>;
 			interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C5>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 919>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -817,8 +498,8 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66e8000 0 0x40>;
 			interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mssr R8A7795_CLK_I2C6>;
-			power-domains = <&cpg_clocks>;
+			clocks = <&cpg CPG_MOD 918>;
+			power-domains = <&cpg>;
 			status = "disabled";
 		};
 
@@ -843,31 +524,35 @@
 				<0 0xec740000 0 0x200>;  /* Audio DMAC peri peri*/
 			reg-names = "scu", "adg", "ssiu", "ssi", "audmapp";
 
-			clocks = <&mssr R8A7795_CLK_SSI_ALL>,
-				<&mssr R8A7795_CLK_SSI9>, <&mssr R8A7795_CLK_SSI8>,
-				<&mssr R8A7795_CLK_SSI7>, <&mssr R8A7795_CLK_SSI6>,
-				<&mssr R8A7795_CLK_SSI5>, <&mssr R8A7795_CLK_SSI4>,
-				<&mssr R8A7795_CLK_SSI3>, <&mssr R8A7795_CLK_SSI2>,
-				<&mssr R8A7795_CLK_SSI1>, <&mssr R8A7795_CLK_SSI0>,
-				<&mssr R8A7795_CLK_SCU_SRC9>, <&mssr R8A7795_CLK_SCU_SRC8>,
-				<&mssr R8A7795_CLK_SCU_SRC7>, <&mssr R8A7795_CLK_SCU_SRC6>,
-				<&mssr R8A7795_CLK_SCU_SRC5>, <&mssr R8A7795_CLK_SCU_SRC4>,
-				<&mssr R8A7795_CLK_SCU_SRC3>, <&mssr R8A7795_CLK_SCU_SRC2>,
-				<&mssr R8A7795_CLK_SCU_SRC1>, <&mssr R8A7795_CLK_SCU_SRC0>,
-				<&mssr R8A7795_CLK_SCU_CTU0_MIX0>, <&mssr R8A7795_CLK_SCU_CTU1_MIX1>,
-				<&mssr R8A7795_CLK_SCU_CTU0_MIX0>, <&mssr R8A7795_CLK_SCU_CTU1_MIX1>,
-				<&mssr R8A7795_CLK_SCU_DVC0>, <&mssr R8A7795_CLK_SCU_DVC1>,
-				<&audio_clk_a>, <&audio_clk_b>, <&audio_clk_c>, <&s0d4_clk>;
+			clocks = <&cpg CPG_MOD 1005>,
+				 <&cpg CPG_MOD 1006>, <&cpg CPG_MOD 1007>,
+				 <&cpg CPG_MOD 1008>, <&cpg CPG_MOD 1009>,
+				 <&cpg CPG_MOD 1010>, <&cpg CPG_MOD 1011>,
+				 <&cpg CPG_MOD 1012>, <&cpg CPG_MOD 1013>,
+				 <&cpg CPG_MOD 1014>, <&cpg CPG_MOD 1015>,
+				 <&cpg CPG_MOD 1022>, <&cpg CPG_MOD 1023>,
+				 <&cpg CPG_MOD 1024>, <&cpg CPG_MOD 1025>,
+				 <&cpg CPG_MOD 1026>, <&cpg CPG_MOD 1027>,
+				 <&cpg CPG_MOD 1028>, <&cpg CPG_MOD 1029>,
+				 <&cpg CPG_MOD 1030>, <&cpg CPG_MOD 1031>,
+				 <&cpg CPG_MOD 1021>, <&cpg CPG_MOD 1020>,
+				 <&cpg CPG_MOD 1021>, <&cpg CPG_MOD 1020>,
+				 <&cpg CPG_MOD 1019>, <&cpg CPG_MOD 1018>,
+				 <&audio_clk_a>, <&audio_clk_b>,
+				 <&audio_clk_c>,
+				 <&cpg CPG_CORE R8A7795_CLK_S0D4>;
 			clock-names = "ssi-all",
-					"ssi.9", "ssi.8", "ssi.7", "ssi.6", "ssi.5",
-					"ssi.4", "ssi.3", "ssi.2", "ssi.1", "ssi.0",
-					"src.9", "src.8", "src.7", "src.6", "src.5",
-					"src.4", "src.3", "src.2", "src.1", "src.0",
-					"ctu.0", "ctu.1",
-					"mix.0", "mix.1",
-					"dvc.0", "dvc.1",
-					"clk_a", "clk_b", "clk_c", "clk_i";
-			power-domains = <&cpg_clocks>;
+				      "ssi.9", "ssi.8", "ssi.7", "ssi.6",
+				      "ssi.5", "ssi.4", "ssi.3", "ssi.2",
+				      "ssi.1", "ssi.0",
+				      "src.9", "src.8", "src.7", "src.6",
+				      "src.5", "src.4", "src.3", "src.2",
+				      "src.1", "src.0",
+				      "ctu.0", "ctu.1",
+				      "mix.0", "mix.1",
+				      "dvc.0", "dvc.1",
+				      "clk_a", "clk_b", "clk_c", "clk_i";
+			power-domains = <&cpg>;
 			status = "disabled";
 
 			rcar_sound,dvc {
