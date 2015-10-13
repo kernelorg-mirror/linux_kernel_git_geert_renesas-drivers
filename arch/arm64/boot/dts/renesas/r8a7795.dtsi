@@ -72,7 +72,7 @@
 			gpio-ranges = <&pfc 0 0 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO0>;
+			clocks = <&mssr R8A7795_CLK_GPIO0>;
 		};
 
 		gpio1: gpio@e6051000 {
@@ -85,7 +85,7 @@
 			gpio-ranges = <&pfc 0 32 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO1>;
+			clocks = <&mssr R8A7795_CLK_GPIO1>;
 		};
 
 		gpio2: gpio@e6052000 {
@@ -98,7 +98,7 @@
 			gpio-ranges = <&pfc 0 64 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO2>;
+			clocks = <&mssr R8A7795_CLK_GPIO2>;
 		};
 
 		gpio3: gpio@e6053000 {
@@ -111,7 +111,7 @@
 			gpio-ranges = <&pfc 0 96 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO3>;
+			clocks = <&mssr R8A7795_CLK_GPIO3>;
 		};
 
 		gpio4: gpio@e6054000 {
@@ -124,7 +124,7 @@
 			gpio-ranges = <&pfc 0 128 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO4>;
+			clocks = <&mssr R8A7795_CLK_GPIO4>;
 		};
 
 		gpio5: gpio@e6055000 {
@@ -137,7 +137,7 @@
 			gpio-ranges = <&pfc 0 160 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO5>;
+			clocks = <&mssr R8A7795_CLK_GPIO5>;
 		};
 
 		gpio6: gpio@e6055400 {
@@ -150,7 +150,7 @@
 			gpio-ranges = <&pfc 0 192 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO6>;
+			clocks = <&mssr R8A7795_CLK_GPIO6>;
 		};
 
 		gpio7: gpio@e6055800 {
@@ -163,7 +163,7 @@
 			gpio-ranges = <&pfc 0 224 32>;
 			#interrupt-cells = <2>;
 			interrupt-controller;
-			clocks = <&mstp9_clks R8A7795_CLK_GPIO7>;
+			clocks = <&mssr R8A7795_CLK_GPIO7>;
 		};
 
 		timer {
@@ -411,7 +411,47 @@
 						<&s3d4_clk>, <&s3d4_clk>,
 						<&s3d4_clk>,
 						/* MSTP3 */
-						<&s3d4_clk>;
+						<&s3d4_clk>,
+						/* MSTP5 */
+						<&s3d4_clk>, <&s3d4_clk>,
+						/* MSTP8 */
+						<&s3d2_clk>,
+						/* MSTP9 */
+						<&cp_clk>, <&cp_clk>,
+						<&cp_clk>, <&cp_clk>,
+						<&cp_clk>, <&cp_clk>,
+						<&cp_clk>, <&cp_clk>,
+						<&s3d2_clk>, <&s3d2_clk>,
+						<&s3d2_clk>, <&s3d2_clk>,
+						<&s3d2_clk>, <&s3d2_clk>,
+						<&s3d2_clk>,
+						/* MSTP10 */
+						<&s3d4_clk>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&mssr R8A7795_CLK_SSI_ALL>,
+						<&s3d4_clk>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>,
+						<&mssr R8A7795_CLK_SCU_ALL>;
 					clock-indices = <
 						/* MSTP2 */
 						R8A7795_CLK_SCIF5
@@ -421,97 +461,72 @@
 						R8A7795_CLK_SCIF0
 						/* MSTP3 */
 						R8A7795_CLK_SCIF2
+						/* MSTP5 */
+						R8A7795_CLK_AUDIO_DMAC0
+						R8A7795_CLK_AUDIO_DMAC1
+						/* MSTP8 */
+						R8A7795_CLK_ETHERAVB
+						/* MSTP9 */
+						R8A7795_CLK_GPIO7
+						R8A7795_CLK_GPIO6
+						R8A7795_CLK_GPIO5
+						R8A7795_CLK_GPIO4
+						R8A7795_CLK_GPIO3
+						R8A7795_CLK_GPIO2
+						R8A7795_CLK_GPIO1
+						R8A7795_CLK_GPIO0
+						R8A7795_CLK_I2C6
+						R8A7795_CLK_I2C5
+						R8A7795_CLK_I2C4
+						R8A7795_CLK_I2C3
+						R8A7795_CLK_I2C2
+						R8A7795_CLK_I2C1
+						R8A7795_CLK_I2C0
+						/* MSTP10 */
+						R8A7795_CLK_SSI_ALL
+						R8A7795_CLK_SSI9
+						R8A7795_CLK_SSI8
+						R8A7795_CLK_SSI7
+						R8A7795_CLK_SSI6
+						R8A7795_CLK_SSI5
+						R8A7795_CLK_SSI4
+						R8A7795_CLK_SSI3
+						R8A7795_CLK_SSI2
+						R8A7795_CLK_SSI1
+						R8A7795_CLK_SSI0
+						R8A7795_CLK_SCU_ALL
+						R8A7795_CLK_SCU_DVC1
+						R8A7795_CLK_SCU_DVC0
+						R8A7795_CLK_SCU_CTU1_MIX1
+						R8A7795_CLK_SCU_CTU0_MIX0
+						R8A7795_CLK_SCU_SRC9
+						R8A7795_CLK_SCU_SRC8
+						R8A7795_CLK_SCU_SRC7
+						R8A7795_CLK_SCU_SRC6
+						R8A7795_CLK_SCU_SRC5
+						R8A7795_CLK_SCU_SRC4
+						R8A7795_CLK_SCU_SRC3
+						R8A7795_CLK_SCU_SRC2
+						R8A7795_CLK_SCU_SRC1
+						R8A7795_CLK_SCU_SRC0
 					>;
 					clock-output-names =
 						/* MSTP2 */
 						"scif5", "scif4", "scif3",
 						"scif1", "scif0",
 						/* MSTP3 */
-						"scif2";
-					#reset-cells = <1>;
-				};
-
-				mstp5_clks: mstp5_clks@e6150144 {
-					compatible = "renesas,r8a7795-mstp-clocks",
-						     "renesas,cpg-mstp-clocks";
-					reg = <0 0xe6150144 0 4>, <0 0xe615003c 0 4>;
-					clocks = <&s3d4_clk>, <&s3d4_clk>;
-					#clock-cells = <1>;
-					clock-indices = <
-						R8A7795_CLK_AUDIO_DMAC0 R8A7795_CLK_AUDIO_DMAC1
-					>;
-					clock-output-names =
-						"audmac0", "audmac1";
-				};
-
-				mstp8_clks: mstp8_clks@e6150990 {
-					compatible = "renesas,r8a7795-mstp-clocks",
-						     "renesas,cpg-mstp-clocks";
-					reg = <0 0xe6150990 0 4>, <0 0xe61509a0 0 4>;
-					clocks =  <&s3d2_clk>;
-					#clock-cells = <1>;
-					clock-indices = <R8A7795_CLK_ETHERAVB>;
-					clock-output-names = "etheravb";
-				};
-
-				mstp9_clks: mstp9_clks@e6150994 {
-					compatible = "renesas,r8a7795-mstp-clocks",
-						     "renesas,cpg-mstp-clocks";
-					reg = <0 0xe6150994 0 4>, <0 0xe61509a4 0 4>;
-					clocks = <&cp_clk>, <&cp_clk>, <&cp_clk>,
-						 <&cp_clk>, <&cp_clk>, <&cp_clk>,
-						 <&cp_clk>, <&cp_clk>,
-						 <&s3d2_clk>, <&s3d2_clk>, <&s3d2_clk>,
-						 <&s3d2_clk>, <&s3d2_clk>, <&s3d2_clk>,
-						 <&s3d2_clk>;
-					#clock-cells = <1>;
-					clock-indices = <
-						R8A7795_CLK_GPIO7 R8A7795_CLK_GPIO6
-						R8A7795_CLK_GPIO5 R8A7795_CLK_GPIO4
-						R8A7795_CLK_GPIO3 R8A7795_CLK_GPIO2
-						R8A7795_CLK_GPIO1 R8A7795_CLK_GPIO0
-						R8A7795_CLK_I2C6  R8A7795_CLK_I2C5
-						R8A7795_CLK_I2C4  R8A7795_CLK_I2C3
-						R8A7795_CLK_I2C2  R8A7795_CLK_I2C1
-						R8A7795_CLK_I2C0
-					>;
-					clock-output-names =
+						"scif2",
+						/* MSTP5 */
+						"audmac0", "audmac1",
+						/* MSTP8 */
+						"etheravb",
+						/* MSTP9 */
 						"gpio7", "gpio6", "gpio5",
 						"gpio4", "gpio3", "gpio2",
-						"gpio1", "gpio0", "i2c6",
-						"i2c5", "i2c4", "i2c3", "i2c2",
-						"i2c1", "i2c0";
-				};
-
-				mstp10_clks: mstp10_clks@e6150998 {
-					compatible = "renesas,r8a7795-mstp-clocks", "renesas,cpg-mstp-clocks";
-					reg = <0 0xe6150998 0 4>, <0 0xe61509a8 0 4>;
-					#clock-cells = <1>;
-					clocks = <&s3d4_clk>,
-						<&mstp10_clks R8A7795_CLK_SSI_ALL>, <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-						<&mstp10_clks R8A7795_CLK_SSI_ALL>, <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-						<&mstp10_clks R8A7795_CLK_SSI_ALL>, <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-						<&mstp10_clks R8A7795_CLK_SSI_ALL>, <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-						<&mstp10_clks R8A7795_CLK_SSI_ALL>, <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-						<&s3d4_clk>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>,
-						<&mstp10_clks R8A7795_CLK_SCU_ALL>, <&mstp10_clks R8A7795_CLK_SCU_ALL>;
-					clock-indices = <
-						R8A7795_CLK_SSI_ALL
-						R8A7795_CLK_SSI9 R8A7795_CLK_SSI8 R8A7795_CLK_SSI7 R8A7795_CLK_SSI6 R8A7795_CLK_SSI5
-						R8A7795_CLK_SSI4 R8A7795_CLK_SSI3 R8A7795_CLK_SSI2 R8A7795_CLK_SSI1 R8A7795_CLK_SSI0
-						R8A7795_CLK_SCU_ALL
-						R8A7795_CLK_SCU_DVC1 R8A7795_CLK_SCU_DVC0
-						R8A7795_CLK_SCU_CTU1_MIX1 R8A7795_CLK_SCU_CTU0_MIX0
-						R8A7795_CLK_SCU_SRC9 R8A7795_CLK_SCU_SRC8 R8A7795_CLK_SCU_SRC7 R8A7795_CLK_SCU_SRC6 R8A7795_CLK_SCU_SRC5
-						R8A7795_CLK_SCU_SRC4 R8A7795_CLK_SCU_SRC3 R8A7795_CLK_SCU_SRC2 R8A7795_CLK_SCU_SRC1 R8A7795_CLK_SCU_SRC0
-					>;
-					clock-output-names =
+						"gpio1", "gpio0",
+						"i2c6", "i2c5", "i2c4", "i2c3",
+						"i2c2", "i2c1", "i2c0",
+						/* MSTP10 */
 						"ssi-all",
 						"ssi9", "ssi8", "ssi7", "ssi6",
 						"ssi5", "ssi4", "ssi3", "ssi2",
@@ -525,6 +540,7 @@
 						"scu-src5", "scu-src4",
 						"scu-src3", "scu-src2",
 						"scu-src1", "scu-src0";
+					#reset-cells = <1>;
 				};
 			};
 		};
@@ -554,7 +570,7 @@
 					"ch4", "ch5", "ch6", "ch7",
 					"ch8", "ch9", "ch10", "ch11",
 					"ch12", "ch13", "ch14", "ch15";
-			clocks = <&mstp5_clks R8A7795_CLK_AUDIO_DMAC0>;
+			clocks = <&mssr R8A7795_CLK_AUDIO_DMAC0>;
 			power-domains = <&cpg_clocks>;
 			clock-names = "fck";
 			#dma-cells = <1>;
@@ -586,7 +602,7 @@
 					"ch4", "ch5", "ch6", "ch7",
 					"ch8", "ch9", "ch10", "ch11",
 					"ch12", "ch13", "ch14", "ch15";
-			clocks = <&mstp5_clks R8A7795_CLK_AUDIO_DMAC1>;
+			clocks = <&mssr R8A7795_CLK_AUDIO_DMAC1>;
 			power-domains = <&cpg_clocks>;
 			clock-names = "fck";
 			#dma-cells = <1>;
@@ -642,7 +658,7 @@
 					  "ch16", "ch17", "ch18", "ch19",
 					  "ch20", "ch21", "ch22", "ch23",
 					  "ch24";
-			clocks = <&mstp8_clks R8A7795_CLK_ETHERAVB>;
+			clocks = <&mssr R8A7795_CLK_ETHERAVB>;
 			power-domains = <&cpg_clocks>;
 			phy-mode = "rgmii-id";
 			#address-cells = <1>;
@@ -735,7 +751,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6500000 0 0x40>;
 			interrupts = <GIC_SPI 287 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C0>;
+			clocks = <&mssr R8A7795_CLK_I2C0>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -746,7 +762,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6508000 0 0x40>;
 			interrupts = <GIC_SPI 288 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C1>;
+			clocks = <&mssr R8A7795_CLK_I2C1>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -757,7 +773,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe6510000 0 0x40>;
 			interrupts = <GIC_SPI 286 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C2>;
+			clocks = <&mssr R8A7795_CLK_I2C2>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -768,7 +784,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66d0000 0 0x40>;
 			interrupts = <GIC_SPI 290 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C3>;
+			clocks = <&mssr R8A7795_CLK_I2C3>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -779,7 +795,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66d8000 0 0x40>;
 			interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C4>;
+			clocks = <&mssr R8A7795_CLK_I2C4>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -790,7 +806,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66e0000 0 0x40>;
 			interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C5>;
+			clocks = <&mssr R8A7795_CLK_I2C5>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -801,7 +817,7 @@
 			compatible = "renesas,i2c-r8a7795";
 			reg = <0 0xe66e8000 0 0x40>;
 			interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
-			clocks = <&mstp9_clks R8A7795_CLK_I2C6>;
+			clocks = <&mssr R8A7795_CLK_I2C6>;
 			power-domains = <&cpg_clocks>;
 			status = "disabled";
 		};
@@ -827,20 +843,20 @@
 				<0 0xec740000 0 0x200>;  /* Audio DMAC peri peri*/
 			reg-names = "scu", "adg", "ssiu", "ssi", "audmapp";
 
-			clocks = <&mstp10_clks R8A7795_CLK_SSI_ALL>,
-				<&mstp10_clks R8A7795_CLK_SSI9>, <&mstp10_clks R8A7795_CLK_SSI8>,
-				<&mstp10_clks R8A7795_CLK_SSI7>, <&mstp10_clks R8A7795_CLK_SSI6>,
-				<&mstp10_clks R8A7795_CLK_SSI5>, <&mstp10_clks R8A7795_CLK_SSI4>,
-				<&mstp10_clks R8A7795_CLK_SSI3>, <&mstp10_clks R8A7795_CLK_SSI2>,
-				<&mstp10_clks R8A7795_CLK_SSI1>, <&mstp10_clks R8A7795_CLK_SSI0>,
-				<&mstp10_clks R8A7795_CLK_SCU_SRC9>, <&mstp10_clks R8A7795_CLK_SCU_SRC8>,
-				<&mstp10_clks R8A7795_CLK_SCU_SRC7>, <&mstp10_clks R8A7795_CLK_SCU_SRC6>,
-				<&mstp10_clks R8A7795_CLK_SCU_SRC5>, <&mstp10_clks R8A7795_CLK_SCU_SRC4>,
-				<&mstp10_clks R8A7795_CLK_SCU_SRC3>, <&mstp10_clks R8A7795_CLK_SCU_SRC2>,
-				<&mstp10_clks R8A7795_CLK_SCU_SRC1>, <&mstp10_clks R8A7795_CLK_SCU_SRC0>,
-				<&mstp10_clks R8A7795_CLK_SCU_CTU0_MIX0>, <&mstp10_clks R8A7795_CLK_SCU_CTU1_MIX1>,
-				<&mstp10_clks R8A7795_CLK_SCU_CTU0_MIX0>, <&mstp10_clks R8A7795_CLK_SCU_CTU1_MIX1>,
-				<&mstp10_clks R8A7795_CLK_SCU_DVC0>, <&mstp10_clks R8A7795_CLK_SCU_DVC1>,
+			clocks = <&mssr R8A7795_CLK_SSI_ALL>,
+				<&mssr R8A7795_CLK_SSI9>, <&mssr R8A7795_CLK_SSI8>,
+				<&mssr R8A7795_CLK_SSI7>, <&mssr R8A7795_CLK_SSI6>,
+				<&mssr R8A7795_CLK_SSI5>, <&mssr R8A7795_CLK_SSI4>,
+				<&mssr R8A7795_CLK_SSI3>, <&mssr R8A7795_CLK_SSI2>,
+				<&mssr R8A7795_CLK_SSI1>, <&mssr R8A7795_CLK_SSI0>,
+				<&mssr R8A7795_CLK_SCU_SRC9>, <&mssr R8A7795_CLK_SCU_SRC8>,
+				<&mssr R8A7795_CLK_SCU_SRC7>, <&mssr R8A7795_CLK_SCU_SRC6>,
+				<&mssr R8A7795_CLK_SCU_SRC5>, <&mssr R8A7795_CLK_SCU_SRC4>,
+				<&mssr R8A7795_CLK_SCU_SRC3>, <&mssr R8A7795_CLK_SCU_SRC2>,
+				<&mssr R8A7795_CLK_SCU_SRC1>, <&mssr R8A7795_CLK_SCU_SRC0>,
+				<&mssr R8A7795_CLK_SCU_CTU0_MIX0>, <&mssr R8A7795_CLK_SCU_CTU1_MIX1>,
+				<&mssr R8A7795_CLK_SCU_CTU0_MIX0>, <&mssr R8A7795_CLK_SCU_CTU1_MIX1>,
+				<&mssr R8A7795_CLK_SCU_DVC0>, <&mssr R8A7795_CLK_SCU_DVC1>,
 				<&audio_clk_a>, <&audio_clk_b>, <&audio_clk_c>, <&s0d4_clk>;
 			clock-names = "ssi-all",
 					"ssi.9", "ssi.8", "ssi.7", "ssi.6", "ssi.5",
