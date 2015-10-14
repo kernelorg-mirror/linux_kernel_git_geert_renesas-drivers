@@ -118,6 +118,12 @@ int __of_attach_node_post(struct device_node *np)
 	struct property *pp;
 	int rc;
 
+	if (of_phandle_ht_available()) {
+		rc = of_phandle_ht_insert(np);
+		WARN(rc, "insert to phandle hash fail @%s\n",
+				of_node_full_name(np));
+	}
+
 	if (!of_kset)
 		return 0;
 
@@ -146,6 +152,13 @@ int __of_attach_node_post(struct device_node *np)
 void __of_detach_node_post(struct device_node *np)
 {
 	struct property *pp;
+	int rc;
+
+	if (of_phandle_ht_available()) {
+		rc = of_phandle_ht_remove(np);
+		WARN(rc, "remove from phandle hash fail @%s\n",
+				of_node_full_name(np));
+	}
 
 	BUG_ON(!of_node_is_initialized(np));
 	if (!of_kset)
