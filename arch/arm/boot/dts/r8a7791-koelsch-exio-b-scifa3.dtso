@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for SCIFA3(b) on r8a7791/Koelsch EXIO Connector B
+//
+// Copyright (C) 2015 Glider bvba
+//
+// Pinout:
+//   - TXD = EXIO B pin 8
+//   - RXD = EXIO B pin 10
+//   - SCK = EXIO B pin 12
+//   - GND = EXIO B pin 1/2/19/20/38
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	scifa3_pins: scifa3 {
+		groups = "scifa3_data_c", "scifa3_clk_c";
+		function = "scifa3";
+	};
+};
+
+&scifa3 {
+	pinctrl-0 = <&scifa3_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
