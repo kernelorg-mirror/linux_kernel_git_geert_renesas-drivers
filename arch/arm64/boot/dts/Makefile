@@ -31,4 +31,8 @@ dtstree		:= $(srctree)/$(src)
 
 dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(foreach d,$(dts-dirs), $(wildcard $(dtstree)/$(d)/*.dts)))
 
+ifeq ($(CONFIG_OF_OVERLAY),y)
+dtb-y += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(foreach d,$(dts-dirs), $(wildcard $(dtstree)/$(d)/*.dtso)))
+endif
+
 always		:= $(dtb-y)
