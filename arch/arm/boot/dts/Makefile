@@ -844,5 +844,9 @@ endif
 dtstree		:= $(srctree)/$(src)
 dtb-$(CONFIG_OF_ALL_DTBS) := $(patsubst $(dtstree)/%.dts,%.dtb, $(wildcard $(dtstree)/*.dts))
 
+ifeq ($(CONFIG_OF_OVERLAY),y)
+dtb-y += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(wildcard $(dtstree)/*.dtso))
+endif
+
 always		:= $(dtb-y)
-clean-files	:= *.dtb
+clean-files	:= *.dtb *.dtbo
