@@ -40,3 +40,6 @@ subdir-y += vt8500
 subdir-y += xen
 subdir-y += xilinx
 subdir-y += zte
+
+dtstree := $(srctree)/$(src)
+dtb-$(CONFIG_OF_OVERLAY) += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(foreach d,. $(subdir-y), $(wildcard $(dtstree)/$(d)/*.dtso)))
