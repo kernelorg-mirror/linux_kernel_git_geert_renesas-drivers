@@ -32,3 +32,6 @@ subdir-y += tesla
 subdir-y += ti
 subdir-y += toshiba
 subdir-y += xilinx
+
+dtstree := $(srctree)/$(src)
+dtb-$(CONFIG_OF_OVERLAY) += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(foreach d,$(subdir-y), $(wildcard $(dtstree)/$(d)/*.dtso)))
