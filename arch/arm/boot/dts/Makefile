@@ -1454,3 +1454,6 @@ dtb-$(CONFIG_ARCH_ASPEED) += \
 	aspeed-bmc-portwell-neptune.dtb \
 	aspeed-bmc-quanta-q71l.dtb \
 	aspeed-bmc-supermicro-x11spi.dtb
+
+dtstree := $(srctree)/$(src)
+dtb-$(CONFIG_OF_OVERLAY) += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(wildcard $(dtstree)/*.dtso))
