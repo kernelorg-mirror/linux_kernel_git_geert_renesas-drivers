@@ -1,0 +1,63 @@
+/*
+ * Device Tree Overlay for MSIOF1 and 4xHC595 on r8a7791/koelsch EXIO B
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - CS# = EXIO B pin 17
+ *   - SCK = EXIO B pin 15
+ *   - MOSI = EXIO B pin 9
+ *   - MISO = EXIO B pin 7
+ */
+
+/dts-v1/ /plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* spi2 = &msiof1; */
+			spi2 = "/spi@e6e10000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			msiof1_pins: msiof1 {
+				groups = "msiof1_clk_c", "msiof1_sync_c",
+					 "msiof1_rx_c", "msiof1_tx_c";
+				function = "msiof1";
+			};
+		};
+	};
+
+	fragment-msiof1 {
+		target = <&msiof1>;
+
+		__overlay__ {
+			pinctrl-0 = <&msiof1_pins>;
+			pinctrl-names = "default";
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			hc595s: gpio@0 {
+				compatible = "fairchild,74hc595";
+				reg = <0>;
+
+				gpio-controller;
+				#gpio-cells = <2>;
+				registers-number = <4>;
+				spi-max-frequency = <100000>;
+			};
+		};
+	};
+};
