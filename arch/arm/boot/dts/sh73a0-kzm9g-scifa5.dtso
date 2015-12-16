@@ -1,0 +1,51 @@
+/*
+ * Device Tree Overlay for SCIFA5 on sh73a0/KZM-A9-GT CN8
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = pin 64
+ *   - RXD = pin 66
+ *   - RTS# = pin 68
+ *   - CTS# = pin 70
+ */
+
+/dts-v1/ /plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial5 = &scifa5; */
+			serial5 = "/serial@e6cb0000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			scifa5_pins: scifa5 {
+				groups = "scifa5_data_0", "scifa5_ctrl_0";
+				function = "scifa5";
+			};
+		};
+	};
+
+	fragment-scifa5 {
+		target = <&scifa5>;
+
+		__overlay__ {
+			pinctrl-0 = <&scifa5_pins>;
+			pinctrl-names = "default";
+
+			uart-has-rtscts;
+			status = "okay";
+		};
+	};
+};
