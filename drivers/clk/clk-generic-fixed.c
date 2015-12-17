@@ -35,7 +35,6 @@ static int generic_fixed_clk_remove(struct platform_device *pdev)
 static struct platform_driver generic_fixed_clk_driver = {
 	.driver = {
 		.name = "generic-fixed-clk",
-		.owner = THIS_MODULE,
 		.of_match_table = generic_fixed_clk_match,
 	},
 	.probe	= generic_fixed_clk_probe,
