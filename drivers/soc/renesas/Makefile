@@ -32,3 +32,4 @@ obj-$(CONFIG_SYSC_RMOBILE)	+= rmobile-sysc.o
 # Renesas MSTP debug handling
 obj-$(CONFIG_ARCH_R8A73A4)	+= renesas-mstp.o r8a73a4-mstp.o
 obj-$(CONFIG_ARCH_R8A7740)	+= renesas-mstp.o r8a7740-mstp.o
+obj-$(CONFIG_ARCH_R8A7790)	+= renesas-mstp.o r8a7790-mstp.o
