@@ -1,0 +1,50 @@
+/*
+ * Device Tree Overlay for HSCIF4 on r8a7795/Salvator-X EXIO Connector D
+ *
+ * Copyright (C) 2016 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * EXIO Pinout:
+ *   - HSCIF4 TXD = EXIO D pin 21
+ *   - HSCIF4 RXD = EXIO D pin 27
+ */
+
+/dts-v1/ /plugin/;
+
+#include <dt-bindings/clock/r8a7795-cpg-mssr.h>
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial4 = &hscif4; */
+			serial4 = "/soc/serial@e66b0000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			hscif4_pins: hscif4 {
+				groups = "hscif4_data_b";
+				function = "hscif4";
+			};
+		};
+	};
+
+	fragment-hscif4 {
+		target = <&hscif4>;
+
+		__overlay__ {
+			pinctrl-0 = <&hscif4_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};
