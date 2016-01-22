@@ -39,6 +39,11 @@
 		};
 	};
 
+	ptm {
+		compatible = "arm,coresight-etm3x";
+		power-domains = <&pd_d4>;
+	};
+
 	timer@f0000200 {
 		compatible = "arm,cortex-a9-global-timer";
 		reg = <0xf0000200 0x100>;
