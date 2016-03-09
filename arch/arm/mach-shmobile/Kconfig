@@ -4,6 +4,11 @@ config ARCH_SHMOBILE
 config ARCH_SHMOBILE_MULTI
 	bool
 
+config PM_RCAR
+	bool
+	select PM
+	select PM_GENERIC_DOMAINS
+
 config PM_RMOBILE
 	bool
 	select PM
@@ -11,13 +16,13 @@ config PM_RMOBILE
 
 config ARCH_RCAR_GEN1
 	bool
-	select RENESAS_RCAR_PM
+	select PM_RCAR
 	select RENESAS_INTC_IRQPIN
 	select SYS_SUPPORTS_SH_TMU
 
 config ARCH_RCAR_GEN2
 	bool
-	select RENESAS_RCAR_PM
+	select PM_RCAR
 	select RENESAS_IRQC
 	select SYS_SUPPORTS_SH_CMT
 	select PCI_DOMAINS if PCI

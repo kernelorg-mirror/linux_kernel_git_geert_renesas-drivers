@@ -1,8 +1,6 @@
 #ifndef PM_RCAR_H
 #define PM_RCAR_H
 
-#include <linux/types.h>
-
 struct rcar_sysc_ch {
 	u16 chan_offs;
 	u8 chan_bit;

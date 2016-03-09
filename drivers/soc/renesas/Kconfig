@@ -1,9 +1,0 @@
-#
-# Renesas SoC drivers
-#
-
-config RENESAS_RCAR_PM
-	bool
-	select PM
-	select PM_GENERIC_DOMAINS
-	default y if ARCH_RENESAS && ARM64
