@@ -1,0 +1,55 @@
+/*
+ * Device Tree Overlay for HSCIF1 on r8a7791/Koelsch EXIO Connector A, using
+ * GPIO-based RTS/CTS hardware flow control
+ *
+ * Copyright (C) 2016 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = EXIO Connector A pin 53
+ *   - RXD = EXIO Connector A pin 72
+ *   - RTS = EXIO Connector A pin 63
+ *   - CTS = EXIO Connector A pin 76
+ */
+
+/dts-v1/ /plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial16 = &hscif1; */
+			serial16 = "/serial@e62c8000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			hscif1_pins: hscif1 {
+				groups = "hscif1_data_b";
+				function = "hscif1";
+			};
+		};
+	};
+
+	fragment-hscif1 {
+		target = <&hscif1>;
+
+		__overlay__ {
+			pinctrl-0 = <&hscif1_pins>;
+			pinctrl-names = "default";
+
+			rts-gpios = <&gpio1 14 GPIO_ACTIVE_LOW>;
+			cts-gpios = <&gpio1 24 GPIO_ACTIVE_LOW>;
+			status = "okay";
+		};
+	};
+};
