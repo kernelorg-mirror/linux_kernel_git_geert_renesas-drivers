@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for SCIF1 on Salvator-X(S) Debug Serial 1 (CN26),
+// with RTS/CTS hardware flow control disabled
+//
+// Copyright (C) 2016 Glider bvba
+//
+// Notes:
+//   - As these pins are shared with HSCIF1, the latter is disabled first.
+//
+// EXIO Pinout:
+//   - TXD = EXIO B pin 55
+//   - RXD = EXIO B pin 53 [*]
+//   - SCK = EXIO B pin 57
+//   - 3V3 = EXIO B pin 41
+//   - GND = EXIO B pin 63
+//
+// [*] As this pin is driven by a buffer connected to the CP2102, it can be
+//     used for monitoring only, and not serve as an input!
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	scif1_pins: scif1 {
+		groups = "scif1_data_a", "scif1_clk_a";
+		function = "scif1";
+	};
+};
+
+&hscif1 {
+	status = "disabled";
+};
+
+&scif1 {
+	pinctrl-0 = <&scif1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
