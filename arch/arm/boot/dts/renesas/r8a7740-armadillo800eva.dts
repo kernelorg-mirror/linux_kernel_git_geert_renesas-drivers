@@ -155,6 +155,20 @@
 		};
 	};
 
+	remote-wakeup {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&remote_wakeup_pins>;
+		pinctrl-names = "default";
+
+		wakeup-key {
+			gpios = <&pfc 95 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WAKEUP>;
+			label = "CON15-43";
+			wakeup-source;
+		};
+	};
+
 	sound {
 		compatible = "simple-audio-card";
 
@@ -302,6 +316,11 @@
 		gpio-hog;
 		gpios = <176 0>;
 		output-high;
+	};
+
+	remote_wakeup_pins: remote-wakeup {
+		pins = "PORT95";
+		bias-pull-up;
 	};
 };
 
