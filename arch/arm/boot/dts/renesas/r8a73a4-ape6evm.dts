@@ -140,6 +140,20 @@
 			label = "S21";
 		};
 	};
+
+	remote-wakeup {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&remote_wakeup_pins>;
+		pinctrl-names = "default";
+
+		wakeup-key {
+			gpios = <&pfc 1 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WAKEUP>;
+			label = "X8-16";
+			wakeup-source;
+		};
+	};
 };
 
 &i2c5 {
@@ -245,6 +259,11 @@
 	keyboard_pins: keyboard {
 		pins = "PORT324", "PORT325", "PORT326", "PORT327", "PORT328",
 		       "PORT329";
+		bias-pull-up;
+	};
+
+	remote_wakeup_pins: remote-wakeup {
+		pins = "PORT1";
 		bias-pull-up;
 	};
 };
