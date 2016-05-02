@@ -205,6 +205,20 @@
 		regulator-always-on;
 	};
 
+	remote-wakeup {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&remote_wakeup_pins>;
+		pinctrl-names = "default";
+
+		key-wakeup {
+			gpios = <&gpio2 1 GPIO_ACTIVE_LOW>;
+			label = "EXIO-D-50";
+			linux,code = <KEY_WAKEUP>;
+			wakeup-source;
+		};
+	};
+
 	sound_card: sound {
 		compatible = "audio-graph-card";
 
@@ -702,6 +716,11 @@
 	pwm1_pins: pwm1 {
 		groups = "pwm1_a";
 		function = "pwm1";
+	};
+
+	remote_wakeup_pins: remote-wakeup {
+		pins = "GP_2_1";
+		bias-pull-up;
 	};
 
 	scif1_pins: scif1 {
