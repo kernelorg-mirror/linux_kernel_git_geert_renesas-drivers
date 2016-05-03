@@ -3,6 +3,7 @@
 #include <linux/bitops.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/of.h>
 #include <linux/soc/renesas/rcar-rst.h>
 
 #include "renesas-mstp.h"
@@ -526,18 +527,27 @@ const struct renesas_mstp_info r8a7791_mstp_info = {
 	.num_do_not_touch	= ARRAY_SIZE(mstp_do_not_touch),
 };
 
-void __init r8a7791_disable_mstp_clocks(void)
+static int __init r8a7791_disable_mstp_clocks(void)
 {
 	u32 mode;
+	int ret;
 
-	if (rcar_rst_read_mode_pins(&mode))
-		return;
+	if (!of_machine_is_compatible("renesas,r8a7743") &&
+	    !of_machine_is_compatible("renesas,r8a7744") &&
+	    !of_machine_is_compatible("renesas,r8a7791") &&
+	    !of_machine_is_compatible("renesas,r8a7793"))
+		return -ENODEV;
+
+	ret = rcar_rst_read_mode_pins(&mode);
+	if (ret)
+		return ret;
 
 	/* Do not touch the RMSTP clocks when booted from the Realtime Core */
 	if (mode & BIT(7)) {
 		pr_warn("Booted from Realtime Core. Skipping MSTP disable\n");
-		return;
+		return -ENODEV;
 	}
 
-	renesas_disable_mstp_clocks(&r8a7791_mstp_info);
+	return renesas_disable_mstp_clocks(&r8a7791_mstp_info);
 }
+arch_initcall(r8a7791_disable_mstp_clocks);
