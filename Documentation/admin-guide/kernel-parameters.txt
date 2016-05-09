@@ -4802,6 +4802,8 @@ Kernel parameters
 			Valid values range from 0 to the smaller of
 			UINT_MAX / 1000 and MAX_JIFFY_OFFSET / HZ. Default: 10
 
+	of_overlay_disable	[OF] Disable device tree overlays at boot time.
+
 	ohci1394_dma=early	[HW,EARLY] enable debugging via the ohci1394 driver.
 			See Documentation/core-api/debugging-via-ohci1394.rst for more
 			info.
