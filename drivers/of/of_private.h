@@ -212,4 +212,13 @@ static void __maybe_unused of_dump_addr(const char *s, const __be32 *addr, int n
 int __of_address_resource_bounds(struct resource *r, u64 start, u64 size);
 #endif
 
+#if defined(CONFIG_OF_OVERLAY)
+extern int of_overlay_init(void);
+#else
+static inline int of_overlay_init(void)
+{
+	return 0;
+}
+#endif
+
 #endif /* _LINUX_OF_PRIVATE_H */
