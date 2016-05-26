@@ -1,0 +1,91 @@
+/*
+ * Device Tree Overlay for HSCIF1 with 990 kHz HSCK input on r8a7795/Salvator-X
+ * Debug Serial 1
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Notes:
+ *   - As these pins are shared with SCIF1, the latter is disabled first.
+ *
+ * EXIO Pinout:
+ *   - TXD = EXIO Connector B pin 55
+ *   - RXD = EXIO Connector B pin 53 [*]
+ *   - RTS = EXIO Connector B pin 49
+ *   - CTS = EXIO Connector B pin 47 [*]
+ *   - SCK = EXIO Connector B pin 57
+ *   - 3V3 = EXIO Connector B pin 41
+ *   - GND = EXIO Connector B pin 63
+ *
+ * [*] As these pins are driven by buffers connected to the CP2102, they can
+ *     be used for monitoring only, and not serve as inputs!
+ */
+
+/dts-v1/ /plugin/;
+
+#include <dt-bindings/clock/r8a7795-cpg-mssr.h>
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial1 = &hscif1; */
+			serial1 = "/soc/serial@e6550000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			hscif1_pins: hscif1 {
+				groups = "hscif1_data_a", "hscif1_ctrl_a",
+					 "hscif1_clk_a";
+				function = "hscif1";
+			};
+		};
+	};
+
+	fragment-scif1 {
+		target = <&scif1>;
+
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment-hsck1 {
+		target-path = "/";
+
+		__overlay__ {
+			hsck_clk: hsck1 {
+				/* 74HC14 oscillator, R = 15K/2, C = 120J */
+				compatible = "fixed-clock";
+				#clock-cells = <0>;
+				clock-frequency = <990000>;
+				status = "okay";
+			};
+		};
+	};
+
+	fragment-hscif1 {
+		target = <&hscif1>;
+
+		__overlay__ {
+			pinctrl-0 = <&hscif1_pins>;
+			pinctrl-names = "default";
+
+			clocks = <&cpg CPG_MOD 519>,
+				 <&cpg CPG_CORE R8A7795_CLK_S3D1>,
+				 <&scif_clk>, <&hsck_clk>;
+			clock-names = "fck", "brg_int", "scif_clk", "hsck";
+
+			uart-has-rtscts;
+			status = "okay";
+		};
+	};
+};
