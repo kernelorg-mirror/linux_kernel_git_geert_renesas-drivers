@@ -1,0 +1,68 @@
+/*
+ * Device Tree Overlay for MSIOF1 with cs-gpios and 2xHC595 on r8a7791/koelsch
+ * EXIO A
+ *
+ * Copyright (C) 2016 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - CS# = EXIO A pin 48
+ *   - SCK = EXIO A pin 46
+ *   - MOSI = EXIO A pin 54
+ *   - MISO = EXIO A pin 56
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* spi2 = &msiof1; */
+			spi2 = "/spi@e6e10000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			msiof1_pins: msiof1 {
+				groups = "msiof1_clk", "msiof1_rx",
+					 "msiof1_tx";
+				function = "msiof1";
+			};
+		};
+	};
+
+	fragment-msiof1 {
+		target = <&msiof1>;
+
+		__overlay__ {
+			pinctrl-0 = <&msiof1_pins>;
+			pinctrl-names = "default";
+			cs-gpios = <&gpio0 23 GPIO_ACTIVE_LOW>;
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			hc595s: gpio@0 {
+				compatible = "fairchild,74hc595";
+				reg = <0>;
+
+				gpio-controller;
+				#gpio-cells = <2>;
+				registers-number = <2>;
+				spi-max-frequency = <100000>;
+			};
+		};
+	};
+};
