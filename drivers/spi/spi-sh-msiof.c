@@ -584,7 +584,8 @@ static int sh_msiof_spi_setup(struct spi_device *spi)
 	struct device_node	*np = spi->master->dev.of_node;
 	struct sh_msiof_spi_priv *p = spi_master_get_devdata(spi->master);
 	u32 max_speed_hz, min_speed_hz;
-	unsigned long rate;
+	unsigned long rate, req_rate;
+	int error;
 
 	rate = clk_get_rate(p->clk);
 	max_speed_hz = rate;
@@ -594,6 +595,77 @@ static int sh_msiof_spi_setup(struct spi_device *spi)
 		 "%s: master speed min %u max %u, device speed max = %u\n",
 		 __func__, min_speed_hz, max_speed_hz, spi->max_speed_hz);
 
+	if (spi->max_speed_hz < min_speed_hz) {
+		dev_err(&p->pdev->dev,
+			"Parent clock rate %lu too high for %u!\n", rate,
+			spi->max_speed_hz);
+
+		req_rate = spi->max_speed_hz * MAX_DIV;
+
+		error = clk_set_rate(p->clk, req_rate);
+		if (error) {
+			dev_err(&p->pdev->dev,
+				"Failed to set parent clock rate to %lu: %d\n",
+				req_rate, error);
+			return error;
+		}
+
+		rate = clk_get_rate(p->clk);
+		dev_info(&p->pdev->dev,
+			 "Changed parent clock rate to %lu actual %lu\n",
+			 req_rate, rate);
+
+		max_speed_hz = rate;
+		min_speed_hz = rate / MAX_DIV;
+
+		dev_info(&p->pdev->dev,
+			 "%s: new master speed min %u max %u, device speed max = %u\n",
+			 __func__, min_speed_hz, max_speed_hz,
+			 spi->max_speed_hz);
+
+		if (spi->max_speed_hz < min_speed_hz) {
+			dev_err(&p->pdev->dev,
+				"New parent clock rate %lu too high for %u!\n",
+				rate, spi->max_speed_hz);
+			return -EINVAL;
+		}
+	} else if (spi->max_speed_hz * 4 > max_speed_hz * 5) {
+		/* More than 20% lower than desired */
+		dev_warn(&p->pdev->dev,
+			 "Parent clock rate %lu too low for %u\n", rate,
+			 spi->max_speed_hz);
+
+		req_rate = spi->max_speed_hz;
+
+		error = clk_set_rate(p->clk, req_rate);
+		if (error) {
+			dev_warn(&p->pdev->dev,
+				"Failed to set parent clock rate to %lu: %d, ignoring\n",
+				req_rate, error);
+			goto done;
+		}
+
+		rate = clk_get_rate(p->clk);
+		dev_info(&p->pdev->dev,
+			 "Changed parent clock rate to %lu actual %lu\n",
+			 req_rate, rate);
+
+		max_speed_hz = rate;
+		min_speed_hz = rate / MAX_DIV;
+
+		dev_info(&p->pdev->dev,
+			 "%s: new master speed min %u max %u, device speed max = %u\n",
+			 __func__, min_speed_hz, max_speed_hz,
+			 spi->max_speed_hz);
+
+		if (spi->max_speed_hz * 4 > max_speed_hz * 5) {
+			dev_warn(&p->pdev->dev,
+				 "New parent clock rate %lu too high for %u, ignoring\n",
+				 rate, spi->max_speed_hz);
+		}
+	}
+
+done:
 	p->dev_max_speed_hz = spi->max_speed_hz;
 
 	pm_runtime_get_sync(&p->pdev->dev);
