@@ -45,6 +45,10 @@
 		serial2 = &scif3;
 		serial3 = &hscif3;
 		ethernet0 = &avb;
+		spi0 = &msiof0;
+		spi1 = &msiof1;
+		spi2 = &msiof2;
+		spi3 = &msiof3;
 	};
 
 	chosen {
@@ -180,6 +184,24 @@
 	avb_pins: avb {
 		groups = "avb_mdc";
 		function = "avb";
+	};
+
+	msiof0_pins: msiof0 {
+		groups = "msiof0_clk", "msiof0_sync", "msiof0_rxd",
+			 "msiof0_txd";
+		function = "msiof0";
+	};
+
+	msiof2_pins: msiof2 {
+		groups = "msiof2_clk_b", "msiof2_sync_b", "msiof2_rxd_b",
+			 "msiof2_txd_b";
+		function = "msiof2";
+	};
+
+	msiof3_pins: msiof3 {
+		groups = "msiof3_clk_a", "msiof3_sync_a", "msiof3_rxd_a",
+			 "msiof3_txd_a";
+		function = "msiof3";
 	};
 
 	sdhi0_pins: sd0 {
@@ -454,4 +476,56 @@
 
 &pciec1 {
 	status = "okay";
+};
+
+/* Dummy high-speed SPI slave device */
+&msiof0 {
+	pinctrl-0 = <&msiof0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	flash@0 {
+		compatible = "jedec,spi-nor";
+		//compatible = "spidev";
+		reg = <0>;
+
+		spi-max-frequency = <30000000>;
+	};
+};
+
+/* Dummy medium-speed SPI slave device */
+&msiof2 {
+	pinctrl-0 = <&msiof2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	spidev@0 {
+		//compatible = "jedec,spi-nor";
+		compatible = "spidev";
+		reg = <0>;
+
+		spi-max-frequency = <1000000>;
+	};
+};
+
+/* Dummy low-speed SPI slave device */
+&msiof3 {
+	pinctrl-0 = <&msiof3_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	gpio@0 {
+		compatible = "fairchild,74hc595";
+		//compatible = "jedec,spi-nor";
+		//compatible = "spidev";
+		reg = <0>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+		registers-number = <2>;
+		spi-max-frequency = <20000>;
+	};
 };
