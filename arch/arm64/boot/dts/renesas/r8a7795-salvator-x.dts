@@ -143,6 +143,11 @@
 	};
 };
 
+&cpg {
+	assigned-clocks = <&cpg CPG_CORE R8A7795_CLK_MSO>;
+	assigned-clock-rates = <20000000>;
+};
+
 &extal_clk {
 	clock-frequency = <16666666>;
 };
