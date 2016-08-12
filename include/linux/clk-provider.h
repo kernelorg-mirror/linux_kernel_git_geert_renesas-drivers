@@ -389,6 +389,7 @@ struct clk_div_table {
 struct clk_divider {
 	struct clk_hw	hw;
 	void __iomem	*reg;
+	unsigned int reg_val;	// FIXME if reg is NULL
 	u8		shift;
 	u8		width;
 	u8		flags;

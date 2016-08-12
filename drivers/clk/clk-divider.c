@@ -141,8 +141,12 @@ static unsigned long clk_divider_recalc_rate(struct clk_hw *hw,
 	struct clk_divider *divider = to_clk_divider(hw);
 	unsigned int val;
 
-	val = clk_readl(divider->reg) >> divider->shift;
-	val &= div_mask(divider->width);
+	if (divider->reg) {
+		val = clk_readl(divider->reg) >> divider->shift;
+		val &= div_mask(divider->width);
+	} else {
+		val = divider->reg_val;
+	}
 
 	return divider_recalc_rate(hw, parent_rate, val, divider->table,
 				   divider->flags);
@@ -352,8 +356,12 @@ static long clk_divider_round_rate(struct clk_hw *hw, unsigned long rate,
 
 	/* if read only, just return current value */
 	if (divider->flags & CLK_DIVIDER_READ_ONLY) {
-		bestdiv = clk_readl(divider->reg) >> divider->shift;
-		bestdiv &= div_mask(divider->width);
+		if (divider->reg) {
+			bestdiv = clk_readl(divider->reg) >> divider->shift;
+			bestdiv &= div_mask(divider->width);
+		} else {
+			bestdiv = divider->reg_val;
+		}
 		bestdiv = _get_div(divider->table, bestdiv, divider->flags,
 			divider->width);
 		return DIV_ROUND_UP_ULL((u64)*prate, bestdiv);
@@ -396,14 +404,19 @@ static int clk_divider_set_rate(struct clk_hw *hw, unsigned long rate,
 	else
 		__acquire(divider->lock);
 
-	if (divider->flags & CLK_DIVIDER_HIWORD_MASK) {
-		val = div_mask(divider->width) << (divider->shift + 16);
+	if (divider->reg) {
+		if (divider->flags & CLK_DIVIDER_HIWORD_MASK) {
+			val = div_mask(divider->width) << (divider->shift + 16);
+		} else {
+			val = clk_readl(divider->reg);
+			val &= ~(div_mask(divider->width) << divider->shift);
+		}
+		val |= value << divider->shift;
+		clk_writel(val, divider->reg);
 	} else {
-		val = clk_readl(divider->reg);
-		val &= ~(div_mask(divider->width) << divider->shift);
+		pr_info("Setting %pC to value 0x%x\n", hw->clk, value);
+		divider->reg_val = value;
 	}
-	val |= value << divider->shift;
-	clk_writel(val, divider->reg);
 
 	if (divider->lock)
 		spin_unlock_irqrestore(divider->lock, flags);
