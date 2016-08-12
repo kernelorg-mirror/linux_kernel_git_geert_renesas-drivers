@@ -272,6 +272,13 @@ static void sh_msiof_spi_set_clk_regs(struct sh_msiof_spi_priv *p,
 	k = min_t(int, k, ARRAY_SIZE(sh_msiof_spi_div_table) - 1);
 
 	scr = sh_msiof_spi_div_table[k].brdv | SCR_BRPS(brps);
+	dev_info(&p->pdev->dev, "clk at %lu Hz, brps = %u, brdv = %u%s\n",
+		 parent_rate, brps, sh_msiof_spi_div_table[k].div,
+		 ((sh_msiof_spi_div_table[k].div == 1 && brps > 2) ||
+		  (brps > 32)) ? " INVALID!" : "");
+	dev_info(&p->pdev->dev, "wanted: %u Hz, actual: %lu Hz\n", spi_hz,
+		 parent_rate / sh_msiof_spi_div_table[k].div / brps);
+
 	sh_msiof_write(p, TSCR, scr);
 	if (!(p->master->flags & SPI_MASTER_MUST_TX))
 		sh_msiof_write(p, RSCR, scr);
@@ -523,6 +530,16 @@ static int sh_msiof_spi_setup(struct spi_device *spi)
 {
 	struct device_node	*np = spi->master->dev.of_node;
 	struct sh_msiof_spi_priv *p = spi_master_get_devdata(spi->master);
+	u32 max_speed_hz, min_speed_hz;
+	unsigned long rate;
+
+	rate = clk_get_rate(p->clk);
+	max_speed_hz = rate;
+	min_speed_hz = rate / 1024;
+
+	dev_info(&p->pdev->dev,
+		 "%s: master speed min %u max %u, device speed max = %u\n",
+		 __func__, min_speed_hz, max_speed_hz, spi->max_speed_hz);
 
 	pm_runtime_get_sync(&p->pdev->dev);
 
