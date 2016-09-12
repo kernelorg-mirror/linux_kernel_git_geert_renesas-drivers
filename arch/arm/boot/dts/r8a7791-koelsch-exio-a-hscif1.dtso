@@ -1,0 +1,48 @@
+/*
+ * Device Tree Overlay for HSCIF1 on r8a7791/Koelsch EXIO Connector A
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ *
+ * Pinout:
+ *   - TXD = EXIO Connector A pin 53
+ *   - RXD = EXIO Connector A pin 72
+ */
+
+/dts-v1/ /plugin/;
+
+/ {
+	fragment-aliases {
+		target-path = "/aliases";
+
+		__overlay__ {
+			/* serial16 = &hscif1; */
+			serial16 = "/serial@e62c8000";
+		};
+	};
+
+	fragment-pfc {
+		target = <&pfc>;
+
+		__overlay__ {
+			hscif1_pins: hscif1 {
+				groups = "hscif1_data_b";
+				function = "hscif1";
+			};
+		};
+	};
+
+	fragment-hscif1 {
+		target = <&hscif1>;
+
+		__overlay__ {
+			pinctrl-0 = <&hscif1_pins>;
+			pinctrl-names = "default";
+
+			status = "okay";
+		};
+	};
+};

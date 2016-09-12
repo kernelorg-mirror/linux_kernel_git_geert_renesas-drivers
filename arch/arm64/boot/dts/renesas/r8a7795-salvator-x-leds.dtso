@@ -1,0 +1,38 @@
+/*
+ * Device Tree Overlay for GPIO LEDs on r8a7795/salvator-x
+ *
+ * Copyright (C) 2015 Glider bvba
+ *
+ * This file is licensed under the terms of the GNU General Public License
+ * version 2.  This program is licensed "as is" without any warranty of any
+ * kind, whether express or implied.
+ */
+
+/dts-v1/ /plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	fragment-leds {
+		target-path = "/";
+
+		__overlay__ {
+			leds {
+				compatible = "gpio-leds";
+
+				led4 {
+					gpios = <&gpio6 11 GPIO_ACTIVE_HIGH>;
+					label = "LED4";
+				};
+				led5 {
+					gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
+					label = "LED5";
+				};
+				led6 {
+					gpios = <&gpio6 13 GPIO_ACTIVE_HIGH>;
+					label = "LED6";
+				};
+			};
+		};
+	};
+};
