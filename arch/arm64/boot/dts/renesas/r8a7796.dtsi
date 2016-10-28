@@ -483,6 +483,7 @@
 			phy-mode = "rgmii-id";
 			#address-cells = <1>;
 			#size-cells = <0>;
+			iommus = <&ipmmu_ds0 16>;
 		};
 
 		i2c0: i2c@e6500000 {
