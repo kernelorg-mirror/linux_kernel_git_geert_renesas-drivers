@@ -30,6 +30,7 @@
 #include <linux/pci.h>
 #include <linux/scatterlist.h>
 #include <linux/vmalloc.h>
+#include <linux/dma-contiguous.h>
 
 struct iommu_dma_msi_page {
 	struct list_head	list;
@@ -238,15 +239,21 @@ static void __iommu_dma_unmap(struct iommu_domain *domain, dma_addr_t dma_addr)
 	__free_iova(iovad, iova);
 }
 
-static void __iommu_dma_free_pages(struct page **pages, int count)
+static void __iommu_dma_free_pages(struct device *dev, struct page **pages,
+				   int count, unsigned long attrs)
 {
-	while (count--)
-		__free_page(pages[count]);
+	if (attrs & DMA_ATTR_FORCE_CONTIGUOUS) {
+		dma_release_from_contiguous(dev, pages[0], count);
+	} else {
+		while (count--)
+			__free_page(pages[count]);
+	}
 	kvfree(pages);
 }
 
-static struct page **__iommu_dma_alloc_pages(unsigned int count,
-		unsigned long order_mask, gfp_t gfp)
+static struct page **__iommu_dma_alloc_pages(struct device *dev,
+		unsigned int count, unsigned long order_mask, gfp_t gfp,
+		unsigned long attrs)
 {
 	struct page **pages;
 	unsigned int i = 0, array_size = count * sizeof(*pages);
@@ -264,6 +271,20 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 
 	/* IOMMU can map any pages, so himem can also be used here */
 	gfp |= __GFP_NOWARN | __GFP_HIGHMEM;
+
+	if (attrs & DMA_ATTR_FORCE_CONTIGUOUS) {
+		int order = get_order(count << PAGE_SHIFT);
+		struct page *page;
+
+		page = dma_alloc_from_contiguous(dev, count, order);
+		if (!page)
+			return NULL;
+
+		while (count--)
+			pages[i++] = page++;
+
+		return pages;
+	}
 
 	while (count) {
 		struct page *page = NULL;
@@ -294,7 +315,7 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 			__free_pages(page, order);
 		}
 		if (!page) {
-			__iommu_dma_free_pages(pages, i);
+			__iommu_dma_free_pages(dev, pages, i, attrs);
 			return NULL;
 		}
 		count -= order_size;
@@ -310,15 +331,17 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
  * @pages: Array of buffer pages as returned by iommu_dma_alloc()
  * @size: Size of buffer in bytes
  * @handle: DMA address of buffer
+ * @attrs: DMA attributes used for allocation of this buffer
  *
  * Frees both the pages associated with the buffer, and the array
  * describing them
  */
 void iommu_dma_free(struct device *dev, struct page **pages, size_t size,
-		dma_addr_t *handle)
+		dma_addr_t *handle, unsigned long attrs)
 {
 	__iommu_dma_unmap(iommu_get_domain_for_dev(dev), *handle);
-	__iommu_dma_free_pages(pages, PAGE_ALIGN(size) >> PAGE_SHIFT);
+	__iommu_dma_free_pages(dev, pages, PAGE_ALIGN(size) >> PAGE_SHIFT,
+			       attrs);
 	*handle = DMA_ERROR_CODE;
 }
 
@@ -365,7 +388,8 @@ struct page **iommu_dma_alloc(struct device *dev, size_t size, gfp_t gfp,
 		alloc_sizes = min_size;
 
 	count = PAGE_ALIGN(size) >> PAGE_SHIFT;
-	pages = __iommu_dma_alloc_pages(count, alloc_sizes >> PAGE_SHIFT, gfp);
+	pages = __iommu_dma_alloc_pages(dev, count, alloc_sizes >> PAGE_SHIFT,
+					gfp, attrs);
 	if (!pages)
 		return NULL;
 
@@ -403,7 +427,7 @@ out_free_sg:
 out_free_iova:
 	__free_iova(iovad, iova);
 out_free_pages:
-	__iommu_dma_free_pages(pages, count);
+	__iommu_dma_free_pages(dev, pages, count, attrs);
 	return NULL;
 }
 
