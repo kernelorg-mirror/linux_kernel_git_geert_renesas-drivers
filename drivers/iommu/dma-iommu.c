@@ -30,6 +30,7 @@
 #include <linux/pci.h>
 #include <linux/scatterlist.h>
 #include <linux/vmalloc.h>
+#include <linux/dma-contiguous.h>
 
 struct iommu_dma_msi_page {
 	struct list_head	list;
@@ -404,6 +405,77 @@ out_free_iova:
 	__free_iova(iovad, iova);
 out_free_pages:
 	__iommu_dma_free_pages(pages, count);
+	return NULL;
+}
+
+/**
+ * iommu_dma_free_contiguous - Free a buffer allocated by
+ *			       iommu_dma_alloc_contiguous()
+ * @dev: Device which owns this buffer
+ * @page: Buffer page pointer as returned by iommu_dma_alloc_contiguous()
+ * @size: Size of buffer in bytes
+ * @handle: DMA address of buffer
+ *
+ * Frees the pages associated with the buffer.
+ */
+void iommu_dma_free_contiguous(struct device *dev, struct page *page,
+		size_t size, dma_addr_t *handle)
+{
+	__iommu_dma_unmap(iommu_get_domain_for_dev(dev), *handle);
+	dma_release_from_contiguous(dev, page, PAGE_ALIGN(size) >> PAGE_SHIFT);
+	*handle = DMA_ERROR_CODE;
+}
+
+/**
+ * iommu_dma_alloc_contiguous - Allocate and map a buffer contiguous in IOVA
+ *				and physical space
+ * @dev: Device to allocate memory for. Must be a real device attached to an
+ *	 iommu_dma_domain
+ * @size: Size of buffer in bytes
+ * @prot: IOMMU mapping flags
+ * @handle: Out argument for allocated DMA handle
+ *
+ * Return: Buffer page pointer, or NULL on failure.
+ *
+ * Note that unlike iommu_dma_alloc(), it's the caller's responsibility to
+ * ensure the returned region is made visible to the given non-coherent device.
+ */
+struct page *iommu_dma_alloc_contiguous(struct device *dev, size_t size,
+		int prot, dma_addr_t *handle)
+{
+	struct iommu_domain *domain = iommu_get_domain_for_dev(dev);
+	struct iova_domain *iovad = cookie_iovad(domain);
+	dma_addr_t dma_addr;
+	unsigned int count;
+	struct page *page;
+	struct iova *iova;
+	int ret;
+
+	*handle = DMA_ERROR_CODE;
+
+	size = PAGE_ALIGN(size);
+	count = size >> PAGE_SHIFT;
+	page = dma_alloc_from_contiguous(dev, count, get_order(size));
+	if (!page)
+		return NULL;
+
+	iova = __alloc_iova(domain, size, dev->coherent_dma_mask);
+	if (!iova)
+		goto out_free_pages;
+
+	size = iova_align(iovad, size);
+	dma_addr = iova_dma_addr(iovad, iova);
+	ret = iommu_map(domain, dma_addr, page_to_phys(page), size, prot);
+	if (ret < 0)
+		goto out_free_iova;
+
+	*handle = dma_addr;
+	return page;
+
+out_free_iova:
+	__free_iova(iovad, iova);
+out_free_pages:
+	dma_release_from_contiguous(dev, page, count);
 	return NULL;
 }
 
