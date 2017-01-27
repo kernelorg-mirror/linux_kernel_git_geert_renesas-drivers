@@ -211,8 +211,11 @@ static struct iova *__alloc_iova(struct iommu_domain *domain, size_t size,
 	unsigned long shift = iova_shift(iovad);
 	unsigned long length = iova_align(iovad, size) >> shift;
 
-	if (domain->geometry.force_aperture)
+pr_info("%s:%u: size %zu dma_limit %pad force_aperture %d aperture_start %pad aperture_end %pad\n", __func__, __LINE__, size, &dma_limit, domain->geometry.force_aperture, &domain->geometry.aperture_start, &domain->geometry.aperture_end);
+	if (domain->geometry.force_aperture) {
 		dma_limit = min(dma_limit, domain->geometry.aperture_end);
+pr_info("%s:%u: new dma_limit %pad\n", __func__, __LINE__, &dma_limit);
+	}
 	/*
 	 * Enforce size-alignment to be safe - there could perhaps be an
 	 * attribute to control this per-device, or at least per-domain...
@@ -241,6 +244,7 @@ static void __iommu_dma_unmap(struct iommu_domain *domain, dma_addr_t dma_addr)
 
 static void __iommu_dma_free_pages(struct page **pages, int count)
 {
+pr_info("%s:%u: freeing %u pages\n", __func__, __LINE__, count);
 	while (count--)
 		__free_page(pages[count]);
 	kvfree(pages);
@@ -266,6 +270,7 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 	/* IOMMU can map any pages, so himem can also be used here */
 	gfp |= __GFP_NOWARN | __GFP_HIGHMEM;
 
+pr_info("%s:%u: %u bytes\n", __func__, __LINE__, count << PAGE_SHIFT);
 	while (count) {
 		struct page *page = NULL;
 		unsigned int order_size;
@@ -299,6 +304,10 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 			return NULL;
 		}
 		count -= order_size;
+{
+    phys_addr_t phys = page_to_phys(page);
+    pr_info("%s:%u: Got block of %u pages at virt 0x%p phys %pa%s\n", __func__, __LINE__, order_size, page_to_virt(page), &phys, count ? ", continuing..." : "");
+}
 		while (order_size--)
 			pages[i++] = page++;
 	}
@@ -422,6 +431,7 @@ void iommu_dma_free_contiguous(struct device *dev, struct page *page,
 		size_t size, dma_addr_t *handle)
 {
 	__iommu_dma_unmap(iommu_get_domain_for_dev(dev), *handle);
+dev_info(dev, "%s:%u: freeing %zu pages with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, PAGE_ALIGN(size) >> PAGE_SHIFT);
 	dma_release_from_contiguous(dev, page, PAGE_ALIGN(size) >> PAGE_SHIFT);
 	*handle = DMA_ERROR_CODE;
 }
@@ -455,7 +465,14 @@ struct page *iommu_dma_alloc_contiguous(struct device *dev, size_t size,
 
 	size = PAGE_ALIGN(size);
 	count = size >> PAGE_SHIFT;
+dev_info(dev, "%s:%u: %u bytes with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, count << PAGE_SHIFT);
 	page = dma_alloc_from_contiguous(dev, count, get_order(size));
+if (page) {
+phys_addr_t phys = page_to_phys(page);
+dev_info(dev, "%s:%u: dma_alloc_from_contiguous() returned pages at virt 0x%p phys %pa\n", __func__, __LINE__, page_to_virt(page), &phys);
+} else {
+dev_info(dev, "%s:%u: dma_alloc_from_contiguous() failed\n", __func__, __LINE__);
+}
 	if (!page)
 		return NULL;
 
@@ -475,6 +492,7 @@ struct page *iommu_dma_alloc_contiguous(struct device *dev, size_t size,
 out_free_iova:
 	__free_iova(iovad, iova);
 out_free_pages:
+dev_info(dev, "%s:%u: freeing %u pages with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, count);
 	dma_release_from_contiguous(dev, page, count);
 	return NULL;
 }

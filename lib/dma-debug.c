@@ -1013,6 +1013,7 @@ void dma_debug_init(u32 num_entries)
 {
 	int i;
 
+pr_info("======================== %s =======================\n", __func__);
 	/* Do not use dma_debug_initialized here, since we really want to be
 	 * called to set dma_debug_initialized
 	 */
@@ -1024,7 +1025,7 @@ void dma_debug_init(u32 num_entries)
 		spin_lock_init(&dma_entry_hash[i].lock);
 	}
 
-	if (dma_debug_fs_init() != 0) {
+	if (0 && dma_debug_fs_init() != 0) {
 		pr_err("DMA-API: error creating debugfs entries - disabling\n");
 		global_disable = true;
 

@@ -18,6 +18,8 @@
 
 	aliases {
 		serial0 = &scif2;
+		serial1 = &scif1;
+		serial3 = &scif3;
 		ethernet0 = &avb;
 	};
 
@@ -243,6 +245,14 @@
 &scif2 {
 	pinctrl-0 = <&scif2_pins>;
 	pinctrl-names = "default";
+	status = "okay";
+};
+
+&scif1 {
+	status = "okay";
+};
+
+&scif3 {
 	status = "okay";
 };
 

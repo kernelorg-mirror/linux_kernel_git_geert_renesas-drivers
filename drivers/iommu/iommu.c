@@ -1,3 +1,4 @@
+#define DEBUG
 /*
  * Copyright (C) 2007-2008 Advanced Micro Devices, Inc.
  * Author: Joerg Roedel <jroedel@suse.de>
@@ -1320,6 +1321,7 @@ int iommu_map(struct iommu_domain *domain, unsigned long iova,
 	size_t orig_size = size;
 	phys_addr_t orig_paddr = paddr;
 	int ret = 0;
+unsigned int i = 0;
 
 	if (unlikely(domain->ops->map == NULL ||
 		     domain->pgsize_bitmap == 0UL))
@@ -1342,13 +1344,13 @@ int iommu_map(struct iommu_domain *domain, unsigned long iova,
 		return -EINVAL;
 	}
 
-	pr_debug("map: iova 0x%lx pa %pa size 0x%zx\n", iova, &paddr, size);
+	pr_debug("map: iova 0x%lx pa %pa size 0x%zx pgsize %zu\n", iova, &paddr, size, iommu_pgsize(domain, iova | paddr, size));
+pr_info("%s:%u: domain->pgsize_bitmap = 0x%lx\n", __func__, __LINE__, domain->pgsize_bitmap);
 
 	while (size) {
 		size_t pgsize = iommu_pgsize(domain, iova | paddr, size);
 
-		pr_debug("mapping: iova 0x%lx pa %pa pgsize 0x%zx\n",
-			 iova, &paddr, pgsize);
+//		pr_debug("mapping: iova 0x%lx pa %pa pgsize 0x%zx\n", iova, &paddr, pgsize);
 
 		ret = domain->ops->map(domain, iova, paddr, pgsize, prot);
 		if (ret)
@@ -1357,7 +1359,9 @@ int iommu_map(struct iommu_domain *domain, unsigned long iova,
 		iova += pgsize;
 		paddr += pgsize;
 		size -= pgsize;
+i++;
 	}
+pr_debug("     mapped %u chunks (ret = %d) %s\n", i, ret, i > 8 ? "*** TOO MANY CHUNKS! ***" : "GOOD!");
 
 	/* unroll mapping in case something went wrong */
 	if (ret)
@@ -1374,6 +1378,7 @@ size_t iommu_unmap(struct iommu_domain *domain, unsigned long iova, size_t size)
 	size_t unmapped_page, unmapped = 0;
 	unsigned int min_pagesz;
 	unsigned long orig_iova = iova;
+unsigned int i = 0;
 
 	if (unlikely(domain->ops->unmap == NULL ||
 		     domain->pgsize_bitmap == 0UL))
@@ -1409,12 +1414,13 @@ size_t iommu_unmap(struct iommu_domain *domain, unsigned long iova, size_t size)
 		if (!unmapped_page)
 			break;
 
-		pr_debug("unmapped: iova 0x%lx size 0x%zx\n",
-			 iova, unmapped_page);
+		pr_debug("unmapped: iova 0x%lx size 0x%zx\n", iova, unmapped_page);
 
 		iova += unmapped_page;
 		unmapped += unmapped_page;
+i++;
 	}
+pr_debug("     unmapped %u chunks\n", i);
 
 	trace_unmap(orig_iova, size, unmapped);
 	return unmapped;
@@ -1446,6 +1452,7 @@ size_t default_iommu_map_sg(struct iommu_domain *domain, unsigned long iova,
 		if (!IS_ALIGNED(s->offset, min_pagesz))
 			goto out_err;
 
+pr_info("%s:%u: iommu_map va 0x%lx phys %pad len %u\n", __func__, __LINE__, iova + mapped, &phys, s->length);
 		ret = iommu_map(domain, iova + mapped, phys, s->length, prot);
 		if (ret)
 			goto out_err;

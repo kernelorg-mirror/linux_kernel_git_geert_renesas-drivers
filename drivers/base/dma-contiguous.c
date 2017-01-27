@@ -190,10 +190,14 @@ int __init dma_contiguous_reserve_area(phys_addr_t size, phys_addr_t base,
 struct page *dma_alloc_from_contiguous(struct device *dev, size_t count,
 				       unsigned int align)
 {
+	struct page *pages;
+
 	if (align > CONFIG_CMA_ALIGNMENT)
 		align = CONFIG_CMA_ALIGNMENT;
 
-	return cma_alloc(dev_get_cma_area(dev), count, align);
+	pages = cma_alloc(dev_get_cma_area(dev), count, align);
+dev_info(dev, "%s:%u: count %zu align %u => pages 0x%p virt 0x%p\n", __func__, __LINE__, count, align, pages, pages ? page_to_virt(pages) : NULL);
+	return pages;
 }
 
 /**
@@ -209,6 +213,7 @@ struct page *dma_alloc_from_contiguous(struct device *dev, size_t count,
 bool dma_release_from_contiguous(struct device *dev, struct page *pages,
 				 int count)
 {
+dev_info(dev, "%s:%u: pages 0x%p virt 0x%p count %d\n", __func__, __LINE__, pages, pages ? page_to_virt(pages) : NULL, count);
 	return cma_release(dev_get_cma_area(dev), pages, count);
 }
 

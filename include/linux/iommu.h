@@ -324,6 +324,7 @@ static inline size_t iommu_map_sg(struct iommu_domain *domain,
 				  unsigned long iova, struct scatterlist *sg,
 				  unsigned int nents, int prot)
 {
+pr_info("%s:%u: domain->ops->map_sg = %ps\n", __func__, __LINE__, domain->ops->map_sg);
 	return domain->ops->map_sg(domain, iova, sg, nents, prot);
 }
 
