@@ -221,6 +221,7 @@ static void *__arm_lpae_alloc_pages(size_t size, gfp_t gfp,
 		dma = dma_map_single(dev, pages, size, DMA_TO_DEVICE);
 		if (dma_mapping_error(dev, dma))
 			goto out_free;
+dev_info(dev, "%s:%u dma_map_single(0x%p, %zu) returned %pad\n", __func__, __LINE__, pages, size, &dma);
 		/*
 		 * We depend on the IOMMU being able to work with any physical
 		 * address directly, so if the DMA layer suggests otherwise by
@@ -313,7 +314,9 @@ static int __arm_lpae_map(struct arm_lpae_io_pgtable *data, unsigned long iova,
 	struct io_pgtable_cfg *cfg = &data->iop.cfg;
 
 	/* Find our entry at the current level */
+if (lvl == 1) pr_info("%s:%u: iova 0x%lx phys %pa size %zu lvl %d ptep 0x%p\n", __func__, __LINE__, iova, &paddr, size, lvl, ptep);
 	ptep += ARM_LPAE_LVL_IDX(iova, lvl, data);
+if (lvl == 1) pr_info("%s:%u: increasing ptep to 0x%p\n", __func__, __LINE__, ptep);
 
 	/* If we can install a leaf entry at this level, then do so */
 	if (size == block_size && (size & cfg->pgsize_bitmap))
@@ -645,10 +648,12 @@ arm_lpae_alloc_pgtable(struct io_pgtable_cfg *cfg)
 	data->bits_per_level = data->pg_shift - ilog2(sizeof(arm_lpae_iopte));
 
 	va_bits = cfg->ias - data->pg_shift;
+pr_info("%s:%u: cfg->ias = %u data->pg_shift = %lu va_bits = %lu\n", __func__, __LINE__, cfg->ias, data->pg_shift, va_bits);
 	data->levels = DIV_ROUND_UP(va_bits, data->bits_per_level);
 
 	/* Calculate the actual size of our pgd (without concatenation) */
 	pgd_bits = va_bits - (data->bits_per_level * (data->levels - 1));
+pr_info("%s:%u: data->bits_per_level = %lu data->levels = %d pgd_bits = %lu\n", __func__, __LINE__, data->bits_per_level, data->levels, pgd_bits);
 	data->pgd_size = 1UL << (pgd_bits + ilog2(sizeof(arm_lpae_iopte)));
 
 	data->iop.ops = (struct io_pgtable_ops) {

@@ -492,6 +492,7 @@ phys_addr_t swiotlb_tbl_map_single(struct device *hwdev,
 	else
 		stride = 1;
 
+//pr_info("%s:%u: nslots = %u\n", __func__, __LINE__, nslots);
 	BUG_ON(!nslots);
 
 	/*
@@ -519,6 +520,7 @@ phys_addr_t swiotlb_tbl_map_single(struct device *hwdev,
 		 * contiguous buffers, we allocate the buffers from that slot
 		 * and mark the entries as '0' indicating unavailable.
 		 */
+//pr_info("%s:%u: [%u] has %u slots\n", __func__, __LINE__, index, io_tlb_list[index]);
 		if (io_tlb_list[index] >= nslots) {
 			int count = 0;
 
@@ -679,7 +681,8 @@ swiotlb_alloc_coherent(struct device *hwdev, size_t size,
 	if (hwdev && hwdev->coherent_dma_mask)
 		dma_mask = hwdev->coherent_dma_mask;
 
-	ret = (void *)__get_free_pages(flags, order);
+	//ret = (void *)__get_free_pages(flags, order);
+	ret = NULL;
 	if (ret) {
 		dev_addr = swiotlb_virt_to_bus(hwdev, ret);
 		if (dev_addr + size - 1 > dma_mask) {
@@ -690,6 +693,17 @@ swiotlb_alloc_coherent(struct device *hwdev, size_t size,
 			ret = NULL;
 		}
 	}
+#if 0
+	else if (attrs & DMA_ATTR_FORCE_CONTIGUOUS) {
+		// FIXME Try dma_alloc_from_contiguous()
+
+		// Not needed?
+		// arm64 __dma_alloc_coherent() calls
+		// dma_alloc_from_contiguous() if CONFIG_DMA_CMA is enabled
+		// and dev_get_cma_area() returns true?
+
+	}
+#endif
 	if (!ret) {
 		/*
 		 * We are either out of memory or the device can't DMA to

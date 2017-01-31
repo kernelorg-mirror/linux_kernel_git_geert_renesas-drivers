@@ -35,6 +35,7 @@
 #include <linux/errno.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
+#include <linux/iommu.h>
 #include <linux/ioport.h>
 #include <linux/major.h>
 #include <linux/module.h>
@@ -1318,6 +1319,70 @@ static struct dma_chan *sci_request_dma_chan(struct uart_port *port,
 	return chan;
 }
 
+void __test_dma_attr_force_contiguous(struct device *dev,
+				      unsigned long attrs)
+{
+	struct iommu_domain *domain = iommu_get_domain_for_dev(dev);
+	size_t size = 16 * 1024 * 1024;
+	unsigned int pages = size / PAGE_SIZE;
+	dma_addr_t iova_base, iova;
+	void *virt_base, *virt;
+	phys_addr_t phys;
+	bool fail = false;
+	unsigned int i;
+
+	dev_info(dev, "Allocating %zu bytes of DMA memory using %ps\n", size,
+		 get_dma_ops(dev));
+	virt_base = dma_alloc_attrs(dev, size, &iova_base, GFP_KERNEL, attrs);
+	if (!virt_base) {
+		dev_err(dev, "Failed to allocate DMA buffer\n");
+		fail = true;
+		goto fail;
+	}
+
+	virt = virt_base;
+	iova = iova_base;
+	phys = domain ? iommu_iova_to_phys(domain, iova)
+			: dma_to_phys(dev, iova);
+	pr_info("[0] virt 0x%p phys %pa iova %pad\n", virt, &phys, &iova);
+	for (i = 0; i < pages; i++) {
+		phys_addr_t p = domain ? iommu_iova_to_phys(domain, iova)
+				       : dma_to_phys(dev, iova);
+		if (p != phys) {
+			pr_info("[%2u] virt 0x%p phys %pa iova %pad\n", i,
+				virt, &p, &iova);
+			fail = true;
+			/* resync */
+			phys = p;
+		}
+		virt += PAGE_SIZE;
+		iova += PAGE_SIZE;
+		phys += PAGE_SIZE;
+	}
+	dma_free_attrs(dev, size, virt_base, iova_base, attrs);
+
+fail:
+	dev_info(dev, "DMA contiguous test: ***** %s *****\n",
+		 fail ? "FAIL" : "PASS");
+}
+
+void test_dma_attr_force_contiguous(struct device *dev)
+{
+	static int done;
+
+	if (0 && done)
+		return;
+
+	dev_info(dev, "===== Testing using plain DMA attributes =====\n");
+	__test_dma_attr_force_contiguous(dev, 0);
+	dev_info(dev, "===== Testing with DMA_ATTR_FORCE_CONTIGUOUS =====\n");
+	__test_dma_attr_force_contiguous(dev, DMA_ATTR_FORCE_CONTIGUOUS);
+	dev_info(dev, "===== Test completed =====\n");
+
+	done = 1;
+}
+
+
 static void sci_request_dma(struct uart_port *port)
 {
 	struct sci_port *s = to_sci_port(port);
@@ -1349,6 +1414,8 @@ static void sci_request_dma(struct uart_port *port)
 		}
 
 		INIT_WORK(&s->work_tx, work_fn_tx);
+
+		test_dma_attr_force_contiguous(chan->device->dev);
 	}
 
 	chan = sci_request_dma_chan(port, DMA_DEV_TO_MEM);
@@ -1361,8 +1428,10 @@ static void sci_request_dma(struct uart_port *port)
 		s->chan_rx = chan;
 
 		s->buf_len_rx = 2 * max_t(size_t, 16, port->fifosize);
+pr_info("%s:%u\n", __func__, __LINE__);
 		buf = dma_alloc_coherent(chan->device->dev, s->buf_len_rx * 2,
 					 &dma, GFP_KERNEL);
+pr_info("%s:%u dma_alloc_coherent() returned buf 0x%p dma %pad\n", __func__, __LINE__, buf, &dma);
 		if (!buf) {
 			dev_warn(port->dev,
 				 "Failed to allocate Rx dma buffer, using PIO\n");

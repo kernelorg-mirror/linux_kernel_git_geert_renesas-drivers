@@ -402,9 +402,14 @@ int sg_alloc_table_from_pages(struct sg_table *sgt,
 
 	/* compute number of contiguous chunks */
 	chunks = 1;
-	for (i = 1; i < n_pages; ++i)
+pr_info("%s:%u: size %lu\n", __func__, __LINE__, size);
+pr_info("  pfn[0] = 0x%lx\n", page_to_pfn(pages[0]));
+	for (i = 1; i < n_pages; ++i) {
+//pr_info("  pfn[%u] = 0x%lx\n", i, page_to_pfn(pages[i]));
 		if (page_to_pfn(pages[i]) != page_to_pfn(pages[i - 1]) + 1)
 			++chunks;
+	}
+pr_info("%s:%u: need %u chunks\n", __func__, __LINE__, chunks);
 
 	ret = sg_alloc_table(sgt, chunks, gfp_mask);
 	if (unlikely(ret))

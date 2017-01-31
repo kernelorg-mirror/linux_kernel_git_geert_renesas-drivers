@@ -108,10 +108,17 @@ static void *__dma_alloc_coherent(struct device *dev, size_t size,
 
 		page = dma_alloc_from_contiguous(dev, size >> PAGE_SHIFT,
 							get_order(size));
+if (page) {
+	phys_addr_t phys = page_to_phys(page);
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() returned pages 0x%p at virt 0x%p phys %pa\n", __func__, __LINE__, page, page_to_virt(page), &phys);
+} else {
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() failed\n", __func__, __LINE__);
+}
 		if (!page)
 			return NULL;
 
 		*dma_handle = phys_to_dma(dev, page_to_phys(page));
+dev_info(dev, "%s:%u: returned dma address %pad\n", __func__, __LINE__, dma_handle);
 		addr = page_address(page);
 		memset(addr, 0, size);
 		return addr;
@@ -126,12 +133,14 @@ static void __dma_free_coherent(struct device *dev, size_t size,
 {
 	bool freed;
 	phys_addr_t paddr = dma_to_phys(dev, dma_handle);
+	struct page *page = phys_to_page(paddr);
 
 	if (dev == NULL) {
 		WARN_ONCE(1, "Use an actual device structure for DMA allocation\n");
 		return;
 	}
 
+dev_info(dev, "%s:%u: freeing pages 0x%p at virt 0x%p phys %pa\n", __func__, __LINE__, page, page_to_virt(page), &paddr);
 	freed = dma_release_from_contiguous(dev,
 					phys_to_page(paddr),
 					size >> PAGE_SHIFT);
@@ -543,7 +552,7 @@ static int __init dma_debug_do_init(void)
 	dma_debug_init(PREALLOC_DMA_DEBUG_ENTRIES);
 	return 0;
 }
-fs_initcall(dma_debug_do_init);
+arch_initcall(dma_debug_do_init);
 
 
 #ifdef CONFIG_IOMMU_DMA
@@ -605,8 +614,15 @@ static void *__iommu_alloc_attrs(struct device *dev, size_t size,
 		pgprot_t prot = __get_dma_pgprot(attrs, PAGE_KERNEL, coherent);
 		struct page *page;
 
+dev_info(dev, "%s:%u: %zu bytes with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, size);
 		page = dma_alloc_from_contiguous(dev, size >> PAGE_SHIFT,
 						 get_order(size));
+if (page) {
+	phys_addr_t phys = page_to_phys(page);
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() returned pages 0x%p at virt 0x%p phys %pa\n", __func__, __LINE__, page, page_to_virt(page), &phys);
+} else {
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() failed\n", __func__, __LINE__);
+}
 		if (!page)
 			return NULL;
 
@@ -616,14 +632,17 @@ static void *__iommu_alloc_attrs(struct device *dev, size_t size,
 						    size >> PAGE_SHIFT);
 			return NULL;
 		}
-		if (!coherent)
+		if (!coherent) {
+pr_info("%s:%u: __dma_flush_area virt %p size %zu\n", __func__, __LINE__, page_to_virt(page), iosize);
 			__dma_flush_area(page_to_virt(page), iosize);
+		}
 
 		addr = dma_common_contiguous_remap(page, size, VM_USERMAP,
 						   prot,
 						   __builtin_return_address(0));
 		if (!addr) {
 			iommu_dma_unmap_page(dev, *handle, iosize, 0, attrs);
+dev_info(dev, "%s:%u: freeing %zu pages with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, size >> PAGE_SHIFT);
 			dma_release_from_contiguous(dev, page,
 						    size >> PAGE_SHIFT);
 		}
@@ -666,8 +685,15 @@ static void __iommu_free_attrs(struct device *dev, size_t size, void *cpu_addr,
 		__free_from_pool(cpu_addr, size);
 	} else if (attrs & DMA_ATTR_FORCE_CONTIGUOUS) {
 		struct page *page = vmalloc_to_page(cpu_addr);
+		phys_addr_t phys = dma_to_phys(dev, handle);
+		struct vm_struct *area = find_vm_area(cpu_addr);
+
+dev_info(dev, "%s:%u: cpu_addr 0x%p (%svmalloced) dma_addr %pa area 0x%p\n", __func__, __LINE__, cpu_addr, is_vmalloc_addr(cpu_addr) ? "" : "not ", &handle, area);
+dev_info(dev, "area: addr 0x%p size %lu flags 0x%lx pages 0x%p nr_pages %u phys_addr %pa caller %ps\n", area->addr, area->size, area->flags, area->pages, area->nr_pages, &area->phys_addr, area->caller);
+dev_info(dev, "vmalloc_to_page(cpu_addr) = %p\n", vmalloc_to_page(cpu_addr));
 
 		iommu_dma_unmap_page(dev, handle, iosize, 0, attrs);
+dev_info(dev, "%s:%u: freeing %zu pages 0x%p  at virt 0x%p phys %pa with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, size >> PAGE_SHIFT, page, page_to_virt(page), &phys);
 		dma_release_from_contiguous(dev, page, size >> PAGE_SHIFT);
 		dma_common_free_remap(cpu_addr, size, VM_USERMAP);
 	} else if (is_vmalloc_addr(cpu_addr)){
