@@ -210,8 +210,11 @@ static struct iova *__alloc_iova(struct iommu_domain *domain, size_t size,
 	unsigned long shift = iova_shift(iovad);
 	unsigned long length = iova_align(iovad, size) >> shift;
 
-	if (domain->geometry.force_aperture)
+pr_info("%s:%u: size %zu dma_limit %pad force_aperture %d aperture_start %pad aperture_end %pad\n", __func__, __LINE__, size, &dma_limit, domain->geometry.force_aperture, &domain->geometry.aperture_start, &domain->geometry.aperture_end);
+	if (domain->geometry.force_aperture) {
 		dma_limit = min(dma_limit, domain->geometry.aperture_end);
+pr_info("%s:%u: new dma_limit %pad\n", __func__, __LINE__, &dma_limit);
+	}
 	/*
 	 * Enforce size-alignment to be safe - there could perhaps be an
 	 * attribute to control this per-device, or at least per-domain...
@@ -240,6 +243,7 @@ static void __iommu_dma_unmap(struct iommu_domain *domain, dma_addr_t dma_addr)
 
 static void __iommu_dma_free_pages(struct page **pages, int count)
 {
+pr_info("%s:%u: freeing %u pages\n", __func__, __LINE__, count);
 	while (count--)
 		__free_page(pages[count]);
 	kvfree(pages);
@@ -265,6 +269,7 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 	/* IOMMU can map any pages, so himem can also be used here */
 	gfp |= __GFP_NOWARN | __GFP_HIGHMEM;
 
+pr_info("%s:%u: %u bytes\n", __func__, __LINE__, count << PAGE_SHIFT);
 	while (count) {
 		struct page *page = NULL;
 		unsigned int order_size;
@@ -298,6 +303,10 @@ static struct page **__iommu_dma_alloc_pages(unsigned int count,
 			return NULL;
 		}
 		count -= order_size;
+{
+    phys_addr_t phys = page_to_phys(page);
+    pr_info("%s:%u: Got block of %u pages at virt 0x%p phys %pa%s\n", __func__, __LINE__, order_size, page_to_virt(page), &phys, count ? ", continuing..." : "");
+}
 		while (order_size--)
 			pages[i++] = page++;
 	}

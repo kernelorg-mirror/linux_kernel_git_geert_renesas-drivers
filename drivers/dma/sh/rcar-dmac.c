@@ -1724,7 +1724,12 @@ static int rcar_dmac_probe(struct platform_device *pdev)
 
 	dmac->dev = &pdev->dev;
 	platform_set_drvdata(pdev, dmac);
+#if 1 // FIXME
+pr_info("%s:%u: setting 40-bit DMA mask\n", __func__, __LINE__);
 	dma_set_mask_and_coherent(dmac->dev, DMA_BIT_MASK(40));
+#else
+pr_info("%s:%u: NOT setting 40-bit DMA mask\n", __func__, __LINE__);
+#endif
 
 	ret = rcar_dmac_parse_of(&pdev->dev, dmac);
 	if (ret < 0)

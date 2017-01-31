@@ -1291,12 +1291,19 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 	if (!pages)
 		return NULL;
 
-	if (attrs & DMA_ATTR_FORCE_CONTIGUOUS)
+	if (attrs & DMA_ATTR_FORCE_CONTIGUOUS)	// FIXME CONFIG_DMA_CMA
 	{
 		unsigned long order = get_order(size);
 		struct page *page;
 
+dev_info(dev, "%s:%u: %zu bytes with DMA_ATTR_FORCE_CONTIGUOUS\n", __func__, __LINE__, size);
 		page = dma_alloc_from_contiguous(dev, count, order);
+if (page) {
+	phys_addr_t phys = page_to_phys(page);
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() returned pages at virt 0x%p phys %pa\n", __func__, __LINE__, page_to_virt(page), &phys);
+} else {
+	dev_info(dev, "%s:%u: dma_alloc_from_contiguous() failed\n", __func__, __LINE__);
+}
 		if (!page)
 			goto error;
 
@@ -1308,6 +1315,7 @@ static struct page **__iommu_alloc_buffer(struct device *dev, size_t size,
 		return pages;
 	}
 
+dev_info(dev, "%s:%u: %zu bytes\n", __func__, __LINE__, size);
 	/* Go straight to 4K chunks if caller says it's OK. */
 	if (attrs & DMA_ATTR_ALLOC_SINGLE_PAGES)
 		order_idx = ARRAY_SIZE(iommu_order_array) - 1;

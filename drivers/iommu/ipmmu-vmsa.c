@@ -432,8 +432,10 @@ static int ipmmu_domain_init_context(struct ipmmu_vmsa_domain *domain)
 
 	domain->iop = alloc_io_pgtable_ops(ARM_32_LPAE_S1, &domain->cfg,
 					   domain);
-	if (!domain->iop)
+	if (!domain->iop) {
+pr_info("%s:%u: alloc_io_pgtable_ops() failed ***\n", __func__, __LINE__);
 		return -EINVAL;
+	}
 
 	/*
 	 * Find an unused context.
@@ -706,6 +708,11 @@ static int ipmmu_map(struct iommu_domain *io_domain, unsigned long iova,
 
 	if (!domain)
 		return -ENODEV;
+
+if (!domain->iop) {
+	pr_info("%s:%u: *** domain->iop = NULL, skipping ***\n", __func__, __LINE__);
+	return -ENODEV;
+}
 
 	return domain->iop->map(domain->iop, iova, paddr, size, prot);
 }
