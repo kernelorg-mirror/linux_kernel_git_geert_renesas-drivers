@@ -32,11 +32,11 @@
  */
 
 /dts-v1/;
-#include "r8a7795.dtsi"
+#include "r8a7795-es1.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 
 / {
-	model = "Renesas Salvator-X board based on r8a7795 ES2.0+";
+	model = "Renesas Salvator-X board based on r8a7795 ES1.x";
 	compatible = "renesas,salvator-x", "renesas,r8a7795";
 
 	aliases {
