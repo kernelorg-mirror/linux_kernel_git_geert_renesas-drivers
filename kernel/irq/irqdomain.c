@@ -604,6 +604,7 @@ unsigned int irq_create_fwspec_mapping(struct irq_fwspec *fwspec)
 	}
 
 	if (!domain) {
+// FIXME irq: no irq domain found for /interrupt-controller@e61c0000 !
 		pr_warn("no irq domain found for %s !\n",
 			of_node_full_name(to_of_node(fwspec->fwnode)));
 		return 0;
