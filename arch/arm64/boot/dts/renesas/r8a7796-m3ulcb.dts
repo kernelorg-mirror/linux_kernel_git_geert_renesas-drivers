@@ -10,13 +10,13 @@
  */
 
 /dts-v1/;
-#include "r8a7796.dtsi"
+#include "r8j7796-2x1g.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 
 / {
-	model = "Renesas M3ULCB board based on r8a7796";
-	compatible = "renesas,m3ulcb", "renesas,r8a7796";
+	model = "Renesas M3ULCB board based on r8j7796";
+	compatible = "renesas,m3ulcb", "renesas,r8j7796", "renesas,r8a7796";
 
 	aliases {
 		serial0 = &scif2;
@@ -25,17 +25,6 @@
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-	};
-
-	memory@48000000 {
-		device_type = "memory";
-		/* first 128MB is reserved for secure area. */
-		reg = <0x0 0x48000000 0x0 0x38000000>;
-	};
-
-	memory@600000000 {
-		device_type = "memory";
-		reg = <0x6 0x00000000 0x0 0x40000000>;
 	};
 
 	leds {
