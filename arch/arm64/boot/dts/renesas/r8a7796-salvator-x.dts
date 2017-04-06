@@ -9,12 +9,12 @@
  */
 
 /dts-v1/;
-#include "r8a7796.dtsi"
+#include "r8j7796-2x2g.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 
 / {
-	model = "Renesas Salvator-X board based on r8a7796";
-	compatible = "renesas,salvator-x", "renesas,r8a7796";
+	model = "Renesas Salvator-X board based on r8j7796";
+	compatible = "renesas,salvator-x", "renesas,r8j7796", "renesas,r8a7796";
 
 	aliases {
 		serial0 = &scif2;
@@ -25,17 +25,6 @@
 	chosen {
 		bootargs = "ignore_loglevel rw root=/dev/nfs ip=dhcp";
 		stdout-path = "serial0:115200n8";
-	};
-
-	memory@48000000 {
-		device_type = "memory";
-		/* first 128MB is reserved for secure area. */
-		reg = <0x0 0x48000000 0x0 0x78000000>;
-	};
-
-	memory@600000000 {
-		device_type = "memory";
-		reg = <0x6 0x00000000 0x0 0x80000000>;
 	};
 
 	reg_1p8v: regulator0 {
