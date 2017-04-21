@@ -27,6 +27,17 @@
 		stdout-path = "serial0:115200n8";
 	};
 
+	leds {
+		compatible = "gpio-leds";
+
+		led5 {
+			gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
+		};
+		led6 {
+			gpios = <&gpio6 13 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	keyboard {
 		compatible = "gpio-keys";
 
@@ -36,17 +47,6 @@
 			wakeup-source;
 			debounce-interval = <20>;
 			gpios = <&gpio6 11 GPIO_ACTIVE_LOW>;
-		};
-	};
-
-	leds {
-		compatible = "gpio-leds";
-
-		led5 {
-			gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
-		};
-		led6 {
-			gpios = <&gpio6 13 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -93,34 +93,12 @@
 	};
 };
 
-&avb {
-	pinctrl-0 = <&avb_pins>;
-	pinctrl-names = "default";
-	renesas,no-ether-link;
-	phy-handle = <&phy0>;
-	status = "okay";
-
-	phy0: ethernet-phy@0 {
-		rxc-skew-ps = <1500>;
-		reg = <0>;
-		interrupt-parent = <&gpio2>;
-		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
-	};
-};
-
 &extal_clk {
 	clock-frequency = <16666666>;
 };
 
 &extalr_clk {
 	clock-frequency = <32768>;
-};
-
-&i2c2 {
-	pinctrl-0 = <&i2c2_pins>;
-	pinctrl-names = "default";
-
-	status = "okay";
 };
 
 &pfc {
@@ -132,11 +110,6 @@
 		function = "avb";
 	};
 
-	i2c2_pins: i2c2 {
-		groups = "i2c2_a";
-		function = "i2c2";
-	};
-
 	scif2_pins: scif2 {
 		groups = "scif2_data_a";
 		function = "scif2";
@@ -145,6 +118,11 @@
 	scif_clk_pins: scif_clk {
 		groups = "scif_clk_a";
 		function = "scif_clk";
+	};
+
+	i2c2_pins: i2c2 {
+		groups = "i2c2_a";
+		function = "i2c2";
 	};
 
 	sdhi0_pins: sd0 {
@@ -172,15 +150,19 @@
 	};
 };
 
-&scif2 {
-	pinctrl-0 = <&scif2_pins>;
+&avb {
+	pinctrl-0 = <&avb_pins>;
 	pinctrl-names = "default";
-
+	renesas,no-ether-link;
+	phy-handle = <&phy0>;
 	status = "okay";
-};
 
-&scif_clk {
-	clock-frequency = <14745600>;
+	phy0: ethernet-phy@0 {
+		rxc-skew-ps = <1500>;
+		reg = <0>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+	};
 };
 
 &sdhi0 {
@@ -207,6 +189,24 @@
 	bus-width = <8>;
 	mmc-hs200-1_8v;
 	non-removable;
+	status = "okay";
+};
+
+&scif2 {
+	pinctrl-0 = <&scif2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&scif_clk {
+	clock-frequency = <14745600>;
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_pins>;
+	pinctrl-names = "default";
+
 	status = "okay";
 };
 

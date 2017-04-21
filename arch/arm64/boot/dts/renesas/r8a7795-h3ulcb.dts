@@ -27,14 +27,15 @@
 		stdout-path = "serial0:115200n8";
 	};
 
-	audio_clkout: audio-clkout {
-		/*
-		 * This is same as <&rcar_sound 0>
-		 * but needed to avoid cs2000/rcar_sound probe dead-lock
-		 */
-		compatible = "fixed-clock";
-		#clock-cells = <0>;
-		clock-frequency = <11289600>;
+	leds {
+		compatible = "gpio-leds";
+
+		led5 {
+			gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
+		};
+		led6 {
+			gpios = <&gpio6 13 GPIO_ACTIVE_HIGH>;
+		};
 	};
 
 	keyboard {
@@ -49,15 +50,10 @@
 		};
 	};
 
-	leds {
-		compatible = "gpio-leds";
-
-		led5 {
-			gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
-		};
-		led6 {
-			gpios = <&gpio6 13 GPIO_ACTIVE_HIGH>;
-		};
+	x12_clk: x12 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24576000>;
 	};
 
 	reg_1p8v: regulator0 {
@@ -76,22 +72,6 @@
 		regulator-max-microvolt = <3300000>;
 		regulator-boot-on;
 		regulator-always-on;
-	};
-
-	rsnd_ak4613: sound {
-		compatible = "simple-audio-card";
-
-		simple-audio-card,format = "left_j";
-		simple-audio-card,bitclock-master = <&sndcpu>;
-		simple-audio-card,frame-master = <&sndcpu>;
-
-		sndcpu: simple-audio-card,cpu {
-			sound-dai = <&rcar_sound>;
-		};
-
-		sndcodec: simple-audio-card,codec {
-			sound-dai = <&ak4613>;
-		};
 	};
 
 	vcc_sdhi0: regulator-vcc-sdhi0 {
@@ -118,34 +98,31 @@
 			  1800000 0>;
 	};
 
-	x12_clk: x12 {
+	audio_clkout: audio-clkout {
+		/*
+		 * This is same as <&rcar_sound 0>
+		 * but needed to avoid cs2000/rcar_sound probe dead-lock
+		 */
 		compatible = "fixed-clock";
 		#clock-cells = <0>;
-		clock-frequency = <24576000>;
+		clock-frequency = <11289600>;
 	};
-};
 
-&audio_clk_a {
-	clock-frequency = <22579200>;
-};
+	rsnd_ak4613: sound {
+		compatible = "simple-audio-card";
 
-&avb {
-	pinctrl-0 = <&avb_pins>;
-	pinctrl-names = "default";
-	renesas,no-ether-link;
-	phy-handle = <&phy0>;
-	status = "okay";
+		simple-audio-card,format = "left_j";
+		simple-audio-card,bitclock-master = <&sndcpu>;
+		simple-audio-card,frame-master = <&sndcpu>;
 
-	phy0: ethernet-phy@0 {
-		rxc-skew-ps = <1500>;
-		reg = <0>;
-		interrupt-parent = <&gpio2>;
-		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+		sndcpu: simple-audio-card,cpu {
+			sound-dai = <&rcar_sound>;
+		};
+
+		sndcodec: simple-audio-card,codec {
+			sound-dai = <&ak4613>;
+		};
 	};
-};
-
-&ehci1 {
-	status = "okay";
 };
 
 &extal_clk {
@@ -156,59 +133,9 @@
 	clock-frequency = <32768>;
 };
 
-&i2c2 {
-	pinctrl-0 = <&i2c2_pins>;
-	pinctrl-names = "default";
-
-	status = "okay";
-
-	clock-frequency = <100000>;
-
-	ak4613: codec@10 {
-		compatible = "asahi-kasei,ak4613";
-		#sound-dai-cells = <0>;
-		reg = <0x10>;
-		clocks = <&rcar_sound 3>;
-
-		asahi-kasei,in1-single-end;
-		asahi-kasei,in2-single-end;
-		asahi-kasei,out1-single-end;
-		asahi-kasei,out2-single-end;
-		asahi-kasei,out3-single-end;
-		asahi-kasei,out4-single-end;
-		asahi-kasei,out5-single-end;
-		asahi-kasei,out6-single-end;
-	};
-
-	cs2000: clk-multiplier@4f {
-		#clock-cells = <0>;
-		compatible = "cirrus,cs2000-cp";
-		reg = <0x4f>;
-		clocks = <&audio_clkout>, <&x12_clk>;
-		clock-names = "clk_in", "ref_clk";
-
-		assigned-clocks = <&cs2000>;
-		assigned-clock-rates = <24576000>; /* 1/1 divide */
-	};
-};
-
-&ohci1 {
-	status = "okay";
-};
-
 &pfc {
 	pinctrl-0 = <&scif_clk_pins>;
 	pinctrl-names = "default";
-
-	avb_pins: avb {
-		groups = "avb_mdc";
-		function = "avb";
-	};
-
-	i2c2_pins: i2c2 {
-		groups = "i2c2_a";
-		function = "i2c2";
-	};
 
 	scif2_pins: scif2 {
 		groups = "scif2_data_a";
@@ -218,6 +145,16 @@
 	scif_clk_pins: scif_clk {
 		groups = "scif_clk_a";
 		function = "scif_clk";
+	};
+
+	i2c2_pins: i2c2 {
+		groups = "i2c2_a";
+		function = "i2c2";
+	};
+
+	avb_pins: avb {
+		groups = "avb_mdc";
+		function = "avb";
 	};
 
 	sdhi0_pins: sd0 {
@@ -261,6 +198,53 @@
 	};
 };
 
+&scif2 {
+	pinctrl-0 = <&scif2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&scif_clk {
+	clock-frequency = <14745600>;
+};
+
+&i2c2 {
+	pinctrl-0 = <&i2c2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+
+	clock-frequency = <100000>;
+
+	ak4613: codec@10 {
+		compatible = "asahi-kasei,ak4613";
+		#sound-dai-cells = <0>;
+		reg = <0x10>;
+		clocks = <&rcar_sound 3>;
+
+		asahi-kasei,in1-single-end;
+		asahi-kasei,in2-single-end;
+		asahi-kasei,out1-single-end;
+		asahi-kasei,out2-single-end;
+		asahi-kasei,out3-single-end;
+		asahi-kasei,out4-single-end;
+		asahi-kasei,out5-single-end;
+		asahi-kasei,out6-single-end;
+	};
+
+	cs2000: clk-multiplier@4f {
+		#clock-cells = <0>;
+		compatible = "cirrus,cs2000-cp";
+		reg = <0x4f>;
+		clocks = <&audio_clkout>, <&x12_clk>;
+		clock-names = "clk_in", "ref_clk";
+
+		assigned-clocks = <&cs2000>;
+		assigned-clock-rates = <24576000>; /* 1/1 divide */
+	};
+};
+
 &rcar_sound {
 	pinctrl-0 = <&sound_pins &sound_clk_pins>;
 	pinctrl-names = "default";
@@ -301,17 +285,6 @@
 	};
 };
 
-&scif2 {
-	pinctrl-0 = <&scif2_pins>;
-	pinctrl-names = "default";
-
-	status = "okay";
-};
-
-&scif_clk {
-	clock-frequency = <14745600>;
-};
-
 &sdhi0 {
 	pinctrl-0 = <&sdhi0_pins>;
 	pinctrl-1 = <&sdhi0_pins_uhs>;
@@ -343,6 +316,30 @@
 	shared-pin;
 };
 
+&wdt0 {
+	timeout-sec = <60>;
+	status = "okay";
+};
+
+&audio_clk_a {
+	clock-frequency = <22579200>;
+};
+
+&avb {
+	pinctrl-0 = <&avb_pins>;
+	pinctrl-names = "default";
+	renesas,no-ether-link;
+	phy-handle = <&phy0>;
+	status = "okay";
+
+	phy0: ethernet-phy@0 {
+		rxc-skew-ps = <1500>;
+		reg = <0>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+	};
+};
+
 &usb2_phy1 {
 	pinctrl-0 = <&usb1_pins>;
 	pinctrl-names = "default";
@@ -350,7 +347,10 @@
 	status = "okay";
 };
 
-&wdt0 {
-	timeout-sec = <60>;
+&ehci1 {
+	status = "okay";
+};
+
+&ohci1 {
 	status = "okay";
 };
