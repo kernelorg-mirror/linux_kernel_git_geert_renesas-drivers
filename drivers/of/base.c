@@ -1022,6 +1022,19 @@ const struct of_device_id *of_match_node(const struct of_device_id *matches,
 }
 EXPORT_SYMBOL(of_match_node);
 
+const void *of_node_get_match_data(const struct of_device_id *matches,
+				   const struct device_node *node)
+{
+	const struct of_device_id *match;
+
+	match = of_match_node(matches, node);
+	if (!match)
+		return NULL;
+
+	return match->data;
+}
+EXPORT_SYMBOL(of_node_get_match_data);
+
 /**
  *	of_find_matching_node_and_match - Find a node based on an of_device_id
  *					  match table.

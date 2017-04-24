@@ -342,6 +342,8 @@ extern int of_n_addr_cells(struct device_node *np);
 extern int of_n_size_cells(struct device_node *np);
 extern const struct of_device_id *of_match_node(
 	const struct of_device_id *matches, const struct device_node *node);
+extern const void *of_node_get_match_data(const struct of_device_id *matches,
+					  const struct device_node *node);
 extern int of_modalias_node(struct device_node *node, char *modalias, int len);
 extern void of_print_phandle_args(const char *msg, const struct of_phandle_args *args);
 extern struct device_node *of_parse_phandle(const struct device_node *np,
@@ -851,8 +853,9 @@ static inline void of_property_clear_flag(struct property *p, unsigned long flag
 {
 }
 
-#define of_match_ptr(_ptr)	NULL
-#define of_match_node(_matches, _node)	NULL
+#define of_match_ptr(_ptr)			NULL
+#define of_match_node(_matches, _node)		NULL
+#define of_node_get_match_data(_matches, _node)	NULL
 #endif /* CONFIG_OF */
 
 /* Default string compare functions, Allow arch asm/prom.h to override */
