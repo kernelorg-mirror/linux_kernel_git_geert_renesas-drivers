@@ -670,7 +670,7 @@ static int __init cpg_mssr_probe(struct platform_device *pdev)
 	struct clk **clks;
 	int error;
 
-	info = of_match_node(cpg_mssr_match, np)->data;
+	info = of_node_get_match_data(cpg_mssr_match, np);
 	if (info->init) {
 		error = info->init(dev);
 		if (error)
