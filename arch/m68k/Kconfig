@@ -2,6 +2,7 @@ config M68K
 	bool
 	default y
 	select ARCH_MIGHT_HAVE_PC_PARPORT if ISA
+	select COMMON_CLK if !COLDFIRE
 	select HAVE_IDE
 	select HAVE_AOUT if MMU
 	select HAVE_DEBUG_BUGVERBOSE
