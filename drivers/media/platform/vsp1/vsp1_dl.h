@@ -41,7 +41,6 @@ vsp1_dl_body_pool_create(struct vsp1_device *vsp1, unsigned int num_bodies,
 void vsp1_dl_body_pool_destroy(struct vsp1_dl_body_pool *pool);
 struct vsp1_dl_body *vsp1_dl_body_get(struct vsp1_dl_body_pool *pool);
 void vsp1_dl_body_put(struct vsp1_dl_body *dlb);
-
 void vsp1_dl_body_write(struct vsp1_dl_body *dlb, u32 reg, u32 data);
 int vsp1_dl_list_add_body(struct vsp1_dl_list *dl,
 			  struct vsp1_dl_body *dlb);
