@@ -14,7 +14,6 @@
  * GNU General Public License for more details.
  */
 
-#include <linux/clk.h>
 #include <linux/err.h>
 #include <linux/gpio.h>
 #include <linux/init.h>
@@ -36,10 +35,8 @@ struct gpio_rcar_priv {
 	struct platform_device *pdev;
 	struct gpio_chip gpio_chip;
 	struct irq_chip irq_chip;
-	struct clk *clk;
 	unsigned int irq_parent;
 	bool has_both_edge_trigger;
-	bool needs_clk;
 };
 
 #define IOINTSEL 0x00	/* General IO/Interrupt Switching Register */
@@ -185,14 +182,6 @@ static int gpio_rcar_irq_set_wake(struct irq_data *d, unsigned int on)
 		}
 	}
 
-	if (!p->clk)
-		return 0;
-
-	if (on)
-		clk_enable(p->clk);
-	else
-		clk_disable(p->clk);
-
 	return 0;
 }
 
@@ -329,17 +318,14 @@ static int gpio_rcar_direction_output(struct gpio_chip *chip, unsigned offset,
 
 struct gpio_rcar_info {
 	bool has_both_edge_trigger;
-	bool needs_clk;
 };
 
 static const struct gpio_rcar_info gpio_rcar_info_gen1 = {
 	.has_both_edge_trigger = false,
-	.needs_clk = false,
 };
 
 static const struct gpio_rcar_info gpio_rcar_info_gen2 = {
 	.has_both_edge_trigger = true,
-	.needs_clk = true,
 };
 
 static const struct of_device_id gpio_rcar_of_table[] = {
@@ -407,7 +393,6 @@ static int gpio_rcar_parse_dt(struct gpio_rcar_priv *p, unsigned int *npins)
 	ret = of_parse_phandle_with_fixed_args(np, "gpio-ranges", 3, 0, &args);
 	*npins = ret == 0 ? args.args[2] : RCAR_MAX_GPIO_PER_BANK;
 	p->has_both_edge_trigger = info->has_both_edge_trigger;
-	p->needs_clk = info->needs_clk;
 
 	if (*npins == 0 || *npins > RCAR_MAX_GPIO_PER_BANK) {
 		dev_warn(&p->pdev->dev,
@@ -443,16 +428,6 @@ static int gpio_rcar_probe(struct platform_device *pdev)
 		return ret;
 
 	platform_set_drvdata(pdev, p);
-
-	p->clk = devm_clk_get(dev, NULL);
-	if (IS_ERR(p->clk)) {
-		if (p->needs_clk) {
-			dev_err(dev, "unable to get clock\n");
-			ret = PTR_ERR(p->clk);
-			goto err0;
-		}
-		p->clk = NULL;
-	}
 
 	pm_runtime_enable(dev);
 
