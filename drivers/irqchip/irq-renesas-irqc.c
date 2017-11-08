@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <linux/clk.h>
 #include <linux/init.h>
 #include <linux/platform_device.h>
 #include <linux/spinlock.h>
@@ -64,7 +63,6 @@ struct irqc_priv {
 	struct platform_device *pdev;
 	struct irq_chip_generic *gc;
 	struct irq_domain *irq_domain;
-	struct clk *clk;
 };
 
 static struct irqc_priv *irq_data_to_priv(struct irq_data *data)
@@ -111,15 +109,6 @@ static int irqc_irq_set_wake(struct irq_data *d, unsigned int on)
 	int hw_irq = irqd_to_hwirq(d);
 
 	irq_set_irq_wake(p->irq[hw_irq].requested_irq, on);
-
-	if (!p->clk)
-		return 0;
-
-	if (on)
-		clk_enable(p->clk);
-	else
-		clk_disable(p->clk);
-
 	return 0;
 }
 
@@ -158,12 +147,6 @@ static int irqc_probe(struct platform_device *pdev)
 
 	p->pdev = pdev;
 	platform_set_drvdata(pdev, p);
-
-	p->clk = devm_clk_get(&pdev->dev, NULL);
-	if (IS_ERR(p->clk)) {
-		dev_warn(&pdev->dev, "unable to get clock\n");
-		p->clk = NULL;
-	}
 
 	pm_runtime_enable(&pdev->dev);
 	pm_runtime_get_sync(&pdev->dev);
