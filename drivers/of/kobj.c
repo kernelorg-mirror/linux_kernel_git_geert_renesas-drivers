@@ -111,12 +111,18 @@ void __of_update_property_sysfs(struct device_node *np, struct property *newprop
 	__of_add_property_sysfs(np, newprop);
 }
 
-int __of_attach_node_sysfs(struct device_node *np)
+int __of_attach_node_post(struct device_node *np)
 {
 	const char *name;
 	struct kobject *parent;
 	struct property *pp;
 	int rc;
+
+	if (of_phandle_ht_available()) {
+		rc = of_phandle_ht_insert(np);
+		WARN(rc, "insert to phandle hash fail @%s\n",
+				of_node_full_name(np));
+	}
 
 	if (!of_kset)
 		return 0;
@@ -143,9 +149,16 @@ int __of_attach_node_sysfs(struct device_node *np)
 	return 0;
 }
 
-void __of_detach_node_sysfs(struct device_node *np)
+void __of_detach_node_post(struct device_node *np)
 {
 	struct property *pp;
+	int rc;
+
+	if (of_phandle_ht_available()) {
+		rc = of_phandle_ht_remove(np);
+		WARN(rc, "remove from phandle hash fail @%s\n",
+				of_node_full_name(np));
+	}
 
 	BUG_ON(!of_node_is_initialized(np));
 	if (!of_kset)

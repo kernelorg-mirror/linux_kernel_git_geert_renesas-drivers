@@ -1105,3 +1105,10 @@ dtb-$(CONFIG_ARCH_ASPEED) += aspeed-bmc-opp-palmetto.dtb \
 	aspeed-bmc-opp-romulus.dtb \
 	aspeed-ast2500-evb.dtb
 endif
+
+ifeq ($(CONFIG_OF_OVERLAY),y)
+dtstree		:= $(srctree)/$(src)
+dtbo-y += $(patsubst $(dtstree)/%.dtso,%.dtbo, $(wildcard $(dtstree)/*.dtso))
+always		:= $(dtbo-y)
+clean-files	:= *.dtbo
+endif
