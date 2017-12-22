@@ -155,6 +155,15 @@
 	};
 };
 
+&pca9654 {
+	pcie_sata_switch {
+		gpio-hog;
+		gpios = <7 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "PCIE/SATA switch";
+	};
+};
+
 &pfc {
 	usb2_pins: usb2 {
 		groups = "usb2";
@@ -177,6 +186,10 @@
 		groups = "usb2_ch3";
 		function = "usb2_ch3";
 	};
+};
+
+&sata {
+	status = "okay";
 };
 
 &usb2_phy2 {
