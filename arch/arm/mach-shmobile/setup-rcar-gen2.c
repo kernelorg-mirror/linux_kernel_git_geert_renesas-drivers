@@ -21,6 +21,8 @@
 #include <asm/secure_cntvoff.h>
 #include "common.h"
 #include "rcar-gen2.h"
+#include "r8a7790.h"
+#include "r8a7791.h"
 
 static const struct of_device_id cpg_matches[] __initconst = {
 	{ .compatible = "renesas,rcar-gen2-cpg-clocks", },
@@ -106,6 +108,23 @@ void __init rcar_gen2_timer_init(void)
 	timer_probe();
 }
 
+static void __init rcar_gen2_init_machine(void)
+{
+#if defined (CONFIG_ARCH_R8A7742) || defined(CONFIG_ARCH_R8A7790)
+	if (of_machine_is_compatible("renesas,r8a7742") ||
+	    of_machine_is_compatible("renesas,r8a7790"))
+		r8a7790_disable_mstp_clocks();
+#endif
+#if defined (CONFIG_ARCH_R8A7743) || defined(CONFIG_ARCH_R8A7744) || \
+    defined (CONFIG_ARCH_R8A7791) || defined(CONFIG_ARCH_R8A7793)
+	if (of_machine_is_compatible("renesas,r8a7743") ||
+	    of_machine_is_compatible("renesas,r8a7744") ||
+	    of_machine_is_compatible("renesas,r8a7791") ||
+	    of_machine_is_compatible("renesas,r8a7793"))
+		r8a7791_disable_mstp_clocks();
+#endif
+}
+
 struct memory_reserve_config {
 	u64 reserved;
 	u64 base, size;
@@ -188,6 +207,7 @@ static const char * const rcar_gen2_boards_compat_dt[] __initconst = {
 DT_MACHINE_START(RCAR_GEN2_DT, "Generic R-Car Gen2 (Flattened Device Tree)")
 	.init_late	= shmobile_init_late,
 	.init_time	= rcar_gen2_timer_init,
+	.init_machine	= rcar_gen2_init_machine,
 	.reserve	= rcar_gen2_reserve,
 	.dt_compat	= rcar_gen2_boards_compat_dt,
 MACHINE_END
@@ -203,6 +223,7 @@ static const char * const rz_g1_boards_compat_dt[] __initconst = {
 DT_MACHINE_START(RZ_G1_DT, "Generic RZ/G1 (Flattened Device Tree)")
 	.init_late	= shmobile_init_late,
 	.init_time	= rcar_gen2_timer_init,
+	.init_machine	= rcar_gen2_init_machine,
 	.reserve	= rcar_gen2_reserve,
 	.dt_compat	= rz_g1_boards_compat_dt,
 MACHINE_END
