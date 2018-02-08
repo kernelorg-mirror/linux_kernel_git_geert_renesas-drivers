@@ -129,8 +129,12 @@ struct iommu_group *vfio_iommu_group_get(struct device *dev)
 	 * bus.  We set iommudata simply to be able to identify these groups
 	 * as special use and for reclamation later.
 	 */
-	if (group || !noiommu || iommu_present(dev->bus))
+	if (group || !noiommu)
 		return group;
+
+	if (iommu_present(dev->bus))
+		dev_warn(dev, "iommu present (%ps), ignoring\n",
+			 dev->bus->iommu_ops);
 
 	group = iommu_group_alloc();
 	if (IS_ERR(group))
