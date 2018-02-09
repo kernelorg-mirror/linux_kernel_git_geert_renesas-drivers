@@ -442,22 +442,16 @@ static int gpio_rcar_probe(struct platform_device *pdev)
 
 	p->clk = devm_clk_get(dev, NULL);
 	if (IS_ERR(p->clk)) {
-		if (p->needs_clk) {
-			dev_err(dev, "unable to get clock\n");
-			ret = PTR_ERR(p->clk);
-			goto err0;
-		}
+		if (p->needs_clk)
+			dev_warn(dev, "missing clock, ignoring\n");
 		p->clk = NULL;
 	}
 
 	pm_runtime_enable(dev);
 
 	irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
-	if (!irq) {
-		dev_err(dev, "missing IRQ\n");
-		ret = -EINVAL;
-		goto err0;
-	}
+	if (!irq)
+		dev_warn(dev, "missing IRQ, ignoring\n");
 
 	io = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	p->base = devm_ioremap_resource(dev, io);
@@ -502,12 +496,14 @@ static int gpio_rcar_probe(struct platform_device *pdev)
 		goto err1;
 	}
 
-	p->irq_parent = irq->start;
-	if (devm_request_irq(dev, irq->start, gpio_rcar_irq_handler,
-			     IRQF_SHARED, name, p)) {
-		dev_err(dev, "failed to request IRQ\n");
-		ret = -ENOENT;
-		goto err1;
+	if (irq) {
+		p->irq_parent = irq->start;
+		if (devm_request_irq(dev, irq->start, gpio_rcar_irq_handler,
+				     IRQF_SHARED, name, p)) {
+			dev_err(dev, "failed to request IRQ\n");
+			ret = -ENOENT;
+			goto err1;
+		}
 	}
 
 	dev_info(dev, "driving %d GPIOs\n", npins);
