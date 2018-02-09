@@ -271,6 +271,7 @@ static struct mssr_mod_clk r8a7795_mod_clks[] __initdata = {
 
 static const unsigned int r8a7795_crit_mod_clks[] __initconst = {
 	MOD_CLK_ID(408),	/* INTC-AP (GIC) */
+	MOD_CLK_ID(906),	/* GPIO6 */
 };
 
 
