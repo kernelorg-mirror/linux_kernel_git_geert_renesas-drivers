@@ -24,7 +24,7 @@
 #define DRIVER_DESC     "VFIO for platform devices - User Level meta-driver"
 
 static bool reset_required = true;
-module_param(reset_required, bool, 0644);
+module_param(reset_required, bool, 0444);
 MODULE_PARM_DESC(reset_required, "override reset requirement (default: 1)");
 
 /* probing devices from the linux platform bus */
