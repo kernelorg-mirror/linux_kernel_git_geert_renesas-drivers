@@ -17,6 +17,7 @@
 #include <linux/iommu.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
+#include <linux/reset.h>
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/uaccess.h>
@@ -112,7 +113,13 @@ static bool vfio_platform_has_reset(struct vfio_platform_device *vdev)
 	if (VFIO_PLATFORM_IS_ACPI(vdev))
 		return vfio_platform_acpi_has_reset(vdev);
 
-	return vdev->of_reset ? true : false;
+	if (vdev->of_reset)
+		return true;
+
+	if (!IS_ERR_OR_NULL(vdev->reset_control))
+		return true;
+
+	return false;
 }
 
 static int vfio_platform_get_reset(struct vfio_platform_device *vdev)
@@ -127,8 +134,15 @@ static int vfio_platform_get_reset(struct vfio_platform_device *vdev)
 		vdev->of_reset = vfio_platform_lookup_reset(vdev->compat,
 							&vdev->reset_module);
 	}
+	if (vdev->of_reset)
+		return 0;
 
-	return vdev->of_reset ? 0 : -ENOENT;
+	vdev->reset_control = __of_reset_control_get(vdev->device->of_node,
+						     NULL, 0, false, false);
+	if (!IS_ERR(vdev->reset_control))
+		return 0;
+
+	return PTR_ERR(vdev->reset_control);
 }
 
 static void vfio_platform_put_reset(struct vfio_platform_device *vdev)
@@ -138,6 +152,8 @@ static void vfio_platform_put_reset(struct vfio_platform_device *vdev)
 
 	if (vdev->of_reset)
 		module_put(vdev->reset_module);
+
+	reset_control_put(vdev->reset_control);
 }
 
 static int vfio_platform_regions_init(struct vfio_platform_device *vdev)
@@ -217,6 +233,9 @@ static int vfio_platform_call_reset(struct vfio_platform_device *vdev,
 	} else if (vdev->of_reset) {
 		dev_info(vdev->device, "reset\n");
 		return vdev->of_reset(vdev);
+	} else if (!IS_ERR_OR_NULL(vdev->reset_control)) {
+		dev_info(vdev->device, "reset\n");
+		return reset_control_reset(vdev->reset_control);
 	}
 
 	dev_warn(vdev->device, "no reset function found!\n");
