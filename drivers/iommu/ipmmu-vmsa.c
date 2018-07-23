@@ -751,6 +751,9 @@ static int ipmmu_init_platform_device(struct device *dev,
 
 static bool ipmmu_slave_whitelist(struct device *dev)
 {
+	if (!strcmp(dev_name(dev), "ee300000.sata"))
+		return true;
+
 	/* By default, do not allow use of IPMMU */
 	return false;
 }
