@@ -840,6 +840,11 @@ int phy_aneg_done(struct phy_device *phydev);
 int phy_stop_interrupts(struct phy_device *phydev);
 int phy_restart_aneg(struct phy_device *phydev);
 
+static inline void phy_device_reset(struct phy_device *phydev, int value)
+{
+	mdio_device_reset(&phydev->mdio, value);
+}
+
 static inline int phy_read_status(struct phy_device *phydev)
 {
 	if (!phydev->drv)
@@ -879,6 +884,10 @@ static inline int genphy_no_soft_reset(struct phy_device *phydev)
 {
 	return 0;
 }
+int genphy_read_mmd_unsupported(struct phy_device *phdev, int devad,
+				u16 regnum);
+int genphy_write_mmd_unsupported(struct phy_device *phdev, int devnum,
+				 u16 regnum, u16 val);
 
 /* Clause 45 PHY */
 int genphy_c45_restart_aneg(struct phy_device *phydev);

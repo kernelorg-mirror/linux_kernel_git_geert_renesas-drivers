@@ -38,7 +38,7 @@ struct sh_msiof_chipdata {
 	u16 tx_fifo_size;
 	u16 rx_fifo_size;
 	u16 master_flags;
-	u16 min_div;
+	u16 min_div_pow;
 };
 
 struct sh_msiof_spi_priv {
@@ -50,7 +50,7 @@ struct sh_msiof_spi_priv {
 	struct completion done;
 	unsigned int tx_fifo_size;
 	unsigned int rx_fifo_size;
-	unsigned int min_div;
+	unsigned int min_div_pow;
 	void *tx_dma_page;
 	void *rx_dma_page;
 	dma_addr_t tx_dma_addr;
@@ -243,43 +243,46 @@ static irqreturn_t sh_msiof_spi_irq(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
-static struct {
-	unsigned short div;
-	unsigned short brdv;
-} const sh_msiof_spi_div_table[] = {
-	{ 1,	SCR_BRDV_DIV_1 },
-	{ 2,	SCR_BRDV_DIV_2 },
-	{ 4,	SCR_BRDV_DIV_4 },
-	{ 8,	SCR_BRDV_DIV_8 },
-	{ 16,	SCR_BRDV_DIV_16 },
-	{ 32,	SCR_BRDV_DIV_32 },
+static const u32 sh_msiof_spi_div_array[] = {
+	SCR_BRDV_DIV_1, SCR_BRDV_DIV_2,	 SCR_BRDV_DIV_4,
+	SCR_BRDV_DIV_8,	SCR_BRDV_DIV_16, SCR_BRDV_DIV_32,
 };
 
 static void sh_msiof_spi_set_clk_regs(struct sh_msiof_spi_priv *p,
 				      unsigned long parent_rate, u32 spi_hz)
 {
-	unsigned long div = 1024;
+	unsigned long div;
 	u32 brps, scr;
-	size_t k;
+	unsigned int div_pow = p->min_div_pow;
 
-	if (!WARN_ON(!spi_hz || !parent_rate))
-		div = DIV_ROUND_UP(parent_rate, spi_hz);
-
-	div = max_t(unsigned long, div, p->min_div);
-
-	for (k = 0; k < ARRAY_SIZE(sh_msiof_spi_div_table); k++) {
-		brps = DIV_ROUND_UP(div, sh_msiof_spi_div_table[k].div);
-		/* SCR_BRDV_DIV_1 is valid only if BRPS is x 1/1 or x 1/2 */
-		if (sh_msiof_spi_div_table[k].div == 1 && brps > 2)
-			continue;
-		if (brps <= 32) /* max of brdv is 32 */
-			break;
+	if (!spi_hz || !parent_rate) {
+		WARN(1, "Invalid clock rate parameters %lu and %u\n",
+		     parent_rate, spi_hz);
+		return;
 	}
 
-	k = min_t(int, k, ARRAY_SIZE(sh_msiof_spi_div_table) - 1);
-	brps = min_t(int, brps, 32);
+	div = DIV_ROUND_UP(parent_rate, spi_hz);
+	if (div <= 1024) {
+		/* SCR_BRDV_DIV_1 is valid only if BRPS is x 1/1 or x 1/2 */
+		if (!div_pow && div <= 32 && div > 2)
+			div_pow = 1;
 
-	scr = sh_msiof_spi_div_table[k].brdv | SCR_BRPS(brps);
+		if (div_pow)
+			brps = (div + 1) >> div_pow;
+		else
+			brps = div;
+
+		for (; brps > 32; div_pow++)
+			brps = (brps + 1) >> 1;
+	} else {
+		/* Set transfer rate composite divisor to 2^5 * 32 = 1024 */
+		dev_err(&p->pdev->dev,
+			"Requested SPI transfer rate %d is too low\n", spi_hz);
+		div_pow = 5;
+		brps = 32;
+	}
+
+	scr = sh_msiof_spi_div_array[div_pow] | SCR_BRPS(brps);
 	sh_msiof_write(p, TSCR, scr);
 	if (!(p->master->flags & SPI_MASTER_MUST_TX))
 		sh_msiof_write(p, RSCR, scr);
@@ -739,7 +742,7 @@ static int sh_msiof_dma_once(struct sh_msiof_spi_priv *p, const void *tx,
 	if (rx) {
 		ier_bits |= IER_RDREQE | IER_RDMAE;
 		desc_rx = dmaengine_prep_slave_single(p->master->dma_rx,
-					p->rx_dma_addr, len, DMA_FROM_DEVICE,
+					p->rx_dma_addr, len, DMA_DEV_TO_MEM,
 					DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
 		if (!desc_rx)
 			return -EAGAIN;
@@ -756,7 +759,7 @@ static int sh_msiof_dma_once(struct sh_msiof_spi_priv *p, const void *tx,
 		dma_sync_single_for_device(p->master->dma_tx->device->dev,
 					   p->tx_dma_addr, len, DMA_TO_DEVICE);
 		desc_tx = dmaengine_prep_slave_single(p->master->dma_tx,
-					p->tx_dma_addr, len, DMA_TO_DEVICE,
+					p->tx_dma_addr, len, DMA_MEM_TO_DEV,
 					DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
 		if (!desc_tx) {
 			ret = -EAGAIN;
@@ -1028,25 +1031,27 @@ static const struct sh_msiof_chipdata sh_data = {
 	.tx_fifo_size = 64,
 	.rx_fifo_size = 64,
 	.master_flags = 0,
-	.min_div = 1,
+	.min_div_pow = 0,
 };
 
 static const struct sh_msiof_chipdata rcar_gen2_data = {
 	.tx_fifo_size = 64,
 	.rx_fifo_size = 64,
 	.master_flags = SPI_MASTER_MUST_TX,
-	.min_div = 1,
+	.min_div_pow = 0,
 };
 
 static const struct sh_msiof_chipdata rcar_gen3_data = {
 	.tx_fifo_size = 64,
 	.rx_fifo_size = 64,
 	.master_flags = SPI_MASTER_MUST_TX,
-	.min_div = 2,
+	.min_div_pow = 1,
 };
 
 static const struct of_device_id sh_msiof_match[] = {
 	{ .compatible = "renesas,sh-mobile-msiof", .data = &sh_data },
+	{ .compatible = "renesas,msiof-r8a7743",   .data = &rcar_gen2_data },
+	{ .compatible = "renesas,msiof-r8a7745",   .data = &rcar_gen2_data },
 	{ .compatible = "renesas,msiof-r8a7790",   .data = &rcar_gen2_data },
 	{ .compatible = "renesas,msiof-r8a7791",   .data = &rcar_gen2_data },
 	{ .compatible = "renesas,msiof-r8a7792",   .data = &rcar_gen2_data },
@@ -1214,12 +1219,10 @@ free_tx_chan:
 static void sh_msiof_release_dma(struct sh_msiof_spi_priv *p)
 {
 	struct spi_master *master = p->master;
-	struct device *dev;
 
 	if (!master->dma_tx)
 		return;
 
-	dev = &p->pdev->dev;
 	dma_unmap_single(master->dma_rx->device->dev, p->rx_dma_addr,
 			 PAGE_SIZE, DMA_FROM_DEVICE);
 	dma_unmap_single(master->dma_tx->device->dev, p->tx_dma_addr,
@@ -1235,15 +1238,13 @@ static int sh_msiof_spi_probe(struct platform_device *pdev)
 	struct resource	*r;
 	struct spi_master *master;
 	const struct sh_msiof_chipdata *chipdata;
-	const struct of_device_id *of_id;
 	struct sh_msiof_spi_info *info;
 	struct sh_msiof_spi_priv *p;
 	int i;
 	int ret;
 
-	of_id = of_match_device(sh_msiof_match, &pdev->dev);
-	if (of_id) {
-		chipdata = of_id->data;
+	chipdata = of_device_get_match_data(&pdev->dev);
+	if (chipdata) {
 		info = sh_msiof_spi_parse_dt(&pdev->dev);
 	} else {
 		chipdata = (const void *)pdev->id_entry->driver_data;
@@ -1269,7 +1270,7 @@ static int sh_msiof_spi_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, p);
 	p->master = master;
 	p->info = info;
-	p->min_div = chipdata->min_div;
+	p->min_div_pow = chipdata->min_div_pow;
 
 	init_completion(&p->done);
 
