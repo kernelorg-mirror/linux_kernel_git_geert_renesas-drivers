@@ -113,6 +113,9 @@ struct pinmux_cfg_reg {
 	u8 reg_width, field_width;
 	const u16 *enum_ids;
 	const u8 *var_field_width;
+#ifdef DEBUG
+	unsigned int nr_enum_ids;	/* for variable width regs only */
+#endif
 };
 
 #define GROUP(...)	__VA_ARGS__
@@ -148,10 +151,22 @@ struct pinmux_cfg_reg {
  *          combination of the register field bit values, all wrapped using
  *          the GROUP() macro.
  */
+#ifdef DEBUG
+
+#define PINMUX_CFG_REG_VAR(name, r, r_width, f_widths, ids)		\
+	.reg = r, .reg_width = r_width,					\
+	.var_field_width = (const u8 []) { f_widths, 0 },		\
+	.enum_ids = (const u16 []) { ids },				\
+	.nr_enum_ids = sizeof((const u16 []) { ids }) / sizeof(u16)
+
+#else
+
 #define PINMUX_CFG_REG_VAR(name, r, r_width, f_widths, ids)		\
 	.reg = r, .reg_width = r_width,					\
 	.var_field_width = (const u8 []) { f_widths, 0 },		\
 	.enum_ids = (const u16 []) { ids }
+
+#endif
 
 struct pinmux_drive_reg_field {
 	u16 pin;
