@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for HSCIF4(B) on Ebisu EX-SPI Connector (QSPI1)
+//
+// Copyright (C) 2018 Glider bvba
+//
+// Pinout:
+//   - HSCIF4 TXD = CN4 pin 5 if SW2-2 is on
+//   - HSCIF4 RXD = CN4 pin 6 if SW2-3 is on
+//
+// Note:
+//   - As this setting conflicts with HyperFLASH use, the switches must be
+//     switched on after boot, and switched off before reboot!
+//   - These are 1.8V signals!
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	hscif4_pins: hscif4 {
+		groups = "hscif4_data_b";
+		function = "hscif4";
+	};
+};
+
+&hscif4 {
+	pinctrl-0 = <&hscif4_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
