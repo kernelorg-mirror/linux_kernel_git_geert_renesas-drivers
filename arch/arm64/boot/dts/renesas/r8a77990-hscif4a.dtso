@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for HSCIF4(A) on R-Car E3
+//
+// Copyright (C) 2018 Glider bvba
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	hscif4_pins: hscif4 {
+		groups = "hscif4_data_a";
+		function = "hscif4";
+	};
+};
+
+&hscif4 {
+	pinctrl-0 = <&hscif4_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
