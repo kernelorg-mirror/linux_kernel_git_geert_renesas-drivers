@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for SCIF5 on R-Car E3 using (incorrect) DMAC1
+//
+// Pinout:
+//   - TXD: CP45
+//   - RXD: CP46
+//
+// Copyright (C) 2019 Glider bvba
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	scif5_pins: scif5 {
+		groups = "scif5_data_b";
+		function = "scif5";
+	};
+};
+
+&scif5 {
+	pinctrl-0 = <&scif5_pins>;
+	pinctrl-names = "default";
+
+	dmas = <&dmac1 0x5b>, <&dmac1 0x5a>;
+	dma-names = "tx", "rx";
+
+	status = "okay";
+};
