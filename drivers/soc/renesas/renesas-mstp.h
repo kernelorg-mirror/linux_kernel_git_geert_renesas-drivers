@@ -70,3 +70,4 @@ extern const struct renesas_mstp_info r8a7790_mstp_info;
 extern const struct renesas_mstp_info r8a7791_mstp_info;
 extern const struct renesas_mstp_info r8a7795_mstp_info;
 extern const struct renesas_mstp_info r8a77960_mstp_info;
+extern const struct renesas_mstp_info r8a77961_mstp_info;
