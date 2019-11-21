@@ -113,13 +113,15 @@ files that desire to do so need to include the following header::
 GPIOs are mapped by the means of tables of lookups, containing instances of the
 gpiod_lookup structure. Two macros are defined to help declaring such mappings::
 
-	GPIO_LOOKUP(chip_label, chip_hwnum, con_id, flags)
-	GPIO_LOOKUP_IDX(chip_label, chip_hwnum, con_id, idx, flags)
+	GPIO_LOOKUP(key, chip_hwnum, con_id, flags)
+	GPIO_LOOKUP_IDX(key, chip_hwnum, con_id, idx, flags)
 
 where
 
-  - chip_label is the label of the gpiod_chip instance providing the GPIO
-  - chip_hwnum is the hardware number of the GPIO within the chip
+  - key is either the label of the gpiod_chip instance providing the GPIO, or
+    the GPIO line name
+  - chip_hwnum is the hardware number of the GPIO within the chip, or U16_MAX
+    to indicate that key is a GPIO line name
   - con_id is the name of the GPIO function from the device point of view. It
 	can be NULL, in which case it will match any function.
   - idx is the index of the GPIO within the function.
