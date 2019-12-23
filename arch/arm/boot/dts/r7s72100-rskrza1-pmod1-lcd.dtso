@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for Okaya LCD on RSK+RZA1 PMOD Connector 1 (CN25)
+//
+// Copyright (C) 2019 Glider bvba
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&{/} {
+	backlight: backlight {
+		compatible = "gpio-backlight";
+		gpios = <&port3 7 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&spi1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	display@0 {
+		compatible = "okaya,rh128128t", "sitronix,st7715r";
+		reg = <0>;
+
+		spi-max-frequency = <32000000>;
+		dc-gpios = <&port4 15 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&io_expander1 4 GPIO_ACTIVE_HIGH>;
+		backlight = &backlight;
+	};
+};
