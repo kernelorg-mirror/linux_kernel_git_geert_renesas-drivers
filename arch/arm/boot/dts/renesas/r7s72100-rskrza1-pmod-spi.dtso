@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for enabling RSPI1 on the RSK+RZA1 PMOD Connectors
+//
+// Copyright (C) 2019 Glider bvba
+//
+// PMOD1 (Type 2A, Expanded SPI)
+// -----------------------------
+//   pin  1: PMOD1_CS (P1_4_SCL2, pull-up)
+//   pin  2: P11_14_MOSI1
+//   pin  3: P11_15_MISO1
+//   pin  4: P11_12_RSPCK1
+//   pin  5: GND
+//   pin  6: +3.3V
+//   pin  7: PMOD_INT (P1_3_IRQ3_ADTRG, pull-up)
+//   pin  8: PMOD1_RST (io_expander1 IO[4], pull-up)
+//   pin  9: PMOD_PIN9 (P4_15_IRQ7_SDD2C0)
+//   pin 10: PMOD_PIN10 (P3_7_TIOC3D_CS1)
+//   pin 11: GND
+//   pin 12: +3.3V
+//
+// PMOD2 (Type 2A, Expanded SPI)
+// -----------------------------
+//   pin  1: PMOD2_CS (P1_5_SDA2, pull-up)
+//   pin  2: P11_14_MOSI1
+//   pin  3: P11_15_MISO1
+//   pin  4: P11_12_RSPCK1
+//   pin  5: GND
+//   pin  6: +3.3V
+//   pin  7: PMOD_INT (P1_3_IRQ3_ADTRG, pull-up)
+//   pin  8: PMOD2_RST (io_expander1 IO[5], pull-up)
+//   pin  9: PMOD_PIN9 (P4_15_IRQ7_SDD2C0)
+//   pin 10: PMOD_PIN10 (P3_7_TIOC3D_CS1)
+//   pin 11: GND
+//   pin 12: +3.3V
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/r7s72100-pinctrl.h>
+
+&pinctrl {
+	rspi1_pins: rspi1 {
+		pinmux = <RZA1_PINMUX(11, 14, 2)>,	/* MOSI1 */
+			 <RZA1_PINMUX(11, 15, 2)>,	/* MISO1 */
+			 <RZA1_PINMUX(11, 12, 2)>;	/* RSPCK1 */
+	};
+};
+
+&io_expander2 {
+	/* Select DV for RSPI1 on PMOD */
+	lcd-dv-mux-hog {
+		gpio-hog;
+		gpios = <0 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "TFT Panel / DV Input Mux";
+	};
+};
+
+&spi1 {
+	pinctrl-0 = <&rspi1_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	cs-gpios = <&port1 4 GPIO_ACTIVE_LOW>, <&port1 5 GPIO_ACTIVE_LOW>;
+	status = "okay";
+};
