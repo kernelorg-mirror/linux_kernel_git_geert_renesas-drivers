@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for enabling RSPI1 on the RSK+RZA1 PMOD Connectors
+//
+// Copyright (C) 2019 Glider bvba
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/r7s72100-pinctrl.h>
+
+&pinctrl {
+	rspi1_pins: rspi1 {
+		pinmux = <RZA1_PINMUX(11, 14, 2)>,	/* MOSI1 */
+			 <RZA1_PINMUX(11, 15, 2)>,	/* MISO1 */
+			 <RZA1_PINMUX(11, 12, 2)>;	/* RSPCK1 */
+	};
+};
+
+&io_expander2 {
+	/* Select DV for RSPI1 on PMOD */
+	lcd_dv_mux {
+		gpio-hog;
+		gpios = <0 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "TFT Panel / DV Input Mux";
+	};
+};
+
+&spi1 {
+	pinctrl-0 = <&rspi1_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	cs-gpios = <&port1 4 GPIO_ACTIVE_LOW>, <&port1 5 GPIO_ACTIVE_LOW>;
+	status = "okay";
+};
