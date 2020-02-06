@@ -1634,7 +1634,7 @@ static struct cc_crypto_alg *cc_create_alg(const struct cc_alg_template *tmpl,
 	struct cc_crypto_alg *t_alg;
 	struct skcipher_alg *alg;
 
-	t_alg = kzalloc(sizeof(*t_alg), GFP_KERNEL);
+	t_alg = devm_kzalloc(dev, sizeof(*t_alg), GFP_KERNEL);
 	if (!t_alg)
 		return ERR_PTR(-ENOMEM);
 
@@ -1670,7 +1670,6 @@ int cc_cipher_free(struct cc_drvdata *drvdata)
 	list_for_each_entry_safe(t_alg, n, &drvdata->alg_list, entry) {
 		crypto_unregister_skcipher(&t_alg->skcipher_alg);
 		list_del(&t_alg->entry);
-		kfree(t_alg);
 	}
 	return 0;
 }
@@ -1711,7 +1710,6 @@ int cc_cipher_alloc(struct cc_drvdata *drvdata)
 		if (rc) {
 			dev_err(dev, "%s alg registration failed\n",
 				t_alg->skcipher_alg.base.cra_driver_name);
-			kfree(t_alg);
 			goto fail0;
 		}
 
