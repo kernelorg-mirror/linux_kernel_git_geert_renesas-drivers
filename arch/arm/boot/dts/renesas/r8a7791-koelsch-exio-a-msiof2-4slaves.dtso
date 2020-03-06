@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for MSIOF2 with 4 SPI slaves on r8a7791/koelsch EXIO A
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - SCK  = EXIO A pin 61
+//   - MOSI = EXIO A pin 68
+//   - MISO = EXIO A pin 70
+//   - CS0# = EXIO A pin 63
+//   - CS1# = EXIO A pin 72
+//   - CS2# = EXIO A pin 53
+//   - CS3# = EXIO A pin 65
+//   - GND  = EXIO A pin 73/77/78
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&pfc {
+	msiof2_pins: msiof2 {
+		groups = "msiof2_clk", "msiof2_tx", "msiof2_rx", "msiof2_sync",
+			 "msiof2_ss1";
+		function = "msiof2";
+	};
+};
+
+&msiof2 {
+	pinctrl-0 = <&msiof2_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	cs-gpios = <0>, /* SYNC */
+		   <0>, /* SS1 */
+		   <&gpio1 18 GPIO_ACTIVE_LOW>, /* SS2 unused */
+		   <&gpio1 23 GPIO_ACTIVE_LOW>;
+	status = "okay";
+};
