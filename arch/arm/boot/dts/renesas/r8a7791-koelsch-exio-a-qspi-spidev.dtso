@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for QSPI and spidev on r8a7791/koelsch EXIO A
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - SPCLK = EXIO A pin 41 (SW18-5 = ON)
+//   - MOSI  = EXIO A pin 43 (SW18-4 = ON)
+//   - MISO  = EXIO A pin 45 (SW18-3 = ON)
+//   - IO2   = EXIO A pin 47 (SW18-2 = ON)
+//   - IO3   = EXIO A pin 49 (SW18-1 = ON)
+//   - SSL   = EXIO A pin 51 (SW16 = 2-3 = ON)
+//   - GND   = EXIO A pin 73/77/78
+
+/dts-v1/;
+/plugin/;
+
+&qspi {
+	pinctrl-0 = <&qspi_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	exio-a@0 {
+		compatible = "renesas,koelsch-exio-a-qspi";
+		reg = <0>;
+
+		spi-max-frequency = <97500000>;
+		spi-tx-bus-width = <4>;
+		spi-rx-bus-width = <4>;
+	};
+};
