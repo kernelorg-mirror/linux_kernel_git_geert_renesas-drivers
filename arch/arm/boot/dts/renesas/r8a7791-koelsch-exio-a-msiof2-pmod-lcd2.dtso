@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for Renesas YRSK-LCD-PMOD on MSIOF2 (CS2#) on
+// r8a7791/koelsch EXIO A
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - CS2#      = EXIO A pin 53          = PMOD pin 1
+//   - MOSI      = EXIO A pin 68          = PMOD pin 2
+//   - MISO      = EXIO A pin 70          = PMOD pin 3
+//   - SCK       = EXIO A pin 61          = PMOD pin 4
+//   - reset2    = EXIO A pin 54          = PMOD pin 8
+//   - dc2       = EXIO A pin 52          = PMOD pin 9
+//   - backlight = EXIO A pin 42 (shared) = PMOD pin 10
+//   - GND       = CN26 pin 3, 5          = PMOD pin 5, 11
+//   - +3.3V     = CN26 pin 6, 7          = PMOD pin 6, 12
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&msiof2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	display@2 {
+		compatible = "okaya,rh128128t", "sitronix,st7715r";
+		reg = <2>;
+
+		spi-max-frequency = <32000000>;
+		dc-gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
+	};
+};
