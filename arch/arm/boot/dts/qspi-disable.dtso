@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay to disable QSPI before replacing its slave
+//
+// Copyright (C) 2020 Glider bv
+
+/dts-v1/;
+/plugin/;
+
+&qspi {
+	status = "disabled";
+};
