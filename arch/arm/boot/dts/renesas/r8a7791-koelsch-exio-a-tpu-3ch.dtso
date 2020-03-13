@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for 3-channel TPU on r8a7791/koelsch EXIO A
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - PWM1 = EXIO A pin 72
+//   - PWM2 = EXIO A pin 53
+//   - PWM3 = EXIO A pin 76
+//   - GND  = EXIO A pin 73/77/78
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	tpu_pins: tpu {
+		groups = "tpu_to1", "tpu_to2", "tpu_to3";
+		function = "tpu";
+	};
+};
+
+&tpu {
+	pinctrl-0 = <&tpu_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
