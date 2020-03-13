@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for 3-channel PWM on r8a7791/koelsch EXIO A
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - PWM1 = EXIO A pin 72
+//   - PWM2 = EXIO A pin 53
+//   - PWM3 = EXIO A pin 76
+//   - GND  = EXIO A pin 73/77/78
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&pfc {
+	pwm1_pins: pwm1 {
+		groups = "pwm1";
+		function = "pwm1";
+	};
+
+	pwm2_pins: pwm2 {
+		groups = "pwm2";
+		function = "pwm2";
+	};
+
+	pwm3_pins: pwm3 {
+		groups = "pwm3";
+		function = "pwm3";
+	};
+};
+
+&pwm1 {
+	pinctrl-0 = <&pwm1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm2 {
+	pinctrl-0 = <&pwm2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm3 {
+	pinctrl-0 = <&pwm3_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
