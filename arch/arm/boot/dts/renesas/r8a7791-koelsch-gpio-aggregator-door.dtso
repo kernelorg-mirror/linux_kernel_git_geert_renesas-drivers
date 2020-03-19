@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay to describe a dummy GPIO-operated device using the
+// GPIO Aggregator
+//
+// Copyright (C) 2020 Glider bv
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+
+&{/} {
+	door {
+		compatible = "myvendor,mydoor";
+
+		gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>,
+			<&gpio2 20 GPIO_ACTIVE_LOW>;
+		gpio-line-names = "open", "lock";
+	};
+};
