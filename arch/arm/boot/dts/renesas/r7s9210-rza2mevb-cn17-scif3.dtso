@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for SCIF3 on CMOS Camera Connector CN17
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - TXD = CMOS Camera Connector CN17 pin 6
+//   - RXD = CMOS Camera Connector CN17 pin 5
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/pinctrl/r7s9210-pinctrl.h>
+
+&pinctrl {
+	scif3_pins: serial3 {
+		pinmux = <RZA2_PINMUX(PORT6, 3, 3)>,	/* TxD3 */
+			 <RZA2_PINMUX(PORT6, 2, 3)>;	/* RxD3 */
+	};
+};
+
+&scif3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&scif3_pins>;
+
+	status = "okay";
+};
