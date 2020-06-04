@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for spidev on the TFT LCD Panel Connector (CN44)
+//
+// Copyright (C) 2020 Glider bv
+//
+// Pinout:
+//   - CS#  = pin 43
+//   - MOSI = pin 41
+//   - MISO = pin 42
+//   - SCK  = pin 40
+//   - GND  = pin 47/48
+//   - +3V3 = pin 45/46
+//   - +5V  = pin 49/50
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/r7s72100-pinctrl.h>
+
+&pinctrl {
+	rspi1_pins: rspi1 {
+		pinmux = <RZA1_PINMUX(11, 14, 2)>,	/* MOSI1 */
+			 <RZA1_PINMUX(11, 15, 2)>,	/* MISO1 */
+			 <RZA1_PINMUX(11, 12, 2)>;	/* RSPCK1 */
+	};
+};
+
+&io_expander2 {
+	/* Select DV for RSPI1 on TFT LCD Panel Connector */
+	lcd_dv_mux {
+		gpio-hog;
+		gpios = <0 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "TFT Panel / DV Input Mux";
+	};
+};
+
+&spi1 {
+	pinctrl-0 = <&rspi1_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	cs-gpios = <&io_expander2 2 GPIO_ACTIVE_LOW>;
+	status = "okay";
+
+	spidev@0 {
+		compatible = "spidev";
+		reg = <0>;
+
+		spi-max-frequency = <33333333>;
+	};
+};
