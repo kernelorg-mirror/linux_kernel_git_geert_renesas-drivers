@@ -81,7 +81,8 @@
 
 	renesas,no-ether-link;
 	phy-handle = <&phy0>;
-	phy-mode = "rgmii-id";
+	renesas,rxc-delay-ps = <1800>;
+	renesas,txc-delay-ps = <2000>;
 	status = "okay";
 
 	phy0: ethernet-phy@0 {
