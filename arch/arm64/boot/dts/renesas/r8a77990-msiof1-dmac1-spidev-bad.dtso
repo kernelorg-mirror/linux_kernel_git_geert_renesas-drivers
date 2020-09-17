@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for MSIOF1 with SYS-DMAC1 and spidev on R-Car E3
+//
+// Note: BAD version, as MSIOF1 can only use SYS-DMAC0!
+//
+// Copyright (C) 2020 Glider bv
+//
+
+/dts-v1/;
+/plugin/;
+
+&msiof1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	dmas = <&dmac1 0x43>, <&dmac1 0x42>;
+	dma-names = "tx", "rx";
+	status = "okay";
+
+	cn41@0 {
+		compatible = "renesas,r8a77990-msiof0";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+	};
+};
