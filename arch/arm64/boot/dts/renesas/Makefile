@@ -65,3 +65,4 @@ dtb-$(CONFIG_ARCH_R8A779A0) += r8a779a0-falcon.dtb
 
 dtb-$(CONFIG_ARCH_R8A77951) += r8a779m1-salvator-xs.dtb
 dtb-$(CONFIG_ARCH_R8A77951) += r8a779m1-ulcb.dtb
+dtb-$(CONFIG_ARCH_R8A77951) += r8a779m1-ulcb-kf.dtb
