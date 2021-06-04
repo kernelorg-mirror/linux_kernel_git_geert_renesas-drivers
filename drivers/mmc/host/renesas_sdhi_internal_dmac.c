@@ -400,6 +400,8 @@ static const struct soc_device_attribute soc_dma_quirks[] = {
 	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
 	{ .soc_id = "r8a7796", .revision = "ES1.0",
 	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
+	{ .soc_id = "r8a779m3", .revision = "ES1.0",		// FIXME Prototyping R-Car M3e-2G on R-Car M3-W ES1.0
+	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
 	{ /* sentinel */ }
 };
 

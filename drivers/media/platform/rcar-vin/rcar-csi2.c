@@ -1193,6 +1193,10 @@ static const struct soc_device_attribute r8a7795[] = {
 		.soc_id = "r8a7795", .revision = "ES2.*",
 		.data = &rcar_csi2_info_r8a7795es2,
 	},
+	{
+		.soc_id = "r8a779m1", .revision = "ES2.*",	// FIXME Prototyping R-Car H3e-2G on R-Car H3 ES2.0
+		.data = &rcar_csi2_info_r8a7795es2,
+	},
 	{ /* sentinel */ },
 };
 

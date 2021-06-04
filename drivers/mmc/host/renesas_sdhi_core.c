@@ -943,7 +943,10 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
 	{ .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
 	{ .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
 	{ .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
+	{ .soc_id = "r8a779m1", .revision = "ES2.0", .data = &sdhi_quirks_4tap },		// FIXME Prototyping R-Car H3e-2G on R-Car H3 ES2.0
 	{ .soc_id = "r8a779m1", .data = &sdhi_quirks_bad_taps2367 },
+	{ .soc_id = "r8a779m3", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },	// FIXME Prototyping R-Car M3e-2G on R-Car M3-W ES1.0
+	{ .soc_id = "r8a779m3", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },	// FIXME Prototyping R-Car M3e-2G on R-Car M3-W ES1.3
 	{ .soc_id = "r8a779m3", .data = &sdhi_quirks_bad_taps1357 },
 	{ /* Sentinel. */ },
 };

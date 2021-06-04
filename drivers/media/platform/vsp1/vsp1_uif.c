@@ -234,6 +234,7 @@ static const struct vsp1_entity_operations uif_entity_ops = {
 
 static const struct soc_device_attribute vsp1_r8a7796[] = {
 	{ .soc_id = "r8a7796" },
+	{ .soc_id = "r8a779m3", .revision = "ES1.*" },	// FIXME Prototyping R-Car M3e-2G on R-Car M3-W
 	{ /* sentinel */ }
 };
 

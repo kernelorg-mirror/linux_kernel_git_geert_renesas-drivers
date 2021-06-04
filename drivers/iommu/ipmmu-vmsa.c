@@ -736,6 +736,7 @@ static int ipmmu_init_platform_device(struct device *dev,
 
 static const struct soc_device_attribute soc_needs_opt_in[] = {
 	{ .family = "R-Car Gen3", },
+	{ .family = "R-Car Gen3e", },	// FIXME Prototyping R-Car Gen3e on R-Car Gen3
 	{ .family = "RZ/G2", },
 	{ /* sentinel */ }
 };
@@ -744,7 +745,9 @@ static const struct soc_device_attribute soc_denylist[] = {
 	{ .soc_id = "r8a774a1", },
 	{ .soc_id = "r8a7795", .revision = "ES1.*" },
 	{ .soc_id = "r8a7795", .revision = "ES2.*" },
+	{ .soc_id = "r8a779m1", .revision = "ES2.*" },	// FIXME Prototyping R-Car H3e-2G on R-Car H3 ES2.0
 	{ .soc_id = "r8a7796", },
+	{ .soc_id = "r8a779m3", .revision = "ES1.*"},	// FIXME Prototyping R-Car M3e-2G on R-Car M3-W
 	{ /* sentinel */ }
 };
 
