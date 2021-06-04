@@ -571,17 +571,21 @@ static const struct of_device_id sh_pfc_of_table[] = {
 		.data = &r8a7794_pinmux_info,
 	},
 #endif
-/* Both r8a7795 entries must be present to make sanity checks work */
-#ifdef CONFIG_PINCTRL_PFC_R8A77950
-	{
-		.compatible = "renesas,pfc-r8a7795",
-		.data = &r8a77950_pinmux_info,
-	},
-#endif
+/*
+ * Both r8a7795 entries must be present to make sanity checks work, but only
+ * the first entry is actually used, for R-Car H3e.
+ * R-Car H3 ES1.x and ES2.0+ are matched using soc_device_match() instead.
+ */
 #ifdef CONFIG_PINCTRL_PFC_R8A77951
 	{
 		.compatible = "renesas,pfc-r8a7795",
 		.data = &r8a77951_pinmux_info,
+	},
+#endif
+#ifdef CONFIG_PINCTRL_PFC_R8A77950
+	{
+		.compatible = "renesas,pfc-r8a7795",
+		.data = &r8a77950_pinmux_info,
 	},
 #endif
 #ifdef CONFIG_PINCTRL_PFC_R8A77960
