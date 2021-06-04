@@ -196,6 +196,9 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
 	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
 	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
 	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
+	{ .soc_id = "r8a779m[018]", .revision = "ES2.0", .data = &sdhi_quirks_4tap },		// FIXME Prototyping R-Car H3(N)e(-2G) on R-Car H3 ES2.0
+	{ .soc_id = "r8a779m[23]", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W ES1.[012]
+	{ .soc_id = "r8a779m[23]", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },	// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W ES1.3
 	{ /* Sentinel. */ },
 };
 
@@ -509,6 +512,8 @@ static const struct soc_device_attribute soc_dma_quirks[] = {
 	{ .soc_id = "r8a7795", .revision = "ES1.*",
 	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
 	{ .soc_id = "r8a7796", .revision = "ES1.0",
+	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
+	{ .soc_id = "r8a779m[23]", .revision = "ES1.0",		// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W ES1.0
 	  .data = (void *)BIT(SDHI_INTERNAL_DMAC_ONE_RX_ONLY) },
 	{ /* sentinel */ }
 };

@@ -743,7 +743,9 @@ static const struct soc_device_attribute soc_denylist[] = {
 	{ .soc_id = "r8a774a1", },
 	{ .soc_id = "r8a7795", .revision = "ES1.*" },
 	{ .soc_id = "r8a7795", .revision = "ES2.*" },
+	{ .soc_id = "r8a779m[018]", .revision = "ES2.*" },	// FIXME Prototyping R-Car H3(N)e(-2G) on R-Car H3 ES2.0
 	{ .soc_id = "r8a7796", },
+	{ .soc_id = "r8a779m[23]", .revision = "ES1.*"},	// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W
 	{ /* sentinel */ }
 };
 

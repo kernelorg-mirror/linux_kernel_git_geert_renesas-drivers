@@ -421,6 +421,18 @@ static const struct soc_device_attribute cpg_quirks_match[] __initconst = {
 		.soc_id = "r8a7796", .revision = "ES1.1",
 		.data = (void *)SD_SKIP_FIRST,
 	},
+	{
+		.soc_id = "r8a779m[018]", .revision = "ES2.0",	// FIXME Prototyping R-Car H3(N)e(-2G) on R-Car H3 ES2.0
+		.data = (void *)SD_SKIP_FIRST,
+	},
+	{
+		.soc_id = "r8a779m[23]", .revision = "ES1.0",	// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W ES1.0
+		.data = (void *)(RCKCR_CKSEL | SD_SKIP_FIRST),
+	},
+	{
+		.soc_id = "r8a779m[23]", .revision = "ES1.1",	// FIXME Prototyping R-Car M3e(-2G) on R-Car M3-W ES1.1
+		.data = (void *)SD_SKIP_FIRST,
+	},
 	{ /* sentinel */ }
 };
 

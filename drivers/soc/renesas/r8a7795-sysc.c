@@ -64,6 +64,9 @@ static const struct soc_device_attribute r8a7795_quirks_match[] __initconst = {
 	}, {
 		.soc_id = "r8a7795", .revision = "ES2.*",
 		.data = (void *)(NO_EXTMASK),
+	}, {
+		.soc_id = "r8a779m[018]", .revision = "ES2.*",	// FIXME Prototyping R-Car H3(N)e(-2G) on R-Car H3 ES2.0
+		.data = (void *)(NO_EXTMASK),
 	},
 	{ /* sentinel */ }
 };

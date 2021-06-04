@@ -31,6 +31,7 @@ static struct rcar_sysc_area r8a77990_areas[] __initdata = {
 /* Fixups for R-Car E3 ES1.0 revision */
 static const struct soc_device_attribute r8a77990[] __initconst = {
 	{ .soc_id = "r8a77990", .revision = "ES1.0" },
+	{ .soc_id = "r8a779m6", .revision = "ES1.0" },	// FIXME Prototyping R-Car E3e on R-Car E3 ES1.0
 	{ /* sentinel */ }
 };
 
