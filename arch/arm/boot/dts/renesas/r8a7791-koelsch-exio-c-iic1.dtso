@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for IIC1/I2C8 on r8a7791/Koelsch EXIO Connector C
+//
+// Copyright (C) 2021 Glider bv
+//
+// Pinout:
+//   - SCL = EXIO C pin 37
+//   - SDA = EXIO C pin 39
+//   - GND = EXIO C pin 1/2/23/24
+//
+// Notes:
+//   - As these pins are shared with SDHI2, the latter is disabled first.
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	i2c8_pins: i2c8 {
+		groups = "i2c8_c";
+		function = "i2c8";
+	};
+};
+
+&sdhi2 {
+	status = "disabled";
+};
+
+&i2c8 {
+	pinctrl-0 = <&i2c8_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
