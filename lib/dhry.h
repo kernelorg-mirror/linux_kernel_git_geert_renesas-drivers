@@ -130,17 +130,6 @@
  ***************************************************************************
  *
  * Defines:     The following "Defines" are possible:
- *              -DREG=register          (default: Not defined)
- *                      As an approximation to what an average C programmer
- *                      might do, the "register" storage class is applied
- *                      (if enabled by -DREG=register)
- *                      - for local variables, if they are used (dynamically)
- *                        five or more times
- *                      - for parameters if they are used (dynamically)
- *                        six or more times
- *                      Note that an optimal "register" strategy is
- *                      compiler-dependent, and that "register" declarations
- *                      do not necessarily lead to faster execution.
  *              -DTIMES                 (default)
  *              -DTIME
  *                      The "times" function of UNIX (returning process times)
