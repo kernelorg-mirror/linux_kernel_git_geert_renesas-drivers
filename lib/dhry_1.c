@@ -51,7 +51,7 @@ u64             Dhrystones_Per_Second;
 /* end of variables for time measurement */
 
 
-main ()
+dhry (int n)
 /*****/
 
   /* main program, corresponds to procedures        */
@@ -89,13 +89,8 @@ main ()
   pr_info ("\n");
   pr_info ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
   pr_info ("\n");
-  pr_info ("Please give the number of runs through the benchmark: ");
-  {
-    int n;
-    scanf ("%d", &n);
-    Number_Of_Runs = n;
-  }
-  pr_info ("\n");
+
+  Number_Of_Runs = n;
 
   pr_info ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
 
