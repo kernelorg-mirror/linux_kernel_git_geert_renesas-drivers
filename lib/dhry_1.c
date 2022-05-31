@@ -32,7 +32,7 @@ char            Ch_1_Glob,
 int             Arr_1_Glob [50];
 int             Arr_2_Glob [50] [50];
 
-Enumeration     Func_1 ();
+Enumeration     Func_1 (Capital_Letter Ch_1_Par_Val, Capital_Letter Ch_2_Par_Val);
   /* forward declaration necessary since Enumeration may not simply be int */
 
 /* variables for time measurement: */
@@ -48,7 +48,7 @@ u64             Dhrystones_Per_Second;
 /* end of variables for time measurement */
 
 
-dhry (int n)
+void dhry (int n)
 /*****/
 
   /* main program, corresponds to procedures        */
@@ -224,10 +224,8 @@ dhry (int n)
 }
 
 
-Proc_1 (Ptr_Val_Par)
+void Proc_1 (Rec_Pointer Ptr_Val_Par)
 /******************/
-
-Rec_Pointer Ptr_Val_Par;
     /* executed once */
 {
   Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;
@@ -258,12 +256,10 @@ Rec_Pointer Ptr_Val_Par;
 } /* Proc_1 */
 
 
-Proc_2 (Int_Par_Ref)
+void Proc_2 (One_Fifty *Int_Par_Ref)
 /******************/
     /* executed once */
     /* *Int_Par_Ref == 1, becomes 4 */
-
-One_Fifty   *Int_Par_Ref;
 {
   One_Fifty  Int_Loc;
   Enumeration   Enum_Loc;
@@ -281,13 +277,10 @@ One_Fifty   *Int_Par_Ref;
 } /* Proc_2 */
 
 
-Proc_3 (Ptr_Ref_Par)
+void Proc_3 (Rec_Pointer *Ptr_Ref_Par)
 /******************/
     /* executed once */
     /* Ptr_Ref_Par becomes Ptr_Glob */
-
-Rec_Pointer *Ptr_Ref_Par;
-
 {
   if (Ptr_Glob)
     /* then, executed */
@@ -296,7 +289,7 @@ Rec_Pointer *Ptr_Ref_Par;
 } /* Proc_3 */
 
 
-Proc_4 () /* without parameters */
+void Proc_4 (void)
 /*******/
     /* executed once */
 {
@@ -308,7 +301,7 @@ Proc_4 () /* without parameters */
 } /* Proc_4 */
 
 
-Proc_5 () /* without parameters */
+void Proc_5 (void)
 /*******/
     /* executed once */
 {
