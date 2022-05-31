@@ -292,7 +292,7 @@ REG Rec_Pointer Ptr_Val_Par;
   /* Local variable, initialized with Ptr_Val_Par->Ptr_Comp,    */
   /* corresponds to "rename" in Ada, "with" in Pascal           */
 
-  structassign (*Ptr_Val_Par->Ptr_Comp, *Ptr_Glob);
+  *Ptr_Val_Par->Ptr_Comp = *Ptr_Glob;
   Ptr_Val_Par->variant.var_1.Int_Comp = 5;
   Next_Record->variant.var_1.Int_Comp
         = Ptr_Val_Par->variant.var_1.Int_Comp;
@@ -311,7 +311,7 @@ REG Rec_Pointer Ptr_Val_Par;
            &Next_Record->variant.var_1.Int_Comp);
   }
   else /* not executed */
-    structassign (*Ptr_Val_Par, *Ptr_Val_Par->Ptr_Comp);
+    *Ptr_Val_Par = *Ptr_Val_Par->Ptr_Comp;
 } /* Proc_1 */
 
 
@@ -372,18 +372,3 @@ Proc_5 () /* without parameters */
   Ch_1_Glob = 'A';
   Bool_Glob = false;
 } /* Proc_5 */
-
-
-        /* Procedure for the assignment of structures,          */
-        /* if the C compiler doesn't support this feature       */
-#ifdef  NOSTRUCTASSIGN
-memcpy (d, s, l)
-register char   *d;
-register char   *s;
-register int    l;
-{
-        while (l--) *d++ = *s++;
-}
-#endif
-
-

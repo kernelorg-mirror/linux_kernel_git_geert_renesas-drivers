@@ -141,9 +141,6 @@
  *                      Note that an optimal "register" strategy is
  *                      compiler-dependent, and that "register" declarations
  *                      do not necessarily lead to faster execution.
- *              -DNOSTRUCTASSIGN        (default: Not defined)
- *                      Define if the C compiler does not support
- *                      assignment of structures.
  *              -DNOENUMS               (default: Not defined)
  *                      Define if the C compiler does not support
  *                      enumeration types.
@@ -361,12 +358,6 @@
 
 #define Mic_secs_Per_Second     1000000.0
                 /* Berkeley UNIX C returns process times in seconds/HZ */
-
-#ifdef  NOSTRUCTASSIGN
-#define structassign(d, s)      memcpy(&(d), &(s), sizeof(d))
-#else
-#define structassign(d, s)      d = s
-#endif
 
 #ifdef  NOENUM
 #define Ident_1 0
