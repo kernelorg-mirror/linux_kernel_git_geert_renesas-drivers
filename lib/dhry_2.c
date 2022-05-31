@@ -19,9 +19,6 @@
 
 #include <linux/string.h>
 
-extern  int     Int_Glob;
-extern  char    Ch_1_Glob;
-
 
 void Proc_6 (Enumeration  Enum_Val_Par, Enumeration *Enum_Ref_Par)
 /*********************************/
