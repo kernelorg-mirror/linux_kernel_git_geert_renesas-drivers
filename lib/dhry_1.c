@@ -23,29 +23,30 @@
 
 /* Global Variables: */
 
-Rec_Pointer     Ptr_Glob,
-                Next_Ptr_Glob;
-int             Int_Glob;
-Boolean         Bool_Glob;
-char            Ch_1_Glob,
-                Ch_2_Glob;
-int             Arr_1_Glob [50];
-int             Arr_2_Glob [50] [50];
+int                    Int_Glob;
+char                   Ch_1_Glob;
+
+static Rec_Pointer     Ptr_Glob,
+                       Next_Ptr_Glob;
+static Boolean         Bool_Glob;
+static char            Ch_2_Glob;
+static int             Arr_1_Glob [50];
+static int             Arr_2_Glob [50] [50];
 
 /* variables for time measurement: */
 
 #define Too_Small_Time (2 * MSEC_PER_SEC)
                 /* Measurements should last at least 2 seconds */
 
-ktime_t         Begin_Time,
-                End_Time;
-u32             User_Time;
-u64             Dhrystones_Per_Second;
+static ktime_t         Begin_Time,
+                       End_Time;
+static u32             User_Time;
+static u64             Dhrystones_Per_Second;
 
 /* end of variables for time measurement */
 
 
-void Proc_3 (Rec_Pointer *Ptr_Ref_Par)
+static void Proc_3 (Rec_Pointer *Ptr_Ref_Par)
 /******************/
     /* executed once */
     /* Ptr_Ref_Par becomes Ptr_Glob */
@@ -57,7 +58,7 @@ void Proc_3 (Rec_Pointer *Ptr_Ref_Par)
 } /* Proc_3 */
 
 
-void Proc_1 (Rec_Pointer Ptr_Val_Par)
+static void Proc_1 (Rec_Pointer Ptr_Val_Par)
 /******************/
     /* executed once */
 {
@@ -89,7 +90,7 @@ void Proc_1 (Rec_Pointer Ptr_Val_Par)
 } /* Proc_1 */
 
 
-void Proc_2 (One_Fifty *Int_Par_Ref)
+static void Proc_2 (One_Fifty *Int_Par_Ref)
 /******************/
     /* executed once */
     /* *Int_Par_Ref == 1, becomes 4 */
@@ -110,7 +111,7 @@ void Proc_2 (One_Fifty *Int_Par_Ref)
 } /* Proc_2 */
 
 
-void Proc_4 (void)
+static void Proc_4 (void)
 /*******/
     /* executed once */
 {
@@ -122,7 +123,7 @@ void Proc_4 (void)
 } /* Proc_4 */
 
 
-void Proc_5 (void)
+static void Proc_5 (void)
 /*******/
     /* executed once */
 {
