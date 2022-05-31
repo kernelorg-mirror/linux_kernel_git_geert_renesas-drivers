@@ -313,8 +313,6 @@ typedef       enum    {Ident_1, Ident_2, Ident_3, Ident_4, Ident_5}
 #include <stdio.h>
                 /* for strcpy, strcmp */
 
-#define Null 0
-                /* Value of a Null pointer */
 #define true  1
 #define false 0
 
