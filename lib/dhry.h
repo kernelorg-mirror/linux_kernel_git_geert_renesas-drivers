@@ -310,9 +310,6 @@ typedef       enum    {Ident_1, Ident_2, Ident_3, Ident_4, Ident_5}
 
 /* General definitions: */
 
-#include <stdio.h>
-                /* for strcpy, strcmp */
-
 typedef int     One_Thirty;
 typedef int     One_Fifty;
 typedef char    Capital_Letter;

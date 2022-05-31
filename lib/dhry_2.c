@@ -17,6 +17,8 @@
 
 #include "dhry.h"
 
+#include <linux/string.h>
+
 extern  int     Int_Glob;
 extern  char    Ch_1_Glob;
 
