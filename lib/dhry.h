@@ -129,30 +129,6 @@
  *
  ***************************************************************************
  *
- * Defines:     The following "Defines" are possible:
- *              -DTIMES                 (default)
- *              -DTIME
- *                      The "times" function of UNIX (returning process times)
- *                      or the "time" function (returning wallclock time)
- *                      is used for measurement.
- *                      For single user machines, "time ()" is adequate. For
- *                      multi-user machines where you cannot get single-user
- *                      access, use the "times ()" function. If you have
- *                      neither, use a stopwatch in the dead of night.
- *                      "printf"s are provided marking the points "Start Timer"
- *                      and "Stop Timer". DO NOT use the UNIX "time(1)"
- *                      command, as this will measure the total time to
- *                      run this program, which will (erroneously) include
- *                      the time to allocate storage (malloc) and to perform
- *                      the initialization.
- *              -DHZ=nnn
- *                      In Berkeley UNIX, the function "times" returns process
- *                      time in 1/HZ seconds, with HZ = 60 for most systems.
- *                      CHECK YOUR SYSTEM DESCRIPTION BEFORE YOU JUST APPLY
- *                      A VALUE.
- *
- ***************************************************************************
- *
  *  Compilation model and measurement (IMPORTANT):
  *
  *  This C version of Dhrystone consists of three files:
@@ -327,23 +303,6 @@
  *
  ***************************************************************************
  */
-
-/* Compiler and system dependent definitions: */
-
-#ifndef TIME
-#define TIMES
-#endif
-                /* Use times(2) time function unless    */
-                /* explicitly defined otherwise         */
-
-#ifdef TIMES
-#include <sys/types.h>
-#include <sys/times.h>
-                /* for "times" */
-#endif
-
-#define Mic_secs_Per_Second     1000000.0
-                /* Berkeley UNIX C returns process times in seconds/HZ */
 
 typedef       enum    {Ident_1, Ident_2, Ident_3, Ident_4, Ident_5}
                 Enumeration;

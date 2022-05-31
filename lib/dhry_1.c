@@ -16,6 +16,9 @@
  */
 
 #include "dhry.h"
+
+#include <linux/ktime.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -37,25 +40,13 @@ Enumeration     Func_1 ();
 
 /* variables for time measurement: */
 
-#ifdef TIMES
-struct tms      time_info;
-// extern  int     times ();
-                /* see library function "times" */
-#define Too_Small_Time 120
-                /* Measurements should last at least about 2 seconds */
-#endif
-#ifdef TIME
-extern long     time();
-                /* see library function "time"  */
-#define Too_Small_Time 2
+#define Too_Small_Time (2 * MSEC_PER_SEC)
                 /* Measurements should last at least 2 seconds */
-#endif
 
-long            Begin_Time,
-                End_Time,
-                User_Time;
-float           Microseconds,
-                Dhrystones_Per_Second;
+ktime_t         Begin_Time,
+                End_Time;
+u32             User_Time;
+u64             Dhrystones_Per_Second;
 
 /* end of variables for time measurement */
 
@@ -112,13 +103,7 @@ main ()
   /* Start timer */
   /***************/
 
-#ifdef TIMES
-  times (&time_info);
-  Begin_Time = (long) time_info.tms_utime;
-#endif
-#ifdef TIME
-  Begin_Time = time ( (long *) 0);
-#endif
+  Begin_Time = ktime_get();
 
   for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index)
   {
@@ -170,13 +155,7 @@ main ()
   /* Stop timer */
   /**************/
 
-#ifdef TIMES
-  times (&time_info);
-  End_Time = (long) time_info.tms_utime;
-#endif
-#ifdef TIME
-  End_Time = time ( (long *) 0);
-#endif
+  End_Time = ktime_get();
 
   printf ("Execution ends\n");
   printf ("\n");
@@ -231,7 +210,7 @@ main ()
   printf ("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
   printf ("\n");
 
-  User_Time = End_Time - Begin_Time;
+  User_Time = ktime_to_ms(ktime_sub(End_Time, Begin_Time));
 
   if (User_Time < Too_Small_Time)
   {
@@ -241,21 +220,10 @@ main ()
   }
   else
   {
-#ifdef TIME
-    Microseconds = (float) User_Time * Mic_secs_Per_Second
-                        / (float) Number_Of_Runs;
-    Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
-#else
-    int scale = sysconf(_SC_CLK_TCK);
-    Microseconds = (float) User_Time * Mic_secs_Per_Second
-                        / ((float) scale * ((float) Number_Of_Runs));
-    Dhrystones_Per_Second = ((float) scale * (float) Number_Of_Runs)
-                        / (float) User_Time;
-#endif
-    printf ("Microseconds for one run through Dhrystone: ");
-    printf ("%6.1f \n", Microseconds);
+    Dhrystones_Per_Second = div_u64((u64)MSEC_PER_SEC * Number_Of_Runs,
+                                    User_Time);
     printf ("Dhrystones per Second:                      ");
-    printf ("%6.1f \n", Dhrystones_Per_Second);
+    printf ("%llu\n", Dhrystones_Per_Second);
     printf ("\n");
   }
 
