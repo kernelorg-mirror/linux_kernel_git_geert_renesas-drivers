@@ -141,9 +141,6 @@
  *                      Note that an optimal "register" strategy is
  *                      compiler-dependent, and that "register" declarations
  *                      do not necessarily lead to faster execution.
- *              -DNOENUMS               (default: Not defined)
- *                      Define if the C compiler does not support
- *                      enumeration types.
  *              -DTIMES                 (default)
  *              -DTIME
  *                      The "times" function of UNIX (returning process times)
@@ -359,17 +356,8 @@
 #define Mic_secs_Per_Second     1000000.0
                 /* Berkeley UNIX C returns process times in seconds/HZ */
 
-#ifdef  NOENUM
-#define Ident_1 0
-#define Ident_2 1
-#define Ident_3 2
-#define Ident_4 3
-#define Ident_5 4
-  typedef int   Enumeration;
-#else
-  typedef       enum    {Ident_1, Ident_2, Ident_3, Ident_4, Ident_5}
+typedef       enum    {Ident_1, Ident_2, Ident_3, Ident_4, Ident_5}
                 Enumeration;
-#endif
         /* for boolean and enumeration types in Ada, Pascal */
 
 /* General definitions: */
