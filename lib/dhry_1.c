@@ -86,18 +86,18 @@ main ()
         /* Warning: With 16-Bit processors and Number_Of_Runs > 32000,  */
         /* overflow may occur for this array element.                   */
 
-  printf ("\n");
-  printf ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
-  printf ("\n");
-  printf ("Please give the number of runs through the benchmark: ");
+  pr_info ("\n");
+  pr_info ("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
+  pr_info ("\n");
+  pr_info ("Please give the number of runs through the benchmark: ");
   {
     int n;
     scanf ("%d", &n);
     Number_Of_Runs = n;
   }
-  printf ("\n");
+  pr_info ("\n");
 
-  printf ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
+  pr_info ("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
 
   /***************/
   /* Start timer */
@@ -157,74 +157,74 @@ main ()
 
   End_Time = ktime_get();
 
-  printf ("Execution ends\n");
-  printf ("\n");
-  printf ("Final values of the variables used in the benchmark:\n");
-  printf ("\n");
-  printf ("Int_Glob:            %d\n", Int_Glob);
-  printf ("        should be:   %d\n", 5);
-  printf ("Bool_Glob:           %d\n", Bool_Glob);
-  printf ("        should be:   %d\n", 1);
-  printf ("Ch_1_Glob:           %c\n", Ch_1_Glob);
-  printf ("        should be:   %c\n", 'A');
-  printf ("Ch_2_Glob:           %c\n", Ch_2_Glob);
-  printf ("        should be:   %c\n", 'B');
-  printf ("Arr_1_Glob[8]:       %d\n", Arr_1_Glob[8]);
-  printf ("        should be:   %d\n", 7);
-  printf ("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
-  printf ("        should be:   Number_Of_Runs + 10\n");
-  printf ("Ptr_Glob->\n");
-  printf ("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
-  printf ("        should be:   (implementation-dependent)\n");
-  printf ("  Discr:             %d\n", Ptr_Glob->Discr);
-  printf ("        should be:   %d\n", 0);
-  printf ("  Enum_Comp:         %d\n", Ptr_Glob->variant.var_1.Enum_Comp);
-  printf ("        should be:   %d\n", 2);
-  printf ("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
-  printf ("        should be:   %d\n", 17);
-  printf ("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
-  printf ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-  printf ("Next_Ptr_Glob->\n");
-  printf ("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
-  printf ("        should be:   (implementation-dependent), same as above\n");
-  printf ("  Discr:             %d\n", Next_Ptr_Glob->Discr);
-  printf ("        should be:   %d\n", 0);
-  printf ("  Enum_Comp:         %d\n", Next_Ptr_Glob->variant.var_1.Enum_Comp);
-  printf ("        should be:   %d\n", 1);
-  printf ("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
-  printf ("        should be:   %d\n", 18);
-  printf ("  Str_Comp:          %s\n",
+  pr_info ("Execution ends\n");
+  pr_info ("\n");
+  pr_info ("Final values of the variables used in the benchmark:\n");
+  pr_info ("\n");
+  pr_info ("Int_Glob:            %d\n", Int_Glob);
+  pr_info ("        should be:   %d\n", 5);
+  pr_info ("Bool_Glob:           %d\n", Bool_Glob);
+  pr_info ("        should be:   %d\n", 1);
+  pr_info ("Ch_1_Glob:           %c\n", Ch_1_Glob);
+  pr_info ("        should be:   %c\n", 'A');
+  pr_info ("Ch_2_Glob:           %c\n", Ch_2_Glob);
+  pr_info ("        should be:   %c\n", 'B');
+  pr_info ("Arr_1_Glob[8]:       %d\n", Arr_1_Glob[8]);
+  pr_info ("        should be:   %d\n", 7);
+  pr_info ("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
+  pr_info ("        should be:   Number_Of_Runs + 10\n");
+  pr_info ("Ptr_Glob->\n");
+  pr_info ("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
+  pr_info ("        should be:   (implementation-dependent)\n");
+  pr_info ("  Discr:             %d\n", Ptr_Glob->Discr);
+  pr_info ("        should be:   %d\n", 0);
+  pr_info ("  Enum_Comp:         %d\n", Ptr_Glob->variant.var_1.Enum_Comp);
+  pr_info ("        should be:   %d\n", 2);
+  pr_info ("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
+  pr_info ("        should be:   %d\n", 17);
+  pr_info ("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
+  pr_info ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
+  pr_info ("Next_Ptr_Glob->\n");
+  pr_info ("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
+  pr_info ("        should be:   (implementation-dependent), same as above\n");
+  pr_info ("  Discr:             %d\n", Next_Ptr_Glob->Discr);
+  pr_info ("        should be:   %d\n", 0);
+  pr_info ("  Enum_Comp:         %d\n", Next_Ptr_Glob->variant.var_1.Enum_Comp);
+  pr_info ("        should be:   %d\n", 1);
+  pr_info ("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
+  pr_info ("        should be:   %d\n", 18);
+  pr_info ("  Str_Comp:          %s\n",
                                 Next_Ptr_Glob->variant.var_1.Str_Comp);
-  printf ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-  printf ("Int_1_Loc:           %d\n", Int_1_Loc);
-  printf ("        should be:   %d\n", 5);
-  printf ("Int_2_Loc:           %d\n", Int_2_Loc);
-  printf ("        should be:   %d\n", 13);
-  printf ("Int_3_Loc:           %d\n", Int_3_Loc);
-  printf ("        should be:   %d\n", 7);
-  printf ("Enum_Loc:            %d\n", Enum_Loc);
-  printf ("        should be:   %d\n", 1);
-  printf ("Str_1_Loc:           %s\n", Str_1_Loc);
-  printf ("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
-  printf ("Str_2_Loc:           %s\n", Str_2_Loc);
-  printf ("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
-  printf ("\n");
+  pr_info ("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
+  pr_info ("Int_1_Loc:           %d\n", Int_1_Loc);
+  pr_info ("        should be:   %d\n", 5);
+  pr_info ("Int_2_Loc:           %d\n", Int_2_Loc);
+  pr_info ("        should be:   %d\n", 13);
+  pr_info ("Int_3_Loc:           %d\n", Int_3_Loc);
+  pr_info ("        should be:   %d\n", 7);
+  pr_info ("Enum_Loc:            %d\n", Enum_Loc);
+  pr_info ("        should be:   %d\n", 1);
+  pr_info ("Str_1_Loc:           %s\n", Str_1_Loc);
+  pr_info ("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
+  pr_info ("Str_2_Loc:           %s\n", Str_2_Loc);
+  pr_info ("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
+  pr_info ("\n");
 
   User_Time = ktime_to_ms(ktime_sub(End_Time, Begin_Time));
 
   if (User_Time < Too_Small_Time)
   {
-    printf ("Measured time too small to obtain meaningful results\n");
-    printf ("Please increase number of runs\n");
-    printf ("\n");
+    pr_info ("Measured time too small to obtain meaningful results\n");
+    pr_info ("Please increase number of runs\n");
+    pr_info ("\n");
   }
   else
   {
     Dhrystones_Per_Second = div_u64((u64)MSEC_PER_SEC * Number_Of_Runs,
                                     User_Time);
-    printf ("Dhrystones per Second:                      ");
-    printf ("%llu\n", Dhrystones_Per_Second);
-    printf ("\n");
+    pr_info ("Dhrystones per Second:                      ");
+    pr_info ("%llu\n", Dhrystones_Per_Second);
+    pr_info ("\n");
   }
 
   kfree(Ptr_Glob);
