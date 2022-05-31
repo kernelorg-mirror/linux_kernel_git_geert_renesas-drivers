@@ -3,9 +3,9 @@
  *
  *                   "DHRYSTONE" Benchmark Program
  *                   -----------------------------
- *                                                                            
+ *
  *  Version:    C, Version 2.1
- *                                                                            
+ *
  *  File:       dhry_1.c (part 2 of 3)
  *
  *  Date:       May 25, 1988
@@ -94,7 +94,7 @@ main ()
   Ptr_Glob->Discr                       = Ident_1;
   Ptr_Glob->variant.var_1.Enum_Comp     = Ident_3;
   Ptr_Glob->variant.var_1.Int_Comp      = 40;
-  strcpy (Ptr_Glob->variant.var_1.Str_Comp, 
+  strcpy (Ptr_Glob->variant.var_1.Str_Comp,
           "DHRYSTONE PROGRAM, SOME STRING");
   strcpy (Str_1_Loc, "DHRYSTONE PROGRAM, 1'ST STRING");
 
@@ -130,7 +130,7 @@ main ()
   /***************/
   /* Start timer */
   /***************/
- 
+
 #ifdef TIMES
   times (&time_info);
   Begin_Time = (long) time_info.tms_utime;
@@ -188,7 +188,7 @@ main ()
   /**************/
   /* Stop timer */
   /**************/
-  
+
 #ifdef TIMES
   times (&time_info);
   End_Time = (long) time_info.tms_utime;
@@ -261,12 +261,12 @@ main ()
   else
   {
 #ifdef TIME
-    Microseconds = (float) User_Time * Mic_secs_Per_Second 
+    Microseconds = (float) User_Time * Mic_secs_Per_Second
                         / (float) Number_Of_Runs;
     Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
 #else
     int scale = sysconf(_SC_CLK_TCK);
-    Microseconds = (float) User_Time * Mic_secs_Per_Second 
+    Microseconds = (float) User_Time * Mic_secs_Per_Second
                         / ((float) scale * ((float) Number_Of_Runs));
     Dhrystones_Per_Second = ((float) scale * (float) Number_Of_Runs)
                         / (float) User_Time;
@@ -277,7 +277,7 @@ main ()
     printf ("%6.1f \n", Dhrystones_Per_Second);
     printf ("\n");
   }
-  
+
 }
 
 
@@ -287,27 +287,27 @@ Proc_1 (Ptr_Val_Par)
 REG Rec_Pointer Ptr_Val_Par;
     /* executed once */
 {
-  REG Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;  
+  REG Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;
                                         /* == Ptr_Glob_Next */
   /* Local variable, initialized with Ptr_Val_Par->Ptr_Comp,    */
   /* corresponds to "rename" in Ada, "with" in Pascal           */
-  
-  structassign (*Ptr_Val_Par->Ptr_Comp, *Ptr_Glob); 
+
+  structassign (*Ptr_Val_Par->Ptr_Comp, *Ptr_Glob);
   Ptr_Val_Par->variant.var_1.Int_Comp = 5;
-  Next_Record->variant.var_1.Int_Comp 
+  Next_Record->variant.var_1.Int_Comp
         = Ptr_Val_Par->variant.var_1.Int_Comp;
   Next_Record->Ptr_Comp = Ptr_Val_Par->Ptr_Comp;
   Proc_3 (&Next_Record->Ptr_Comp);
-    /* Ptr_Val_Par->Ptr_Comp->Ptr_Comp 
+    /* Ptr_Val_Par->Ptr_Comp->Ptr_Comp
                         == Ptr_Glob->Ptr_Comp */
   if (Next_Record->Discr == Ident_1)
     /* then, executed */
   {
     Next_Record->variant.var_1.Int_Comp = 6;
-    Proc_6 (Ptr_Val_Par->variant.var_1.Enum_Comp, 
+    Proc_6 (Ptr_Val_Par->variant.var_1.Enum_Comp,
            &Next_Record->variant.var_1.Enum_Comp);
     Next_Record->Ptr_Comp = Ptr_Glob->Ptr_Comp;
-    Proc_7 (Next_Record->variant.var_1.Int_Comp, 10, 
+    Proc_7 (Next_Record->variant.var_1.Int_Comp, 10,
            &Next_Record->variant.var_1.Int_Comp);
   }
   else /* not executed */
@@ -322,7 +322,7 @@ Proc_2 (Int_Par_Ref)
 
 One_Fifty   *Int_Par_Ref;
 {
-  One_Fifty  Int_Loc;  
+  One_Fifty  Int_Loc;
   Enumeration   Enum_Loc;
 
   Int_Loc = *Int_Par_Ref + 10;
