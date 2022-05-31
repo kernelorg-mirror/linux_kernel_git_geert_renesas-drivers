@@ -18,6 +18,7 @@
 #include "dhry.h"
 
 #include <linux/ktime.h>
+#include <linux/slab.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -34,7 +35,6 @@ char            Ch_1_Glob,
 int             Arr_1_Glob [50];
 int             Arr_2_Glob [50] [50];
 
-// extern char     *malloc ();
 Enumeration     Func_1 ();
   /* forward declaration necessary since Enumeration may not simply be int */
 
@@ -69,8 +69,8 @@ main ()
 
   /* Initializations */
 
-  Next_Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
-  Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
+  Next_Ptr_Glob = (Rec_Pointer) kzalloc (sizeof (Rec_Type), GFP_KERNEL);
+  Ptr_Glob = (Rec_Pointer) kzalloc (sizeof (Rec_Type), GFP_KERNEL);
 
   Ptr_Glob->Ptr_Comp                    = Next_Ptr_Glob;
   Ptr_Glob->Discr                       = Ident_1;
@@ -227,6 +227,8 @@ main ()
     printf ("\n");
   }
 
+  kfree(Ptr_Glob);
+  kfree(Next_Ptr_Glob);
 }
 
 
