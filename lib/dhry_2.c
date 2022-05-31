@@ -20,6 +20,22 @@
 #include <linux/string.h>
 
 
+static Boolean Func_3 (Enumeration Enum_Par_Val)
+/***************************/
+    /* executed once        */
+    /* Enum_Par_Val == Ident_3 */
+{
+  Enumeration Enum_Loc;
+
+  Enum_Loc = Enum_Par_Val;
+  if (Enum_Loc == Ident_3)
+    /* then, executed */
+    return (true);
+  else /* not executed */
+    return (false);
+} /* Func_3 */
+
+
 void Proc_6 (Enumeration  Enum_Val_Par, Enumeration *Enum_Ref_Par)
 /*********************************/
     /* executed once */
@@ -149,20 +165,4 @@ Boolean Func_2 (Str_30 Str_1_Par_Ref, Str_30 Str_2_Par_Ref)
       return (false);
   } /* if Ch_Loc */
 } /* Func_2 */
-
-
-Boolean Func_3 (Enumeration Enum_Par_Val)
-/***************************/
-    /* executed once        */
-    /* Enum_Par_Val == Ident_3 */
-{
-  Enumeration Enum_Loc;
-
-  Enum_Loc = Enum_Par_Val;
-  if (Enum_Loc == Ident_3)
-    /* then, executed */
-    return (true);
-  else /* not executed */
-    return (false);
-} /* Func_3 */
 
