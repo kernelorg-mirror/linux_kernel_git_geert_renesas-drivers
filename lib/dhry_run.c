@@ -11,6 +11,9 @@
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/mutex.h>
+#include <linux/smp.h>
+
+#define DHRY_VAX	1757
 
 static int dhry_run_set(const char *val, const struct kernel_param *kp);
 static const struct kernel_param_ops run_ops = {
@@ -28,12 +31,27 @@ MODULE_PARM_DESC(iterations,
 
 static void dhry_benchmark(void)
 {
-	int n = iterations;
+	int i, n;
 
-	if (n < 0)
-		n = 20000000;	// FIXME
+	if (iterations > 0) {
+		n = dhry(iterations);
+		goto report;
+	}
 
-	dhry(n);
+	for (i = DHRY_VAX; i > 0; i <<= 1) {
+		n = dhry(i);
+		if (n != -EAGAIN)
+			break;
+	}
+
+report:
+	if (n >= 0)
+		pr_info("CPU%u: Dhrystones per Second: %d (%d DMIPS)\n",
+			smp_processor_id(), n, n / DHRY_VAX);
+	else if (n == -EAGAIN)
+		pr_err("Please increase the number of iterations\n");
+	else
+		pr_err("Dhrystone benchmark failed error %pe\n", ERR_PTR(n));
 }
 
 static int dhry_run_set(const char *val, const struct kernel_param *kp)
