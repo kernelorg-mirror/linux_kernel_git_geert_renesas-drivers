@@ -41,7 +41,6 @@ static int             Arr_2_Glob [50] [50];
 static ktime_t         Begin_Time,
                        End_Time;
 static u32             User_Time;
-static u64             Dhrystones_Per_Second;
 
 /* end of variables for time measurement */
 
@@ -132,7 +131,7 @@ static void Proc_5 (void)
 } /* Proc_5 */
 
 
-void dhry (int n)
+int dhry (int n)
 /*****/
 
   /* main program, corresponds to procedures        */
@@ -288,21 +287,11 @@ void dhry (int n)
 
   User_Time = ktime_to_ms(ktime_sub(End_Time, Begin_Time));
 
-  if (User_Time < Too_Small_Time)
-  {
-    pr_info ("Measured time too small to obtain meaningful results\n");
-    pr_info ("Please increase number of runs\n");
-    pr_info ("\n");
-  }
-  else
-  {
-    Dhrystones_Per_Second = div_u64((u64)MSEC_PER_SEC * Number_Of_Runs,
-                                    User_Time);
-    pr_info ("Dhrystones per Second:                      ");
-    pr_info ("%llu\n", Dhrystones_Per_Second);
-    pr_info ("\n");
-  }
-
   kfree(Ptr_Glob);
   kfree(Next_Ptr_Glob);
+
+  if (User_Time < Too_Small_Time)
+    return -EAGAIN;
+
+  return div_u64(mul_u32_u32(MSEC_PER_SEC, Number_Of_Runs), User_Time);
 }
