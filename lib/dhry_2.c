@@ -28,11 +28,13 @@ static Boolean Func_3(Enumeration Enum_Par_Val)
 	Enumeration Enum_Loc;
 
 	Enum_Loc = Enum_Par_Val;
-	if (Enum_Loc == Ident_3)
+	if (Enum_Loc == Ident_3) {
 		/* then, executed */
 		return (true);
-	else /* not executed */
+	} else {
+		/* not executed */
 		return (false);
+	}
 } /* Func_3 */
 
 
@@ -42,24 +44,27 @@ void Proc_6(Enumeration  Enum_Val_Par, Enumeration *Enum_Ref_Par)
 /* Enum_Val_Par == Ident_3, Enum_Ref_Par becomes Ident_2 */
 {
 	*Enum_Ref_Par = Enum_Val_Par;
-	if (!Func_3(Enum_Val_Par))
+	if (!Func_3(Enum_Val_Par)) {
 		/* then, not executed */
 		*Enum_Ref_Par = Ident_4;
-	switch (Enum_Val_Par)
-	{
+	}
+	switch (Enum_Val_Par) {
 	case Ident_1:
 		*Enum_Ref_Par = Ident_1;
 		break;
 	case Ident_2:
-		if (Int_Glob > 100)
+		if (Int_Glob > 100) {
 			/* then */
 			*Enum_Ref_Par = Ident_1;
-		else *Enum_Ref_Par = Ident_4;
+		} else {
+			*Enum_Ref_Par = Ident_4;
+		}
 		break;
 	case Ident_3: /* executed */
 		*Enum_Ref_Par = Ident_2;
 		break;
-	case Ident_4: break;
+	case Ident_4:
+		break;
 	case Ident_5:
 		*Enum_Ref_Par = Ident_3;
 		break;
@@ -117,11 +122,11 @@ Enumeration Func_1(Capital_Letter Ch_1_Par_Val, Capital_Letter Ch_2_Par_Val)
 
 	Ch_1_Loc = Ch_1_Par_Val;
 	Ch_2_Loc = Ch_1_Loc;
-	if (Ch_2_Loc != Ch_2_Par_Val)
+	if (Ch_2_Loc != Ch_2_Par_Val) {
 		/* then, executed */
 		return (Ident_1);
-	else  /* not executed */
-	{
+	} else {
+		/* not executed */
 		Ch_1_Glob = Ch_1_Loc;
 		return (Ident_2);
 	}
@@ -138,30 +143,32 @@ Boolean Func_2(Str_30 Str_1_Par_Ref, Str_30 Str_2_Par_Ref)
 	Capital_Letter Ch_Loc;
 
 	Int_Loc = 2;
-	while (Int_Loc <= 2) /* loop body executed once */
+	while (Int_Loc <= 2) {
+		/* loop body executed once */
 		if (Func_1(Str_1_Par_Ref[Int_Loc],
-			   Str_2_Par_Ref[Int_Loc+1]) == Ident_1)
-		/* then, executed */
-		{
+			   Str_2_Par_Ref[Int_Loc+1]) == Ident_1) {
+			/* then, executed */
 			Ch_Loc = 'A';
 			Int_Loc += 1;
-		} /* if, while */
-	if (Ch_Loc >= 'W' && Ch_Loc < 'Z')
+		}
+	} /* if, while */
+	if (Ch_Loc >= 'W' && Ch_Loc < 'Z') {
 		/* then, not executed */
 		Int_Loc = 7;
-	if (Ch_Loc == 'R')
+	}
+	if (Ch_Loc == 'R') {
 		/* then, not executed */
 		return (true);
-	else /* executed */
-	{
-		if (strcmp(Str_1_Par_Ref, Str_2_Par_Ref) > 0)
-		/* then, not executed */
-		{
+	} else {
+		/* executed */
+		if (strcmp(Str_1_Par_Ref, Str_2_Par_Ref) > 0) {
+			/* then, not executed */
 			Int_Loc += 7;
 			Int_Glob = Int_Loc;
 			return (true);
-		}
-		else /* executed */
+		} else {
+			/* executed */
 			return (false);
+		}
 	} /* if Ch_Loc */
 } /* Func_2 */
