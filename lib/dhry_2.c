@@ -30,10 +30,10 @@ static Boolean Func_3(Enumeration Enum_Par_Val)
 	Enum_Loc = Enum_Par_Val;
 	if (Enum_Loc == Ident_3) {
 		/* then, executed */
-		return (true);
+		return true;
 	} else {
 		/* not executed */
-		return (false);
+		return false;
 	}
 } /* Func_3 */
 
@@ -124,11 +124,11 @@ Enumeration Func_1(Capital_Letter Ch_1_Par_Val, Capital_Letter Ch_2_Par_Val)
 	Ch_2_Loc = Ch_1_Loc;
 	if (Ch_2_Loc != Ch_2_Par_Val) {
 		/* then, executed */
-		return (Ident_1);
+		return Ident_1;
 	} else {
 		/* not executed */
 		Ch_1_Glob = Ch_1_Loc;
-		return (Ident_2);
+		return Ident_2;
 	}
 } /* Func_1 */
 
@@ -158,17 +158,17 @@ Boolean Func_2(Str_30 Str_1_Par_Ref, Str_30 Str_2_Par_Ref)
 	}
 	if (Ch_Loc == 'R') {
 		/* then, not executed */
-		return (true);
+		return true;
 	} else {
 		/* executed */
 		if (strcmp(Str_1_Par_Ref, Str_2_Par_Ref) > 0) {
 			/* then, not executed */
 			Int_Loc += 7;
 			Int_Glob = Int_Loc;
-			return (true);
+			return true;
 		} else {
 			/* executed */
-			return (false);
+			return false;
 		}
 	} /* if Ch_Loc */
 } /* Func_2 */
