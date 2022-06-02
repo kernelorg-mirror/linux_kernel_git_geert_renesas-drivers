@@ -164,13 +164,12 @@ int dhry(int n)
 	/* Warning: With 16-Bit processors and Number_Of_Runs > 32000,  */
 	/* overflow may occur for this array element.                   */
 
-	pr_info("\n");
-	pr_info("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
-	pr_info("\n");
+	pr_debug("Dhrystone Benchmark, Version 2.1 (Language: C)\n");
 
 	Number_Of_Runs = n;
 
-	pr_info("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
+	pr_debug("Execution starts, %d runs through Dhrystone\n",
+		 Number_Of_Runs);
 
 	/***************/
 	/* Start timer */
@@ -226,58 +225,55 @@ int dhry(int n)
 
 	End_Time = ktime_get();
 
-	pr_info("Execution ends\n");
-	pr_info("\n");
-	pr_info("Final values of the variables used in the benchmark:\n");
-	pr_info("\n");
-	pr_info("Int_Glob:            %d\n", Int_Glob);
-	pr_info("        should be:   %d\n", 5);
-	pr_info("Bool_Glob:           %d\n", Bool_Glob);
-	pr_info("        should be:   %d\n", 1);
-	pr_info("Ch_1_Glob:           %c\n", Ch_1_Glob);
-	pr_info("        should be:   %c\n", 'A');
-	pr_info("Ch_2_Glob:           %c\n", Ch_2_Glob);
-	pr_info("        should be:   %c\n", 'B');
-	pr_info("Arr_1_Glob[8]:       %d\n", Arr_1_Glob[8]);
-	pr_info("        should be:   %d\n", 7);
-	pr_info("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
-	pr_info("        should be:   Number_Of_Runs + 10\n");
-	pr_info("Ptr_Glob->\n");
-	pr_info("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
-	pr_info("        should be:   (implementation-dependent)\n");
-	pr_info("  Discr:             %d\n", Ptr_Glob->Discr);
-	pr_info("        should be:   %d\n", 0);
-	pr_info("  Enum_Comp:         %d\n", Ptr_Glob->variant.var_1.Enum_Comp);
-	pr_info("        should be:   %d\n", 2);
-	pr_info("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
-	pr_info("        should be:   %d\n", 17);
-	pr_info("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
-	pr_info("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-	pr_info("Next_Ptr_Glob->\n");
-	pr_info("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
-	pr_info("        should be:   (implementation-dependent), same as above\n");
-	pr_info("  Discr:             %d\n", Next_Ptr_Glob->Discr);
-	pr_info("        should be:   %d\n", 0);
-	pr_info("  Enum_Comp:         %d\n", Next_Ptr_Glob->variant.var_1.Enum_Comp);
-	pr_info("        should be:   %d\n", 1);
-	pr_info("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
-	pr_info("        should be:   %d\n", 18);
-	pr_info("  Str_Comp:          %s\n",
+	pr_debug("Execution ends\n");
+	pr_debug("Final values of the variables used in the benchmark:\n");
+	pr_debug("Int_Glob:            %d\n", Int_Glob);
+	pr_debug("        should be:   %d\n", 5);
+	pr_debug("Bool_Glob:           %d\n", Bool_Glob);
+	pr_debug("        should be:   %d\n", 1);
+	pr_debug("Ch_1_Glob:           %c\n", Ch_1_Glob);
+	pr_debug("        should be:   %c\n", 'A');
+	pr_debug("Ch_2_Glob:           %c\n", Ch_2_Glob);
+	pr_debug("        should be:   %c\n", 'B');
+	pr_debug("Arr_1_Glob[8]:       %d\n", Arr_1_Glob[8]);
+	pr_debug("        should be:   %d\n", 7);
+	pr_debug("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
+	pr_debug("        should be:   Number_Of_Runs + 10\n");
+	pr_debug("Ptr_Glob->\n");
+	pr_debug("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
+	pr_debug("        should be:   (implementation-dependent)\n");
+	pr_debug("  Discr:             %d\n", Ptr_Glob->Discr);
+	pr_debug("        should be:   %d\n", 0);
+	pr_debug("  Enum_Comp:         %d\n", Ptr_Glob->variant.var_1.Enum_Comp);
+	pr_debug("        should be:   %d\n", 2);
+	pr_debug("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
+	pr_debug("        should be:   %d\n", 17);
+	pr_debug("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
+	pr_debug("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
+	pr_debug("Next_Ptr_Glob->\n");
+	pr_debug("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
+	pr_debug("        should be:   (implementation-dependent), same as above\n");
+	pr_debug("  Discr:             %d\n", Next_Ptr_Glob->Discr);
+	pr_debug("        should be:   %d\n", 0);
+	pr_debug("  Enum_Comp:         %d\n", Next_Ptr_Glob->variant.var_1.Enum_Comp);
+	pr_debug("        should be:   %d\n", 1);
+	pr_debug("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
+	pr_debug("        should be:   %d\n", 18);
+	pr_debug("  Str_Comp:          %s\n",
 				      Next_Ptr_Glob->variant.var_1.Str_Comp);
-	pr_info("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-	pr_info("Int_1_Loc:           %d\n", Int_1_Loc);
-	pr_info("        should be:   %d\n", 5);
-	pr_info("Int_2_Loc:           %d\n", Int_2_Loc);
-	pr_info("        should be:   %d\n", 13);
-	pr_info("Int_3_Loc:           %d\n", Int_3_Loc);
-	pr_info("        should be:   %d\n", 7);
-	pr_info("Enum_Loc:            %d\n", Enum_Loc);
-	pr_info("        should be:   %d\n", 1);
-	pr_info("Str_1_Loc:           %s\n", Str_1_Loc);
-	pr_info("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
-	pr_info("Str_2_Loc:           %s\n", Str_2_Loc);
-	pr_info("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
-	pr_info("\n");
+	pr_debug("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
+	pr_debug("Int_1_Loc:           %d\n", Int_1_Loc);
+	pr_debug("        should be:   %d\n", 5);
+	pr_debug("Int_2_Loc:           %d\n", Int_2_Loc);
+	pr_debug("        should be:   %d\n", 13);
+	pr_debug("Int_3_Loc:           %d\n", Int_3_Loc);
+	pr_debug("        should be:   %d\n", 7);
+	pr_debug("Enum_Loc:            %d\n", Enum_Loc);
+	pr_debug("        should be:   %d\n", 1);
+	pr_debug("Str_1_Loc:           %s\n", Str_1_Loc);
+	pr_debug("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
+	pr_debug("Str_2_Loc:           %s\n", Str_2_Loc);
+	pr_debug("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
 
 	User_Time = ktime_to_ms(ktime_sub(End_Time, Begin_Time));
 
