@@ -240,7 +240,7 @@ int dhry(int n)
 	pr_debug("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
 	pr_debug("        should be:   Number_Of_Runs + 10\n");
 	pr_debug("Ptr_Glob->\n");
-	pr_debug("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
+	pr_debug("  Ptr_Comp:          %px\n", Ptr_Glob->Ptr_Comp);
 	pr_debug("        should be:   (implementation-dependent)\n");
 	pr_debug("  Discr:             %d\n", Ptr_Glob->Discr);
 	pr_debug("        should be:   %d\n", 0);
@@ -251,7 +251,7 @@ int dhry(int n)
 	pr_debug("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
 	pr_debug("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
 	pr_debug("Next_Ptr_Glob->\n");
-	pr_debug("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
+	pr_debug("  Ptr_Comp:          %px\n", Next_Ptr_Glob->Ptr_Comp);
 	pr_debug("        should be:   (implementation-dependent), same as above\n");
 	pr_debug("  Discr:             %d\n", Next_Ptr_Glob->Discr);
 	pr_debug("        should be:   %d\n", 0);
