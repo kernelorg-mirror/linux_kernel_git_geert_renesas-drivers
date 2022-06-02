@@ -225,55 +225,58 @@ int dhry(int n)
 
 	End_Time = ktime_get();
 
+#define dhry_assert_int_eq(val, expected)				\
+	if (val != expected)						\
+		pr_err("%s: %d (FAIL, expected %d)\n", #val, val,	\
+		       expected);					\
+	else								\
+		pr_debug("%s: %d (OK)\n", #val, val)
+
+#define dhry_assert_char_eq(val, expected)				\
+	if (val != expected)						\
+		pr_err("%s: %c (FAIL, expected %c)\n", #val, val,	\
+		       expected);					\
+	else								\
+		pr_debug("%s: %c (OK)\n", #val, val)
+
+#define dhry_assert_string_eq(val, expected)				\
+	if (strcmp(val, expected))					\
+		pr_err("%s: %s (FAIL, expected %s)\n", #val, val,	\
+		       expected);					\
+	else								\
+		pr_debug("%s: %s (OK)\n", #val, val)
+
 	pr_debug("Execution ends\n");
 	pr_debug("Final values of the variables used in the benchmark:\n");
-	pr_debug("Int_Glob:            %d\n", Int_Glob);
-	pr_debug("        should be:   %d\n", 5);
-	pr_debug("Bool_Glob:           %d\n", Bool_Glob);
-	pr_debug("        should be:   %d\n", 1);
-	pr_debug("Ch_1_Glob:           %c\n", Ch_1_Glob);
-	pr_debug("        should be:   %c\n", 'A');
-	pr_debug("Ch_2_Glob:           %c\n", Ch_2_Glob);
-	pr_debug("        should be:   %c\n", 'B');
-	pr_debug("Arr_1_Glob[8]:       %d\n", Arr_1_Glob[8]);
-	pr_debug("        should be:   %d\n", 7);
-	pr_debug("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
-	pr_debug("        should be:   Number_Of_Runs + 10\n");
-	pr_debug("Ptr_Glob->\n");
-	pr_debug("  Ptr_Comp:          %px\n", Ptr_Glob->Ptr_Comp);
-	pr_debug("        should be:   (implementation-dependent)\n");
-	pr_debug("  Discr:             %d\n", Ptr_Glob->Discr);
-	pr_debug("        should be:   %d\n", 0);
-	pr_debug("  Enum_Comp:         %d\n", Ptr_Glob->variant.var_1.Enum_Comp);
-	pr_debug("        should be:   %d\n", 2);
-	pr_debug("  Int_Comp:          %d\n", Ptr_Glob->variant.var_1.Int_Comp);
-	pr_debug("        should be:   %d\n", 17);
-	pr_debug("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
-	pr_debug("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-	pr_debug("Next_Ptr_Glob->\n");
-	pr_debug("  Ptr_Comp:          %px\n", Next_Ptr_Glob->Ptr_Comp);
-	pr_debug("        should be:   (implementation-dependent), same as above\n");
-	pr_debug("  Discr:             %d\n", Next_Ptr_Glob->Discr);
-	pr_debug("        should be:   %d\n", 0);
-	pr_debug("  Enum_Comp:         %d\n", Next_Ptr_Glob->variant.var_1.Enum_Comp);
-	pr_debug("        should be:   %d\n", 1);
-	pr_debug("  Int_Comp:          %d\n", Next_Ptr_Glob->variant.var_1.Int_Comp);
-	pr_debug("        should be:   %d\n", 18);
-	pr_debug("  Str_Comp:          %s\n",
-				      Next_Ptr_Glob->variant.var_1.Str_Comp);
-	pr_debug("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
-	pr_debug("Int_1_Loc:           %d\n", Int_1_Loc);
-	pr_debug("        should be:   %d\n", 5);
-	pr_debug("Int_2_Loc:           %d\n", Int_2_Loc);
-	pr_debug("        should be:   %d\n", 13);
-	pr_debug("Int_3_Loc:           %d\n", Int_3_Loc);
-	pr_debug("        should be:   %d\n", 7);
-	pr_debug("Enum_Loc:            %d\n", Enum_Loc);
-	pr_debug("        should be:   %d\n", 1);
-	pr_debug("Str_1_Loc:           %s\n", Str_1_Loc);
-	pr_debug("        should be:   DHRYSTONE PROGRAM, 1'ST STRING\n");
-	pr_debug("Str_2_Loc:           %s\n", Str_2_Loc);
-	pr_debug("        should be:   DHRYSTONE PROGRAM, 2'ND STRING\n");
+	dhry_assert_int_eq(Int_Glob, 5);
+	dhry_assert_int_eq(Bool_Glob, 1);
+	dhry_assert_char_eq(Ch_1_Glob, 'A');
+	dhry_assert_char_eq(Ch_2_Glob, 'B');
+	dhry_assert_int_eq(Arr_1_Glob[8], 7);
+	dhry_assert_int_eq(Arr_2_Glob[8][7], Number_Of_Runs + 10);
+	pr_debug("Ptr_Comp: %px\n", Ptr_Glob->Ptr_Comp);
+	dhry_assert_int_eq(Ptr_Glob->Discr, 0);
+	dhry_assert_int_eq(Ptr_Glob->variant.var_1.Enum_Comp, 2);
+	dhry_assert_int_eq(Ptr_Glob->variant.var_1.Int_Comp, 17);
+	dhry_assert_string_eq(Ptr_Glob->variant.var_1.Str_Comp,
+			      "DHRYSTONE PROGRAM, SOME STRING");
+	if (Next_Ptr_Glob->Ptr_Comp != Ptr_Glob->Ptr_Comp)
+		pr_err("Next_Ptr_Glob->Ptr_Comp: %px (expected %px)\n",
+		       Next_Ptr_Glob->Ptr_Comp, Ptr_Glob->Ptr_Comp);
+	else
+		pr_debug("Next_Ptr_Glob->Ptr_Comp: %px\n",
+			 Next_Ptr_Glob->Ptr_Comp);
+	dhry_assert_int_eq(Next_Ptr_Glob->Discr, 0);
+	dhry_assert_int_eq(Next_Ptr_Glob->variant.var_1.Enum_Comp, 1);
+	dhry_assert_int_eq(Next_Ptr_Glob->variant.var_1.Int_Comp, 18);
+	dhry_assert_string_eq(Next_Ptr_Glob->variant.var_1.Str_Comp,
+			      "DHRYSTONE PROGRAM, SOME STRING");
+	dhry_assert_int_eq(Int_1_Loc, 5);
+	dhry_assert_int_eq(Int_2_Loc, 13);
+	dhry_assert_int_eq(Int_3_Loc, 7);
+	dhry_assert_int_eq(Enum_Loc, 1);
+	dhry_assert_string_eq(Str_1_Loc, "DHRYSTONE PROGRAM, 1'ST STRING");
+	dhry_assert_string_eq(Str_2_Loc, "DHRYSTONE PROGRAM, 2'ND STRING");
 
 	User_Time = ktime_to_ms(ktime_sub(End_Time, Begin_Time));
 
