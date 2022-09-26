@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for MSIOF1 on White Hawk MSIOF1 Pin Header CN5
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - SS2  = CN5 pin 1
+//   - SS1  = CN5 pin 2
+//   - SCK  = CN5 pin 3
+//   - SYNC = CN5 pin 4 (SW10 must be switched to the "3" side!)
+//   - RXD  = CN5 pin 5 (SW12 must be switched to the "3" side!)
+//   - TXD  = CN5 pin 6
+//
+//   - GND  = CN4 pin 3/4/7/11
+//   - 3.3V = CN4 pin 9
+//
+// Notes:
+//   - As SCK is shared with the enable signal of the CAN receiver on CAN-FD
+//     channel 0, all of CAN-FD is disabled first.
+
+/dts-v1/;
+/plugin/;
+
+&canfd {
+	status = "disabled";
+};
+
+&can_transceiver0 {
+	status = "disabled";
+};
+
+&pfc {
+	msiof1_pins: msiof1 {
+		groups = "msiof1_ss2", "msiof1_ss1", "msiof1_clk",
+			 "msiof1_sync", "msiof1_rxd", "msiof1_txd";
+		function = "msiof1";
+	};
+};
+
+&msiof1 {
+	pinctrl-0 = <&msiof1_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	cn5@0 {
+		compatible = "renesas,white-hawk-msiof-pin-header";
+		reg = <0>;
+		spi-max-frequency = <200000>;
+	};
+};
