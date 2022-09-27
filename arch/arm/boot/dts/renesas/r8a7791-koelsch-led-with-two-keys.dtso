@@ -1,0 +1,110 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay describing an LED and two keys using the GPIO
+// Aggregator
+//
+// Copyright (C) 2021 Glider bv
+//
+// Note:
+//   As these GPIOS are used by the normal keyboard and LEDS, these are
+//   disabled first.
+//
+// Usage:
+//   $ overlay add r8a7791-koelsch-keyboard-controlled-led
+//   $ echo gpio-aggregator > /sys/devices/platform/frobnicator/driver_override
+//   $ echo frobnicator > /sys/bus/platform/drivers/gpio-aggregator/bind
+//   $ # gpio-keys does not support probe deferral on interrupt controllers
+//   $ echo irq_keyboard > /sys/bus/platform/drivers/gpio-keys/bind
+//
+//   $ gpioinfo frobnicator
+//   gpiochip12 - 3 lines:
+//           line   0:      "light"      "light"  output  active-high [used]
+//           line   1:         "on"         "On"   input   active-low [used]
+//           line   2:        "off"        "Off"   input   active-low [used]
+//
+//   $ echo 255 > /sys/class/leds/light/brightness
+//   $ echo 0 > /sys/class/leds/light/brightness
+//
+//   $ evtest /dev/input/event0
+//
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/} {
+	keyboard {
+		status = "disabled";
+	};
+
+	leds {
+		status = "disabled";
+	};
+
+	frobnicator: frobnicator {
+		compatible = "glider,led-with-two-keys";
+
+		gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>,
+			<&gpio7 2 GPIO_ACTIVE_HIGH>,
+			<&gpio7 6 GPIO_ACTIVE_HIGH>;
+		gpio-line-names = "light", "on", "off";
+		gpio-controller;
+		#gpio-cells = <2>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+	};
+
+	gpio_keyboard {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&gpio_keyboard_pins>;
+		pinctrl-names = "default";
+
+		key-X {
+			gpios = <&frobnicator 1 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_X>;
+			label = "On";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+
+	irq_keyboard {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&irq_keyboard_pins>;
+		pinctrl-names = "default";
+
+		key-O {
+			interrupt-parent = <&frobnicator>;
+			interrupts = <2 IRQ_TYPE_LEVEL_LOW>;
+			linux,code = <KEY_O>;
+			label = "Off";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+
+	new_leds {
+		compatible = "gpio-leds";
+
+		light {
+			gpios = <&frobnicator 0 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};
+
+&pfc {
+	gpio_keyboard_pins: gpio_keyboard_pins {
+		pins = "GP_7_2";
+		bias-pull-up;
+	};
+
+	irq_keyboard_pins: irq_keyboard_pins {
+		pins = "GP_7_6";
+		bias-pull-up;
+	};
+};
