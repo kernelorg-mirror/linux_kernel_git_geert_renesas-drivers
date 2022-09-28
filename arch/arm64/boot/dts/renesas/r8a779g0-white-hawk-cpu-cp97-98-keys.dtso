@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for using CP97/98 on the White Hawk CPU board as keys
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - Key X = CP97
+//   - Key O = CP98
+//   - GND   = TP2
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+&{/} {
+	cp97-cp98-keys {
+		compatible = "gpio-keys";
+
+		key-X {
+			gpios = <&io_expander_a 1 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_X>;
+			label = "CP97";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+
+		key-O {
+			gpios = <&io_expander_a 3 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_O>;
+			label = "CP98";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+};
