@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for using IRQ2 on White Hawk GPIO Connector CN4 as a key
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - IRQ2 = CN4 pin 2 (SW5-1 (MD0) on the SW Board must be OFF!)
+//   - GND  = CN4 pin 3/4/7/11
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/} {
+	irq2-keys {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&irq2_pins>;
+		pinctrl-names = "default";
+
+		key-I {
+			interrupt-parent = <&intc_ex>;
+			interrupts = <2 IRQ_TYPE_LEVEL_LOW>;
+			linux,code = <KEY_I>;
+			label = "IRQ2";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+};
+
+&pfc {
+	irq2_pins: irq2_pins {
+		groups = "intc_ex_irq2_a";
+		function = "intc_ex";
+	};
+};
