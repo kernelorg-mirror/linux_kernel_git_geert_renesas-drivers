@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for SCIF4 on White Hawk GPIO CN CN4
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - TXD  = CN4 pin 6
+//   - RXD  = CN4 pin 8
+//
+//   - GND  = CN4 pin 3/4/7/11
+//
+//  Notes:
+//    - As GP8_12 might be used for remote-wakeup, the latter must be disabled
+//	first, if enabled.
+
+/dts-v1/;
+/plugin/;
+
+&{/} {
+	remote-wakeup {
+		status = "disabled";
+	};
+};
+
+&pfc {
+	scif4_pins: scif4 {
+		groups = "scif4_data";
+		function = "scif4";
+	};
+};
+
+&scif4 {
+	pinctrl-0 = <&scif4_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
