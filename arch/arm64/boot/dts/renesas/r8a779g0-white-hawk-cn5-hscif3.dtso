@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for HSCIF3 on White Hawk MSIOF1 Pin Header CN5
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - TXD  = CN5 pin 1
+//   - RXD  = CN5 pin 6
+//   - SCK  = CN5 pin 3
+//   - RTS# = CN5 pin 4 (SW10 must be switched to the "3" side!)
+//   - CTS# = CN5 pin 2
+//
+//   - GND  = CN4 pin 3/4/7/11
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	hscif3_pins: hscif3 {
+		groups = "hscif3_data_a", "hscif3_clk_a", "hscif3_ctrl_a";
+		function = "hscif3";
+	};
+};
+
+&hscif3 {
+	pinctrl-0 = <&hscif3_pins>;
+	pinctrl-names = "default";
+
+	uart-has-rts-cts;
+	status = "okay";
+};
