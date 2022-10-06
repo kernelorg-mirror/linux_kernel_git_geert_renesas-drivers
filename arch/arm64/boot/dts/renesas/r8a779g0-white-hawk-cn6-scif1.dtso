@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for SCIF1 on White Hawk MSIOF2 Pin Header CN6
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - TXD  = CN6 pin 2
+//   - RXD  = CN6 pin 4
+//   - SCK  = CN6 pin 5
+//   - RTS# = CN6 pin 3
+//   - CTS# = CN6 pin 6
+//
+//   - GND  = CN4 pin 3/4/7/11
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	scif1_pins: scif1 {
+		groups = "scif1_data", "scif1_clk", "scif1_ctrl";
+		function = "scif1";
+	};
+};
+
+&scif1 {
+	pinctrl-0 = <&scif1_pins>;
+	pinctrl-names = "default";
+
+	uart-has-rtscts;
+	status = "okay";
+};
