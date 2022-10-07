@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for TPU0 on White Hawk CPU board IO Pin Header CN40
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - TPU0 = CN40 pin 2 (SW46-2 must be switched "OFF"!)
+//   - GND  = CN40 pin 3/7/11/19
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	tpu0_pins: tpu0 {
+		groups = "tpu_to0_a";
+		function = "tpu";
+	};
+};
+
+&tpu {
+	pinctrl-0 = <&tpu0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
