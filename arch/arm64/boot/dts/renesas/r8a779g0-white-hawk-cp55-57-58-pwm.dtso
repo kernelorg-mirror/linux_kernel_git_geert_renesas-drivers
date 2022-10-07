@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for PWM on White Hawk CP55/57/58
+//
+// Copyright (C) 2022 Glider bv
+//
+// Pinout:
+//   - PWM0 = CP58
+//   - PWM8 = CP55
+//   - PWM9 = CP57
+//
+//   - GND  = TP19
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	pwm0_pins: pwm0 {
+		groups = "pwm0_a";
+		function = "pwm0";
+	};
+
+	pwm8_pins: pwm8 {
+		groups = "pwm8_a";
+		function = "pwm8";
+	};
+
+	pwm9_pins: pwm9 {
+		groups = "pwm9_a";
+		function = "pwm9";
+	};
+};
+
+&pwm0 {
+	pinctrl-0 = <&pwm0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm8 {
+	pinctrl-0 = <&pwm8_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm9 {
+	pinctrl-0 = <&pwm9_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
