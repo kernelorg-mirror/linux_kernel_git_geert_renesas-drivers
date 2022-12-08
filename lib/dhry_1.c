@@ -32,17 +32,6 @@ static char Ch_2_Glob;
 static int Arr_1_Glob[50];
 static int Arr_2_Glob[50][50];
 
-/* variables for time measurement: */
-
-#define Too_Small_Time (2 * MSEC_PER_SEC)
-		/* Measurements should last at least 2 seconds */
-
-static ktime_t Begin_Time, End_Time;
-static u32 User_Time;
-
-/* end of variables for time measurement */
-
-
 static void Proc_3(Rec_Pointer *Ptr_Ref_Par)
 /******************/
 /* executed once */
@@ -144,6 +133,8 @@ int dhry(int n)
 	Str_30 Str_2_Loc;
 	int Run_Index;
 	int Number_Of_Runs;
+	ktime_t Begin_Time, End_Time;
+	u32 User_Time;
 
 	/* Initializations */
 
@@ -283,7 +274,8 @@ int dhry(int n)
 	kfree(Ptr_Glob);
 	kfree(Next_Ptr_Glob);
 
-	if (User_Time < Too_Small_Time)
+	/* Measurements should last at least 2 seconds */
+	if (User_Time < 2 * MSEC_PER_SEC)
 		return -EAGAIN;
 
 	return div_u64(mul_u32_u32(MSEC_PER_SEC, Number_Of_Runs), User_Time);
