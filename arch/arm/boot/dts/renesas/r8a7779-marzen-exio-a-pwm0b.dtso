@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for PWM0 on r8a7779/marzen EXIO A
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - PWM0 = EXIO A pin 89
+//   - GND  = EXIO A pin 87/93
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	pwm0_pins: pwm0 {
+		groups = "pwm0_b";
+		function = "pwm0";
+	};
+};
+
+&pwm0 {
+	pinctrl-0 = <&pwm0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
