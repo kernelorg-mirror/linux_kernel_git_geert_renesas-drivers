@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for TPU PWM on r8a7790/lager EXIO Connector C
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - TPU0TO0 = EXIO C pin 50
+//   - TPU0TO1 = EXIO C pin 52
+//   - TPU0TO2 = EXIO C pin 54
+//   - TPU0TO3 = EXIO C pin 56
+//   - GND     = EXIO C pin 1/8/21/83/91/95/107/108/118
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	tpu_pins: tpu {
+		groups = "tpu0_to0", "tpu0_to1", "tpu0_to2", "tpu0_to3";
+		function = "tpu0";
+	};
+};
+
+&tpu {
+	pinctrl-0 = <&tpu_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
