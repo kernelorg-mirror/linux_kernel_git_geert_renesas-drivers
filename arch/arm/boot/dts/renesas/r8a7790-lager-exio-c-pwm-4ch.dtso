@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for 4-channel PWM on r8a7790/lager EXIO Connector C
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - PWM3 = EXIO C pin 42
+//   - PWM4 = EXIO C pin 44
+//   - PWM5 = EXIO C pin 46
+//   - PWM6 = EXIO C pin 48
+//   - GND  = EXIO C pin 1/8/21/83/91/95/107/108/118
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	pwm3_pins: pwm3 {
+		groups = "pwm3";
+		function = "pwm3";
+	};
+
+	pwm4_pins: pwm4 {
+		groups = "pwm4";
+		function = "pwm4";
+	};
+
+	pwm5_pins: pwm5 {
+		groups = "pwm5";
+		function = "pwm5";
+	};
+
+	pwm6_pins: pwm6 {
+		groups = "pwm6";
+		function = "pwm6";
+	};
+};
+
+&pwm3 {
+	pinctrl-0 = <&pwm3_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm4 {
+	pinctrl-0 = <&pwm4_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm5 {
+	pinctrl-0 = <&pwm5_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm6 {
+	pinctrl-0 = <&pwm6_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
