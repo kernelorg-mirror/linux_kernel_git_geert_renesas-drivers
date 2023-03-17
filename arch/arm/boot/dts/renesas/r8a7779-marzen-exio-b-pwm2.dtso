@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for PWM2 on r8a7779/marzen EXIO B or SUB_JTAG
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - PWM2 = EXIO B pin 92
+//   - GND  = EXIO B pin 73/85/90/93/98/104
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	pwm2_pins: pwm2 {
+		groups = "pwm2";
+		function = "pwm2";
+	};
+};
+
+&pwm2 {
+	pinctrl-0 = <&pwm2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
