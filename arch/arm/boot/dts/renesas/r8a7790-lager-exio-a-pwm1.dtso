@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for PWM1 on r8a7790/lager EXIO Connector A
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - PWM1 = EXIO A pin 63
+//   - GND  = EXIO A pin 47/51/52/56/57/61/62/65/68/71/74/75/78/79
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	pwm1_pins: pwm1 {
+		groups = "pwm1_b";
+		function = "pwm1";
+	};
+};
+
+&pwm1 {
+	pinctrl-0 = <&pwm1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
