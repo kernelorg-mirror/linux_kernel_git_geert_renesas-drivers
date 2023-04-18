@@ -110,6 +110,18 @@
 		};
 	};
 
+	remote-wakeup {
+		compatible = "gpio-keys";
+
+		wakeup-key {
+			interrupts-extended = <&gpio4 19 IRQ_TYPE_EDGE_FALLING>;
+			linux,code = <KEY_WAKEUP>;
+			label = "CN7-5";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+
 	vga-encoder {
 		compatible = "adi,adv7123";
 
