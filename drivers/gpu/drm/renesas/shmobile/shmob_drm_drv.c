@@ -9,7 +9,6 @@
 
 #include <linux/clk.h>
 #include <linux/io.h>
-#include <linux/media-bus-format.h>
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -32,50 +31,6 @@
 /* -----------------------------------------------------------------------------
  * Hardware initialization
  */
-
-static int shmob_drm_init_interface(struct shmob_drm_device *sdev)
-{
-	switch (sdev->pdata->iface.bus_fmt) {
-	case MEDIA_BUS_FMT_RGB888_3X8:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB8;
-		break;
-
-	case MEDIA_BUS_FMT_RGB666_2X9_BE:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB9;
-		break;
-
-	case MEDIA_BUS_FMT_RGB888_2X12_BE:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB12A;
-		break;
-
-	case MEDIA_BUS_FMT_RGB444_1X12:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB12B;
-		break;
-
-	case MEDIA_BUS_FMT_RGB565_1X16:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB16;
-		break;
-
-	case MEDIA_BUS_FMT_RGB666_1X18:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB18;
-		break;
-
-	case MEDIA_BUS_FMT_RGB888_1X24:
-		sdev->ldmt1r = LDMT1R_MIFTYP_RGB24;
-		break;
-
-	case MEDIA_BUS_FMT_UYVY8_1X16:
-		sdev->ldmt1r = LDMT1R_MIFTYP_YCBCR;
-		break;
-
-	default:
-		dev_err(sdev->dev, "invalid bus format 0x%x\n",
-			sdev->pdata->iface.bus_fmt);
-		return -EINVAL;
-	}
-
-	return 0;
-}
 
 static int shmob_drm_setup_clocks(struct shmob_drm_device *sdev,
 				  enum shmob_drm_clk_source clksrc)
@@ -232,10 +187,6 @@ static int shmob_drm_probe(struct platform_device *pdev)
 		return ret;
 
 	ret = shmob_drm_setup_clocks(sdev, pdata->clk_source);
-	if (ret < 0)
-		return ret;
-
-	ret = shmob_drm_init_interface(sdev);
 	if (ret < 0)
 		return ret;
 
