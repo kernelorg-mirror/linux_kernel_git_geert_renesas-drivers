@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/pm.h>
+#include <linux/pm_runtime.h>
 #include <linux/slab.h>
 
 #include <drm/drm_drv.h>
@@ -215,6 +216,10 @@ static int shmob_drm_probe(struct platform_device *pdev)
 	sdev->mmio = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(sdev->mmio))
 		return PTR_ERR(sdev->mmio);
+
+	ret = devm_pm_runtime_enable(&pdev->dev);
+	if (ret)
+		return ret;
 
 	ret = shmob_drm_setup_clocks(sdev, pdata->clk_source);
 	if (ret < 0)

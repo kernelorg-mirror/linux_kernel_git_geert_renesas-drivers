@@ -9,6 +9,7 @@
 
 #include <linux/backlight.h>
 #include <linux/clk.h>
+#include <linux/pm_runtime.h>
 
 #include <drm/drm_crtc.h>
 #include <drm/drm_crtc_helper.h>
@@ -170,10 +171,16 @@ static void shmob_drm_crtc_start(struct shmob_drm_crtc *scrtc)
 	if (WARN_ON(format == NULL))
 		return;
 
+	ret = pm_runtime_resume_and_get(sdev->dev);
+	if (ret)
+		return;
+
 	/* Enable clocks before accessing the hardware. */
 	ret = shmob_drm_clk_on(sdev);
-	if (ret < 0)
+	if (ret < 0) {
+		pm_runtime_put(sdev->dev);
 		return;
+	}
 
 	/* Reset and enable the LCDC. */
 	lcdc_write(sdev, LDCNT2R, lcdc_read(sdev, LDCNT2R) | LDCNT2R_BR);
@@ -270,6 +277,8 @@ static void shmob_drm_crtc_stop(struct shmob_drm_crtc *scrtc)
 
 	/* Stop clocks. */
 	shmob_drm_clk_off(sdev);
+
+	pm_runtime_put(sdev->dev);
 
 	scrtc->started = false;
 }
