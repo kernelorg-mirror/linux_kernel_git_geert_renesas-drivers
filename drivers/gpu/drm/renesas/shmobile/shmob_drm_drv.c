@@ -9,6 +9,7 @@
 
 #include <linux/clk.h>
 #include <linux/io.h>
+#include <linux/media-bus-format.h>
 #include <linux/mm.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
@@ -34,24 +35,45 @@
 
 static int shmob_drm_init_interface(struct shmob_drm_device *sdev)
 {
-	static const u32 ldmt1r[] = {
-		[SHMOB_DRM_IFACE_RGB8] = LDMT1R_MIFTYP_RGB8,
-		[SHMOB_DRM_IFACE_RGB9] = LDMT1R_MIFTYP_RGB9,
-		[SHMOB_DRM_IFACE_RGB12A] = LDMT1R_MIFTYP_RGB12A,
-		[SHMOB_DRM_IFACE_RGB12B] = LDMT1R_MIFTYP_RGB12B,
-		[SHMOB_DRM_IFACE_RGB16] = LDMT1R_MIFTYP_RGB16,
-		[SHMOB_DRM_IFACE_RGB18] = LDMT1R_MIFTYP_RGB18,
-		[SHMOB_DRM_IFACE_RGB24] = LDMT1R_MIFTYP_RGB24,
-		[SHMOB_DRM_IFACE_YUV422] = LDMT1R_MIFTYP_YCBCR,
-	};
+	switch (sdev->pdata->iface.bus_fmt) {
+	case MEDIA_BUS_FMT_RGB888_3X8:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB8;
+		break;
 
-	if (sdev->pdata->iface.interface >= ARRAY_SIZE(ldmt1r)) {
-		dev_err(sdev->dev, "invalid interface type %u\n",
-			sdev->pdata->iface.interface);
+	case MEDIA_BUS_FMT_RGB666_2X9_BE:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB9;
+		break;
+
+	case MEDIA_BUS_FMT_RGB888_2X12_BE:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB12A;
+		break;
+
+	case MEDIA_BUS_FMT_RGB444_1X12:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB12B;
+		break;
+
+	case MEDIA_BUS_FMT_RGB565_1X16:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB16;
+		break;
+
+	case MEDIA_BUS_FMT_RGB666_1X18:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB18;
+		break;
+
+	case MEDIA_BUS_FMT_RGB888_1X24:
+		sdev->ldmt1r = LDMT1R_MIFTYP_RGB24;
+		break;
+
+	case MEDIA_BUS_FMT_UYVY8_1X16:
+		sdev->ldmt1r = LDMT1R_MIFTYP_YCBCR;
+		break;
+
+	default:
+		dev_err(sdev->dev, "invalid bus format 0x%x\n",
+			sdev->pdata->iface.bus_fmt);
 		return -EINVAL;
 	}
 
-	sdev->ldmt1r = ldmt1r[sdev->pdata->iface.interface];
 	return 0;
 }
 
