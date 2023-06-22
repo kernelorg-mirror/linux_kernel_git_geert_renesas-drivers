@@ -196,9 +196,6 @@ static void shmob_drm_crtc_start(struct shmob_drm_crtc *scrtc)
 	u32 value;
 	int ret;
 
-	if (scrtc->started)
-		return;
-
 	ret = pm_runtime_resume_and_get(dev);
 	if (ret)
 		return;
@@ -252,8 +249,6 @@ static void shmob_drm_crtc_start(struct shmob_drm_crtc *scrtc)
 
 	/* Turn vertical blank interrupt reporting back on. */
 	drm_crtc_vblank_on(crtc);
-
-	scrtc->started = true;
 }
 
 /* -----------------------------------------------------------------------------
@@ -314,9 +309,6 @@ static void shmob_drm_crtc_stop(struct shmob_drm_crtc *scrtc)
 	struct drm_crtc *crtc = &scrtc->base;
 	struct shmob_drm_device *sdev = to_shmob_device(crtc->dev);
 
-	if (!scrtc->started)
-		return;
-
 	/*
 	 * Disable vertical blank interrupt reporting.  We first need to wait
 	 * for page flip completion before stopping the CRTC as userspace
@@ -335,28 +327,11 @@ static void shmob_drm_crtc_stop(struct shmob_drm_crtc *scrtc)
 	shmob_drm_clk_off(sdev);
 
 	pm_runtime_put(sdev->dev);
-
-	scrtc->started = false;
 }
 
 static inline struct shmob_drm_crtc *to_shmob_crtc(struct drm_crtc *crtc)
 {
 	return container_of(crtc, struct shmob_drm_crtc, base);
-}
-
-static void shmob_drm_crtc_dpms(struct drm_crtc *crtc, int mode)
-{
-	struct shmob_drm_crtc *scrtc = to_shmob_crtc(crtc);
-
-	if (scrtc->dpms == mode)
-		return;
-
-	if (mode == DRM_MODE_DPMS_ON)
-		shmob_drm_crtc_start(scrtc);
-	else
-		shmob_drm_crtc_stop(scrtc);
-
-	scrtc->dpms = mode;
 }
 
 static void shmob_drm_crtc_atomic_flush(struct drm_crtc *crtc,
@@ -378,13 +353,17 @@ static void shmob_drm_crtc_atomic_flush(struct drm_crtc *crtc,
 static void shmob_drm_crtc_atomic_enable(struct drm_crtc *crtc,
 					 struct drm_atomic_state *state)
 {
-	shmob_drm_crtc_dpms(crtc, DRM_MODE_DPMS_ON);
+	struct shmob_drm_crtc *scrtc = to_shmob_crtc(crtc);
+
+	shmob_drm_crtc_start(scrtc);
 }
 
 static void shmob_drm_crtc_atomic_disable(struct drm_crtc *crtc,
 					  struct drm_atomic_state *state)
 {
-	shmob_drm_crtc_dpms(crtc, DRM_MODE_DPMS_OFF);
+	struct shmob_drm_crtc *scrtc = to_shmob_crtc(crtc);
+
+	shmob_drm_crtc_stop(scrtc);
 }
 
 static const struct drm_crtc_helper_funcs crtc_helper_funcs = {
@@ -475,8 +454,6 @@ int shmob_drm_crtc_create(struct shmob_drm_device *sdev)
 	int ret;
 
 	init_waitqueue_head(&sdev->crtc.flip_wait);
-
-	sdev->crtc.dpms = DRM_MODE_DPMS_OFF;
 
 	primary = shmob_drm_plane_create(sdev, 0);
 	if (IS_ERR(primary))
