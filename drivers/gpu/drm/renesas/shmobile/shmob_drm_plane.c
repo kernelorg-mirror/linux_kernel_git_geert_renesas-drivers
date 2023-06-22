@@ -12,6 +12,7 @@
 #include <drm/drm_fourcc.h>
 #include <drm/drm_framebuffer.h>
 #include <drm/drm_gem_dma_helper.h>
+#include <drm/drm_plane_helper.h>
 
 #include "shmob_drm_drv.h"
 #include "shmob_drm_kms.h"
@@ -64,57 +65,58 @@ static void __shmob_drm_plane_setup(struct shmob_drm_plane *splane,
 				    struct drm_framebuffer *fb)
 {
 	struct shmob_drm_device *sdev = to_shmob_device(splane->plane.dev);
+	unsigned int ovl_idx = splane->index - 1;
 	u32 format;
 
 	/* TODO: Support ROP3 mode */
 	format = LDBBSIFR_EN | (splane->alpha << LDBBSIFR_LAY_SHIFT) |
 		 splane->format->ldbbsifr;
 
-#define plane_reg_dump(sdev, splane, reg) \
+#define plane_reg_dump(sdev, ovl_idx, reg) \
 	dev_dbg(sdev->ddev.dev, "%s(%u): %s 0x%08x 0x%08x\n", __func__, \
-		splane->index, #reg, \
-		lcdc_read(sdev, reg(splane->index)), \
-		lcdc_read(sdev, reg(splane->index) + LCDC_SIDE_B_OFFSET))
+		ovl_idx, #reg, \
+		lcdc_read(sdev, reg(ovl_idx)), \
+		lcdc_read(sdev, reg(ovl_idx) + LCDC_SIDE_B_OFFSET))
 
-	plane_reg_dump(sdev, splane, LDBnBSIFR);
-	plane_reg_dump(sdev, splane, LDBnBSSZR);
-	plane_reg_dump(sdev, splane, LDBnBLOCR);
-	plane_reg_dump(sdev, splane, LDBnBSMWR);
-	plane_reg_dump(sdev, splane, LDBnBSAYR);
-	plane_reg_dump(sdev, splane, LDBnBSACR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSIFR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSSZR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBLOCR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSMWR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSAYR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSACR);
 
-	lcdc_write(sdev, LDBCR, LDBCR_UPC(splane->index));
-	dev_dbg(sdev->ddev.dev, "%s(%u): %s 0x%08x\n", __func__, splane->index,
+	lcdc_write(sdev, LDBCR, LDBCR_UPC(ovl_idx));
+	dev_dbg(sdev->ddev.dev, "%s(%u): %s 0x%08x\n", __func__, ovl_idx,
 		"LDBCR", lcdc_read(sdev, LDBCR));
 
-	lcdc_write(sdev, LDBnBSIFR(splane->index), format);
+	lcdc_write(sdev, LDBnBSIFR(ovl_idx), format);
 
-	lcdc_write(sdev, LDBnBSSZR(splane->index),
+	lcdc_write(sdev, LDBnBSSZR(ovl_idx),
 		   (splane->crtc_h << LDBBSSZR_BVSS_SHIFT) |
 		   (splane->crtc_w << LDBBSSZR_BHSS_SHIFT));
-	lcdc_write(sdev, LDBnBLOCR(splane->index),
+	lcdc_write(sdev, LDBnBLOCR(ovl_idx),
 		   (splane->crtc_y << LDBBLOCR_CVLC_SHIFT) |
 		   (splane->crtc_x << LDBBLOCR_CHLC_SHIFT));
-	lcdc_write(sdev, LDBnBSMWR(splane->index),
+	lcdc_write(sdev, LDBnBSMWR(ovl_idx),
 		   fb->pitches[0] << LDBBSMWR_BSMW_SHIFT);
 
 	shmob_drm_plane_compute_base(splane, fb, splane->src_x, splane->src_y);
 
-	lcdc_write(sdev, LDBnBSAYR(splane->index), splane->dma[0]);
+	lcdc_write(sdev, LDBnBSAYR(ovl_idx), splane->dma[0]);
 	if (shmob_drm_format_is_yuv(splane->format))
-		lcdc_write(sdev, LDBnBSACR(splane->index), splane->dma[1]);
+		lcdc_write(sdev, LDBnBSACR(ovl_idx), splane->dma[1]);
 
 	lcdc_write(sdev, LDBCR,
-		   LDBCR_UPF(splane->index) | LDBCR_UPD(splane->index));
-	dev_dbg(sdev->ddev.dev, "%s(%u): %s 0x%08x\n", __func__, splane->index,
+		   LDBCR_UPF(ovl_idx) | LDBCR_UPD(ovl_idx));
+	dev_dbg(sdev->ddev.dev, "%s(%u): %s 0x%08x\n", __func__, ovl_idx,
 		"LDBCR", lcdc_read(sdev, LDBCR));
 
-	plane_reg_dump(sdev, splane, LDBnBSIFR);
-	plane_reg_dump(sdev, splane, LDBnBSSZR);
-	plane_reg_dump(sdev, splane, LDBnBLOCR);
-	plane_reg_dump(sdev, splane, LDBnBSMWR);
-	plane_reg_dump(sdev, splane, LDBnBSAYR);
-	plane_reg_dump(sdev, splane, LDBnBSACR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSIFR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSSZR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBLOCR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSMWR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSAYR);
+	plane_reg_dump(sdev, ovl_idx, LDBnBSACR);
 }
 
 void shmob_drm_plane_setup(struct drm_plane *plane)
@@ -169,15 +171,21 @@ static int shmob_drm_plane_disable(struct drm_plane *plane,
 {
 	struct shmob_drm_device *sdev = to_shmob_device(plane->dev);
 	struct shmob_drm_plane *splane = to_shmob_plane(plane);
+	unsigned int ovl_idx = splane->index - 1;
 
 	splane->format = NULL;
 
-	lcdc_write(sdev, LDBCR, LDBCR_UPC(splane->index));
-	lcdc_write(sdev, LDBnBSIFR(splane->index), 0);
+	lcdc_write(sdev, LDBCR, LDBCR_UPC(ovl_idx));
+	lcdc_write(sdev, LDBnBSIFR(ovl_idx), 0);
 	lcdc_write(sdev, LDBCR,
-		   LDBCR_UPF(splane->index) | LDBCR_UPD(splane->index));
+		   LDBCR_UPF(ovl_idx) | LDBCR_UPD(ovl_idx));
 	return 0;
 }
+
+static const struct drm_plane_funcs primary_plane_funcs = {
+	.update_plane = drm_plane_helper_update_primary,
+	.disable_plane = drm_plane_helper_disable_primary,
+};
 
 static const struct drm_plane_funcs shmob_drm_plane_funcs = {
 	.update_plane = shmob_drm_plane_update,
@@ -197,19 +205,31 @@ static const uint32_t formats[] = {
 	DRM_FORMAT_NV42,
 };
 
-int shmob_drm_plane_create(struct shmob_drm_device *sdev, unsigned int index)
+struct drm_plane *shmob_drm_plane_create(struct shmob_drm_device *sdev,
+					 unsigned int index)
 {
+	const struct drm_plane_funcs *funcs;
 	struct shmob_drm_plane *splane;
+	enum drm_plane_type type;
 
-	splane = drmm_universal_plane_alloc(&sdev->ddev, struct shmob_drm_plane,
-					    plane, 1, &shmob_drm_plane_funcs,
-					    formats, ARRAY_SIZE(formats), NULL,
-					    DRM_PLANE_TYPE_OVERLAY, NULL);
+	if (!index) {
+		type = DRM_PLANE_TYPE_PRIMARY;
+		funcs = &primary_plane_funcs;
+	} else {
+		type = DRM_PLANE_TYPE_OVERLAY;
+		funcs = &shmob_drm_plane_funcs;
+	}
+
+	splane = drmm_universal_plane_alloc(&sdev->ddev,
+					    struct shmob_drm_plane, plane, 1,
+					    funcs, formats,
+					    ARRAY_SIZE(formats),  NULL, type,
+					    NULL);
 	if (IS_ERR(splane))
-		return PTR_ERR(splane);
+		return ERR_CAST(splane);
 
 	splane->index = index;
 	splane->alpha = 255;
 
-	return 0;
+	return &splane->plane;
 }
