@@ -2101,8 +2101,7 @@ static int __init of_unittest_apply_overlay(int overlay_nr, int *ovcs_id)
 	return 0;
 }
 
-/* apply an overlay while checking before and after states */
-static int __init of_unittest_apply_overlay_check(int overlay_nr,
+static int __init __of_unittest_apply_overlay_check(int overlay_nr,
 		int unittest_nr, int before, int after,
 		enum overlay_type ovtype)
 {
@@ -2134,6 +2133,19 @@ static int __init of_unittest_apply_overlay_check(int overlay_nr,
 		return -EINVAL;
 	}
 
+	return ovcs_id;
+}
+
+/* apply an overlay while checking before and after states */
+static int __init of_unittest_apply_overlay_check(int overlay_nr,
+		int unittest_nr, int before, int after,
+		enum overlay_type ovtype)
+{
+	int ovcs_id = __of_unittest_apply_overlay_check(overlay_nr,
+				unittest_nr, before, after, ovtype);
+	if (ovcs_id < 0)
+		return ovcs_id;
+
 	return 0;
 }
 
@@ -2144,31 +2156,10 @@ static int __init of_unittest_apply_revert_overlay_check(int overlay_nr,
 {
 	int ret, ovcs_id, save_ovcs_id;
 
-	/* unittest device must be in before state */
-	if (of_unittest_device_exists(unittest_nr, ovtype) != before) {
-		unittest(0, "%s with device @\"%s\" %s\n",
-				overlay_name_from_nr(overlay_nr),
-				unittest_path(unittest_nr, ovtype),
-				!before ? "enabled" : "disabled");
-		return -EINVAL;
-	}
-
-	/* apply the overlay */
-	ovcs_id = 0;
-	ret = of_unittest_apply_overlay(overlay_nr, &ovcs_id);
-	if (ret != 0) {
-		/* of_unittest_apply_overlay already called unittest() */
-		return ret;
-	}
-
-	/* unittest device must be in after state */
-	if (of_unittest_device_exists(unittest_nr, ovtype) != after) {
-		unittest(0, "%s with device @\"%s\" %s\n",
-				overlay_name_from_nr(overlay_nr),
-				unittest_path(unittest_nr, ovtype),
-				!after ? "enabled" : "disabled");
-		return -EINVAL;
-	}
+	ovcs_id = __of_unittest_apply_overlay_check(overlay_nr, unittest_nr,
+						    before, after, ovtype);
+	if (ovcs_id < 0)
+		return ovcs_id;
 
 	/* remove the overlay */
 	save_ovcs_id = ovcs_id;
