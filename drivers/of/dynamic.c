@@ -601,13 +601,16 @@ static int __of_changeset_entry_apply(struct of_changeset_entry *ce)
 
 	__of_changeset_entry_dump(ce);
 
-	raw_spin_lock_irqsave(&devtree_lock, flags);
 	switch (ce->action) {
 	case OF_RECONFIG_ATTACH_NODE:
+		raw_spin_lock_irqsave(&devtree_lock, flags);
 		__of_attach_node(ce->np);
+		raw_spin_unlock_irqrestore(&devtree_lock, flags);
 		break;
 	case OF_RECONFIG_DETACH_NODE:
+		raw_spin_lock_irqsave(&devtree_lock, flags);
 		__of_detach_node(ce->np);
+		raw_spin_unlock_irqrestore(&devtree_lock, flags);
 		break;
 	case OF_RECONFIG_ADD_PROPERTY:
 		/* If the property is in deadprops then it must be removed */
@@ -619,7 +622,9 @@ static int __of_changeset_entry_apply(struct of_changeset_entry *ce)
 			}
 		}
 
+		raw_spin_lock_irqsave(&devtree_lock, flags);
 		ret = __of_add_property(ce->np, ce->prop);
+		raw_spin_unlock_irqrestore(&devtree_lock, flags);
 		if (ret) {
 			pr_err("changeset: add_property failed @%pOF/%s\n",
 				ce->np,
@@ -628,7 +633,9 @@ static int __of_changeset_entry_apply(struct of_changeset_entry *ce)
 		}
 		break;
 	case OF_RECONFIG_REMOVE_PROPERTY:
+		raw_spin_lock_irqsave(&devtree_lock, flags);
 		ret = __of_remove_property(ce->np, ce->prop);
+		raw_spin_unlock_irqrestore(&devtree_lock, flags);
 		if (ret) {
 			pr_err("changeset: remove_property failed @%pOF/%s\n",
 				ce->np,
@@ -647,7 +654,9 @@ static int __of_changeset_entry_apply(struct of_changeset_entry *ce)
 			}
 		}
 
+		raw_spin_lock_irqsave(&devtree_lock, flags);
 		ret = __of_update_property(ce->np, ce->prop, &old_prop);
+		raw_spin_unlock_irqrestore(&devtree_lock, flags);
 		if (ret) {
 			pr_err("changeset: update_property failed @%pOF/%s\n",
 				ce->np,
@@ -658,7 +667,6 @@ static int __of_changeset_entry_apply(struct of_changeset_entry *ce)
 	default:
 		ret = -EINVAL;
 	}
-	raw_spin_unlock_irqrestore(&devtree_lock, flags);
 
 	if (ret)
 		return ret;
