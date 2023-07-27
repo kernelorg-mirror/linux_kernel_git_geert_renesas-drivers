@@ -1,0 +1,78 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for using IRQ[0145] on the Spider Breakout board as keys
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - IRQ0 = CP18
+//   - IRQ1 = CP17
+//   - IRQ4 = CN37 (MSIOF0 PIN HEADER) pin 4
+//   - IRQ5 = CN37 (MSIOF0 PIN HEADER) pin 2
+//   - GND  = CN37 (MSIOF0 PIN HEADER) pin 8
+//
+// Notes:
+//   - Some of these signals are also controlled by the switch board.
+//     Make sure they are high when testing interrupts.
+//   - As IRQ4 is shared with LED7, all leds are disabled first.
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&{/leds} {
+	status = "disabled";
+};
+
+&{/} {
+	keyboard-irq {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&keyboard_irq_pins>;
+		pinctrl-names = "default";
+
+		interrupt-parent = <&intc_ex>;
+
+		key-0 {
+			interrupts = <0 IRQ_TYPE_EDGE_FALLING>;
+			linux,code = <KEY_0>;
+			label = "Breakabout Board CP18";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+
+		key-1 {
+			interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+			linux,code = <KEY_1>;
+			label = "Breakabout Board CP17";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+
+		key-4 {
+			interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
+			linux,code = <KEY_4>;
+			label = "Breakout Board CN37-4";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+
+		key-5 {
+			interrupts = <5 IRQ_TYPE_EDGE_FALLING>;
+			linux,code = <KEY_5>;
+			label = "Breakout Board CN37-2";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
+};
+
+&pfc {
+	keyboard_irq_pins: keyboard-irq {
+		groups = "intc_ex_irq0", "intc_ex_irq1", "intc_ex_irq4",
+			 "intc_ex_irq5";
+		function = "intc_ex";
+	};
+};
