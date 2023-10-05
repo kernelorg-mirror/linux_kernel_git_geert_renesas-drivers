@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+//
+// Device Tree Overlay for Adafuit Red 0.56" 4-Digit 7-Segment FeatherWing
+// Display (Adafruit Product ID 3108) on r8a7740/Armadillo-800 EVA Expansion
+// Interface Connector
+//
+// Copyright (C) 2023 Glider bv
+//
+// Pinout:
+//   - GND = CON15 pin 1 or 2
+//   - 3V3 = CON15 pin 3 or 4
+//   - SCL = CON15 pin 59
+//   - SDA = CON15 pin 60
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/leds/common.h>
+
+&i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	status = "okay";
+
+	display@70 {
+		compatible = "adafruit,3108", "holtek,ht16k33";
+		reg = <0x70>;
+		default-brightness-level = <4>;
+
+		led {
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_BACKLIGHT;
+		};
+	};
+};
