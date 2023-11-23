@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for CMT channel 0 on SH-Mobile and R-Car SoCs
+//
+// Copyright (C) 2023 Glider bv
+
+/dts-v1/;
+/plugin/;
+
+&cmt0 {
+	status = "okay";
+};
