@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for TMU channel 2 on R-Mobile and R-Car SoCs
+//
+// Copyright (C) 2023 Glider bv
+
+/dts-v1/;
+/plugin/;
+
+&tmu2 {
+	status = "okay";
+};
