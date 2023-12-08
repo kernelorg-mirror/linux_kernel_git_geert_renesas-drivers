@@ -16,6 +16,21 @@
 		enable-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
 		max-bitrate = <5000000>;
 	};
+
+	remote-wakeup {
+		compatible = "gpio-keys";
+
+		pinctrl-0 = <&remote_wakeup_pins>;
+		pinctrl-names = "default";
+
+		key-wakeup {
+			gpios = <&gpio8 12 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WAKEUP>;
+			label = "CN4-6";
+			wakeup-source;
+			debounce-interval = <20>;
+		};
+	};
 };
 
 &can_clk {
@@ -61,5 +76,10 @@
 	canfd1_pins: canfd1 {
 		groups = "canfd1_data";
 		function = "canfd1";
+	};
+
+	remote_wakeup_pins: remote-wakeup {
+		pins = "GP_8_12";
+		bias-pull-up;
 	};
 };
