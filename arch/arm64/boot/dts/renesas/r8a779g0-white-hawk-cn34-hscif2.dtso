@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for HSCIF2 on White Hawk I2C CN CN34
+//
+// Copyright (C) 2024 Glider bv
+//
+// Pinout:
+//   - TXD  = CN34 pin 10
+//   - RXD  = CN34 pin 8
+//
+//   - GND  = CN34 pin 2
+//
+//  Notes:
+//    - As these pins are intended for I2C4 on White Hawk, and signals pass
+//	through a PCA9517ADP bi-directional level-translator, high clock rates
+//	do not work well.
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	hscif2_pins: hscif2 {
+		groups = "hscif2_data";
+		function = "hscif2";
+	};
+};
+
+&hscif2 {
+	pinctrl-0 = <&hscif2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
