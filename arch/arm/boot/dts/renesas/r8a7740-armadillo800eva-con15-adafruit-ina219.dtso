@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+//
+// Device Tree Overlay for Adafuit INA219 High Side DC Current Sensor Breakout
+// (Adafruit Product ID 904) on r8a7740/Armadillo-800 EVA Expansion Interface
+// Connector
+//
+// Copyright (C) 2024 Glider bv
+//
+// Pinout:
+//   - GND = CON15 pin 5, 6, 22, 38, or 58
+//   - 3V3 = CON15 pin 3, 4, 37, or 57
+//   - SCL = CON15 pin 59
+//   - SDA = CON15 pin 60
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/leds/common.h>
+
+&i2c1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	status = "okay";
+
+	power-sensor@40 {
+		compatible = "ti,ina219";
+		reg = <0x40>;
+		shunt-resistor = <100000>;
+	};
+};
