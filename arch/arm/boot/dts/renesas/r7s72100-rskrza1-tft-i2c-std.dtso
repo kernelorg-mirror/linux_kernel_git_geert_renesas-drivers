@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: GPL-2.0-only
+//
+// Device Tree Overlay for I2C0 Standard Mode on the TFT LCD Panel Connector
+// (CN44)
+//
+// Copyright (C) 2024 Glider bv
+//
+// Pinout:
+//   - SDA0 = pin 37
+//   - SCL0 = pin 38
+//   - GND  = pin 47/48
+//   - +3V3 = pin 45/46
+//   - +5V  = pin 49/50
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/r7s72100-pinctrl.h>
+
+&pinctrl {
+	i2c0_pins: i2c0 {
+		pinmux = <RZA1_PINMUX(1, 1, 1)>,	/* SDA0 */
+			 <RZA1_PINMUX(1, 0, 1)>;	/* SCL0 */
+	};
+};
+
+&i2c0 {
+	pinctrl-0 = <&i2c0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
