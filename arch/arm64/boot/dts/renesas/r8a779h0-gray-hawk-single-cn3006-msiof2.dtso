@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: GPL-2.0 (GPL-2.0-only OR BSD-2-Clause)
+//
+// Device Tree Overlay for MSIOF2 on Gray Hawk Single MSIOF2 Pin Header CN3006
+//
+// Copyright (C) 2025 Glider bv
+//
+// Pinout:
+//   - SS2  = CN6 pin 1
+//   - SS1  = CN6 pin 2
+//   - SCK  = CN6 pin 3
+//   - SYNC = CN6 pin 4
+//   - RXD  = CN6 pin 5
+//   - TXD  = CN6 pin 6
+//
+//   - GND  = CN4 pin 3/4/7/11
+//   - 3.3V = CN4 pin 9
+
+/dts-v1/;
+/plugin/;
+
+&pfc {
+	msiof2_pins: msiof2 {
+		groups = "msiof2_ss2", "msiof2_ss1", "msiof2_clk",
+			 "msiof2_sync", "msiof2_rxd", "msiof2_txd";
+		function = "msiof2";
+	};
+};
+
+&msiof2 {
+	pinctrl-0 = <&msiof2_pins>;
+	pinctrl-names = "default";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	cn3006@0 {
+		compatible = "renesas,gray-hawk-single-msiof-pin-header";
+		reg = <0>;
+		spi-max-frequency = <200000>;
+	};
+};
