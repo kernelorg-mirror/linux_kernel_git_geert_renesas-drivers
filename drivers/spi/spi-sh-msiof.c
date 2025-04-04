@@ -10,6 +10,7 @@
 #include <linux/bitmap.h>
 #include <linux/clk.h>
 #include <linux/completion.h>
+#include <linux/crc32.h>
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
 #include <linux/dmaengine.h>
@@ -1182,6 +1183,339 @@ static void sh_msiof_release_dma(struct sh_msiof_spi_priv *p)
 	dma_release_channel(ctlr->dma_tx);
 }
 
+static const char *str_name(char *buf, u32 str)
+{
+	sprintf(buf,
+		"%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+		str & BIT(31) ? " B31" : "",
+		str & BIT(30) ? " B30" : "",
+		str & SISTR_TFEMP ? " TFEMP" : "",
+		str & SISTR_TDREQ ? " TDREQ" : "",
+		str & BIT(27) ? " B27" : "",
+		str & BIT(26) ? " B26" : "",
+		str & BIT(25) ? " B25" : "",
+		str & BIT(24) ? " B24" : "",
+		str & SISTR_TEOF ? " TEOF" : "",
+		str & BIT(22) ? " B22" : "",
+		str & SISTR_TFSERR ? " TFSERR" : "",
+		str & SISTR_TFOVF ? " TFOVF" : "",
+		str & SISTR_TFUDF ? " TFUDF" : "",
+		str & BIT(18) ? " B18" : "",
+		str & BIT(17) ? " B17" : "",
+		str & BIT(16) ? " B16" : "",
+		str & BIT(15) ? " B15" : "",
+		str & BIT(14) ? " B14" : "",
+		str & SISTR_RFFUL ? " RFFUL" : "",
+		str & SISTR_RDREQ ? " RDREQ" : "",
+		str & BIT(11) ? " B11" : "",
+		str & BIT(10) ? " B10" : "",
+		str & BIT(9) ? " B9" : "",
+		str & BIT(8) ? " B8" : "",
+		str & SISTR_REOF ? " REOF" : "",
+		str & BIT(6) ? " B6" : "",
+		str & SISTR_RFSERR ? " RFSERR" : "",
+		str & SISTR_RFUDF ? " RFUDF" : "",
+		str & SISTR_RFOVF ? " RFOVF" : "",
+		str & BIT(2) ? " B2" : "",
+		str & BIT(1) ? " B1" : "",
+		str & BIT(0) ? " B0" : "");
+
+	return buf;
+}
+
+static u32 sh_msiof_test_words[1024];
+
+static unsigned int words_written, words_read, mismatches;
+static bool loopback;
+
+static void sh_msiof_test_reset(void)
+{
+	memset(sh_msiof_test_words, 0, sizeof(sh_msiof_test_words));
+	words_written = 0;
+	words_read = 0;
+	mismatches = 0;
+	loopback = true;
+}
+
+static u32 sh_msiof_write_word(struct sh_msiof_spi_priv *p)
+{
+	static const u32 data = 0xdeadc0de;
+	u32 x;
+
+	x = words_written ? sh_msiof_test_words[words_written - 1] : 0;
+	x = crc32_le(x, &data, sizeof(data));
+
+	sh_msiof_write(p, SITFDR, x);
+
+	if (words_written < ARRAY_SIZE(sh_msiof_test_words))
+		sh_msiof_test_words[words_written++] = x;
+
+	return x;
+}
+
+static u32 sh_msiof_read_word(struct sh_msiof_spi_priv *p)
+{
+	u32 x;
+
+	x = sh_msiof_read(p, SIRFDR);
+
+	if (words_read < ARRAY_SIZE(sh_msiof_test_words)) {
+		words_read++;
+
+		if (loopback && x != sh_msiof_test_words[words_read - 1]) {
+			mismatches++;
+			pr_info("Data mismatch: read word %u = 0x%08x != 0x%08x\n",
+				words_read, x,
+				sh_msiof_test_words[words_read - 1]);
+			if (words_read == 1 && (x == 0 || ~x == 0)) {
+				pr_info("Assuming no loopback\n");
+				loopback = false;
+			}
+		}
+	}
+
+	return x;
+}
+
+static void sh_msiof_test(struct sh_msiof_spi_priv *p)
+{
+	unsigned int bitlen, wdlen1, wdlen2, words, tx_fifo_size, rx_fifo_size;
+	u32 tmdr2, tmdr3, rmdr2, rmdr3, fctr, fctr0, str, str0;
+	struct device *dev = &p->pdev->dev;
+	struct spi_transfer t = { 0, };
+	void *dummy_tx = (void *)1;
+	void *dummy_rx = (void *)1;
+	static char buf[160];
+	unsigned int i, j;
+	u32 x, y;
+	int ret;
+
+	sh_msiof_test_reset();
+
+	pm_runtime_get_sync(dev);
+
+	pr_info("--- Initial BITLEN / WDLEN / FUA values ---\n");
+	// BITLEN = 16
+	// WDLEN = 1
+	// TFUA = TX FIFO size (i.e. 256 on R-Car V4H/V4M, 64 everywhere else?)
+	// RFUA = 0
+
+	fctr = sh_msiof_read(p, SIFCTR);
+	tmdr2 = sh_msiof_read(p, SITMDR2);
+	tmdr3 = sh_msiof_read(p, SITMDR3);
+	pr_info("TX: BITLEN1 %lu WDLEN1 %lu BITLEN2 %lu WDLEN2 %lu FUA %lu\n",
+		FIELD_GET(SIMDR2_BITLEN1, tmdr2) + 1,
+		FIELD_GET(SIMDR2_WDLEN1, tmdr2) + 1,
+		FIELD_GET(SIMDR3_BITLEN2, tmdr3) + 1,
+		FIELD_GET(SIMDR3_WDLEN2, tmdr3) + 1,
+		FIELD_GET(SIFCTR_TFUA, fctr));
+	rmdr2 = sh_msiof_read(p, SITMDR2);
+	rmdr3 = sh_msiof_read(p, SITMDR3);
+	pr_info("RX: BITLEN1 %lu WDLEN1 %lu BITLEN2 %lu WDLEN2 %lu FUA %lu\n",
+		FIELD_GET(SIMDR2_BITLEN1, rmdr2) + 1,
+		FIELD_GET(SIMDR2_WDLEN1, rmdr2) + 1,
+		FIELD_GET(SIMDR3_BITLEN2, rmdr3) + 1,
+		FIELD_GET(SIMDR3_WDLEN2, rmdr3) + 1,
+		FIELD_GET(SIFCTR_RFUA, fctr));
+
+	tx_fifo_size = FIELD_GET(SIFCTR_TFUA, fctr);
+
+	pr_info("--- WDLEN valid values test ---\n");
+	// => Everything sticks, no conclusion
+
+	for (wdlen1 = 1; wdlen1 <= 256; wdlen1 *= 2) {
+		static const struct {
+			unsigned int offset;
+			const char *name;
+		} sixmdrx[] = {
+			{ SITMDR2, "SITMDR2" },
+			{ SITMDR3, "SITMDR3" },
+			{ SIRMDR2, "SIRMDR2" },
+			{ SIRMDR3, "SIRMDR3" },
+		};
+
+		pr_info("WDLEN %u\n", wdlen1);
+
+		for (i = 0; i < ARRAY_SIZE(sixmdrx); i++) {
+			x = sh_msiof_read(p, sixmdrx[i].offset);
+			x &= ~SIMDR2_WDLEN1;
+			x |= FIELD_PREP(SIMDR2_WDLEN1, wdlen1 - 1);
+			sh_msiof_write(p, sixmdrx[i].offset, x);
+
+			y = sh_msiof_read(p, sixmdrx[i].offset);
+			if (x != y)
+				pr_info("%s: expected 0x%08x got 0x%08x\n",
+					sixmdrx[i].name, x, y);
+		}
+	}
+
+	pr_info("--- Setup ---\n");
+
+	sh_msiof_spi_reset_regs(p);
+
+	sh_msiof_spi_set_pin_regs(p, /* ss */ 0, /* cpol */ false,
+				  /* cpha */ false, /* tx_hi_z */ false,
+				  /* lsb_first */ false, /* cs_high */ false);
+
+	t.speed_hz = 100000;
+	sh_msiof_spi_set_clk_regs(p, &t);
+
+	sh_msiof_write(p, SIFCTR, 0);
+
+	bitlen = FIELD_MAX(SIMDR2_BITLEN1) + 1;
+	wdlen1 = FIELD_MAX(SIMDR2_WDLEN1) + 1;
+	wdlen2 = 0;
+	words = FIELD_MAX(SIMDR2_WDLEN1) + 1;
+	pr_info("Using word size %u and counts %u+%u to transfer %u words\n",
+		bitlen, wdlen1, wdlen2, words);
+	sh_msiof_spi_set_mode_regs(p, dummy_tx, dummy_rx, bitlen, wdlen1,
+				   wdlen2);
+
+	pr_info("--- Fill TX FIFO ---\n");
+
+	fctr0 = sh_msiof_read(p, SIFCTR);
+
+	for (i = 0; i < 1024; i++) {
+		x = sh_msiof_write_word(p);
+
+		for (j = 0; j < 10000; j++) {
+			fctr = sh_msiof_read(p, SIFCTR);
+			if (fctr != fctr0)
+				break;
+			udelay(1);
+		}
+
+		pr_info("Wrote word %u (0x%08x): TFUA %lu RFUA %lu\n",
+			words_written, x, FIELD_GET(SIFCTR_TFUA, fctr),
+			FIELD_GET(SIFCTR_RFUA, fctr));
+
+		if (fctr == fctr0) {
+			pr_info("No change in FCTR, aborting\n");
+			break;
+		}
+
+		if (FIELD_GET(SIFCTR_TFUA, fctr) == 0) {
+			pr_info("TX FIFO full\n");
+			break;
+		}
+
+		fctr0 = fctr;
+	}
+
+	if (words_written != tx_fifo_size)
+		pr_err("Wrote %u words != TX fifo size %u\n", words_written,
+		       tx_fifo_size);
+
+	pr_info("--- Start transmission ---\n");
+
+	ret = sh_msiof_modify_ctr_wait(p, 0, SICTR_TSCKE);
+	pr_info("TSCKE enable: %pe\n", ERR_PTR(ret));
+
+	ret = sh_msiof_modify_ctr_wait(p, 0, SICTR_RXE);
+	pr_info("RXE enable: %pe\n", ERR_PTR(ret));
+
+	ret = sh_msiof_modify_ctr_wait(p, 0, SICTR_TXE);
+	pr_info("TXE enable: %pe\n", ERR_PTR(ret));
+
+	str0 = sh_msiof_read(p, SISTR);
+	pr_info("STR 0x%x%s\n", str0, str_name(buf, str0));
+
+	ret = sh_msiof_modify_ctr_wait(p, 0, SICTR_TFSE);
+	pr_info("TFSE enable: %pe\n", ERR_PTR(ret));
+
+	pr_info("--- Wait for full RX FIFO, refill TX FIFO ---\n");
+
+	for (i = 0; i < 1024; i++) {
+		for (j = 0; j < 10000; j++) {
+			fctr = sh_msiof_read(p, SIFCTR);
+			str = sh_msiof_read(p, SISTR);
+			if (fctr != fctr0 || str != str0)
+				break;
+			udelay(1);
+		}
+
+		pr_info("TFUA %lu RFUA %lu STR 0x%x%s\n",
+			FIELD_GET(SIFCTR_TFUA, fctr),
+			FIELD_GET(SIFCTR_RFUA, fctr), str,
+			str_name(buf, str));
+
+		if (fctr == fctr0 && str == str0) {
+			pr_info("No change in FCTR/STR, aborting\n");
+			break;
+		}
+
+		if (str & SISTR_RFFUL) {
+			pr_info("RX FIFO full\n");
+			break;
+		}
+
+		if (words_written < words && FIELD_GET(SIFCTR_TFUA, fctr)) {
+			for (j = 0; words_written < words &&
+				    FIELD_GET(SIFCTR_TFUA, fctr); j++) {
+				x = sh_msiof_write_word(p);
+				fctr = sh_msiof_read(p, SIFCTR);
+			}
+			pr_info("Wrote words %u-%u\n", words_written - j + 1,
+				words_written);
+		}
+
+		fctr0 = fctr;
+		str0 = str;
+	}
+
+	rx_fifo_size = FIELD_GET(SIFCTR_RFUA, fctr);
+
+	pr_info("--- Empty RX FIFO ---\n");
+
+	for (i = 0; i < 1024; i++) {
+		if (FIELD_GET(SIFCTR_RFUA, fctr) == 0) {
+			pr_info("RX FIFO empty\n");
+			break;
+		}
+
+		x = sh_msiof_read_word(p);
+
+		fctr = sh_msiof_read(p, SIFCTR);
+		str = sh_msiof_read(p, SISTR);
+		pr_info("Read word %u (0x%02x): TFUA %lu RFUA %lu STR 0x%x%s\n",
+			words_read, x, FIELD_GET(SIFCTR_TFUA, fctr),
+			FIELD_GET(SIFCTR_RFUA, fctr), str, str_name(buf, str));
+	}
+
+	if (words_read != rx_fifo_size)
+		pr_err("Read %u words != RX fifo size %u\n", words_read,
+		       rx_fifo_size);
+
+	pr_info("--- Shutdown ---\n");
+
+	ret = sh_msiof_modify_ctr_wait(p, SICTR_TFSE, 0);
+	pr_info("TFSE disable: %pe\n", ERR_PTR(ret));
+
+	ret = sh_msiof_modify_ctr_wait(p, SICTR_RXE, 0);
+	pr_info("RXE disable: %pe\n", ERR_PTR(ret));
+
+	ret = sh_msiof_modify_ctr_wait(p, SICTR_TXE, 0);
+	pr_info("TXE disable: %pe\n", ERR_PTR(ret));
+
+	ret = sh_msiof_modify_ctr_wait(p, 0, SICTR_TSCKE);
+	pr_info("TSCKE disable: %pe\n", ERR_PTR(ret));
+
+	pr_info("--- Test summary ---\n");
+
+	pr_info("FIFO can hold %u TX words and %u RX words\n", tx_fifo_size,
+		rx_fifo_size);
+	if (loopback)
+		pr_info("Wrote %u words, read %u words, %u mismatches\n",
+			words_written, words_read, mismatches);
+	else
+		pr_info("Wrote %u words, read %u words (no loopback)\n",
+			words_written, words_read);
+
+	pr_info("--- Done ---\n");
+
+	pm_runtime_put(dev);
+}
+
 static int sh_msiof_spi_probe(struct platform_device *pdev)
 {
 	struct spi_controller *ctlr;
@@ -1295,6 +1629,8 @@ static int sh_msiof_spi_probe(struct platform_device *pdev)
 		dev_err(dev, "devm_spi_register_controller error.\n");
 		goto err2;
 	}
+
+	if (0) sh_msiof_test(p);
 
 	return 0;
 
