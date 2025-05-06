@@ -7,7 +7,6 @@
  * Copyright (C) 2014-2017 Glider bvba
  */
 
-#include <linux/bitfield.h>
 #include <linux/bitmap.h>
 #include <linux/clk.h>
 #include <linux/completion.h>
