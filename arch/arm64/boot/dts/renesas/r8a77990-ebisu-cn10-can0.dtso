@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-2.0
+//
+// Device Tree Overlay for CAN0 on Ebisu CAN Connector CN10
+//
+// Copyright (C) 2025 Glider bv
+//
+// Pinout:
+//   - CANH = CN10 pin 1
+//   - CANL = CN10 pin 2
+//   - 5.0V = CN10 pin 3
+//   - GND  = CN10 pin 4
+//
+// Note: As these pins are shared with CAN-FD Channel 0, the latter is
+//       disabled first.
+
+/dts-v1/;
+/plugin/;
+
+&canfd {
+	status = "disabled";
+};
+
+&can0 {
+	status = "okay";
+};
