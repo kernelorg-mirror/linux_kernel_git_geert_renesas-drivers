@@ -1,0 +1,11 @@
+Local     / mailbox: remove unneeded double quotation
+v6.19     / media: i2c: imx219: Replace exposure magic value with named constant
+v6.19     / media: i2c: imx219: Propagate errors from control range updates
+v6.19     / media: i2c: imx219: Simplify imx219_get_binning() function
+v6.19     / drm/panel: ilitek-ili9881c: Add configuration for 5" Raspberry Pi 720x1280
+v6.19     / drm/panel: ilitek-ili9881c: Turn ILI9881C_COMMAND_INSTR() parameters lowercase
+v6.19     / arm64: dts: renesas: sparrow-hawk: Add overlay for RPi Display 2
+v6.19     / arm64: dts: renesas: sparrow-hawk: Add overlay for Argon40 fan HAT
+v6.19     / tools: arm64: Add Cortex-A720AE definitions
+v6.19     / arm64: dts: renesas: r8a78000: Add initial Ironhide board support
+v6.19     / arm64: dts: renesas: Add R8A78000 SoC support
