@@ -669,6 +669,7 @@
 	firmware {
 		scmi: scmi {
 			compatible = "arm,scmi";
+			arm,no-completion-irq;
 			#address-cells = <1>;
 			#size-cells = <0>;
 
