@@ -391,11 +391,9 @@ struct mfis_info mfis_info_gen5 = {
 };
 
 static const struct of_device_id mfis_mfd_of_match[] = {
-	{ .compatible = "renesas,rcar-gen4-mfis",		.data = &mfis_info_gen4, },
-	{ .compatible = "renesas,r8a78000-es1.0-mfis-scp",	.data = &mfis_info_gen5, },
-	{ .compatible = "renesas,r8a78000-es1.0-mfis",		.data = &mfis_info_gen5, },
-	{ .compatible = "renesas,rcar-gen5-mfis-scp",		.data = &mfis_info_gen5, },	/* will be changed */
-	{ .compatible = "renesas,rcar-gen5-mfis",		.data = &mfis_info_gen5, },	/* will be changed */
+	{ .compatible = "renesas,rcar-gen4-mfis",	.data = &mfis_info_gen4, },
+	{ .compatible = "renesas,r8a78000-mfis-scp",	.data = &mfis_info_gen5, },
+	{ .compatible = "renesas,r8a78000-mfis",	.data = &mfis_info_gen5, },
 	{}
 };
 MODULE_DEVICE_TABLE(of, mfis_mfd_of_match);
