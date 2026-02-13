@@ -695,7 +695,7 @@
 		ranges;
 
 		mfis: syscon@189e0000 {
-			compatible = "renesas,r8a78000-es1.0-mfis", "renesas,rcar-gen5-mfis";
+			compatible = "renesas,r8a78000-mfis";
 			reg = <0 0x189e0000 0 0x1000>, <0 0x18800000 0 0x40000>;
 			reg-names = "common", "mboxes";
 			status = "disabled";
@@ -782,7 +782,7 @@
 		};
 
 		mfis_scp: syscon@189e1000 {
-			compatible = "renesas,r8a78000-es1.0-mfis-scp", "renesas,rcar-gen5-mfis-scp";
+			compatible = "renesas,r8a78000-mfis-scp";
 			reg = <0 0x189e1000 0 0x1000>, <0 0x18840000 0 0x2c000>;
 			reg-names = "common", "mboxes";
 			status = "disabled";
