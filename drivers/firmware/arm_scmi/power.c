@@ -12,6 +12,7 @@
 
 #include "protocols.h"
 #include "notify.h"
+#include "quirks.h"
 
 /* Updated only after ALL the mandatory features for that version are merged */
 #define SCMI_PROTOCOL_SUPPORTED_VERSION		0x30001
@@ -152,12 +153,31 @@ dev_err(ph->dev, "%s[%d]<%u =name %s>\n", __func__, __LINE__, domain, dom_info->
 	return ret;
 }
 
+#define QUIRK_RCAR_X5H_BAD_DOMAINS					\
+	({								\
+		switch (domain) {					\
+		/* Do not touch */					\
+		case 29:	/* PD_RC08 */				\
+		case 92:	/* PD_ACL0 */				\
+		case 116:	/* PD_CMN */				\
+			return -EPERM;					\
+									\
+		/* Do not power off */					\
+		case 76:	/* PD_AC00 */				\
+			if (state == SCMI_POWER_STATE_GENERIC_OFF)	\
+				return -EPERM;				\
+			break;						\
+		}							\
+	})
+
 static int scmi_power_state_set(const struct scmi_protocol_handle *ph,
 				u32 domain, u32 state)
 {
 	int ret;
 	struct scmi_xfer *t;
 	struct scmi_power_set_state *st;
+
+	SCMI_QUIRK(power_rcar_x5h_bad_domains, QUIRK_RCAR_X5H_BAD_DOMAINS);
 
 	ret = ph->xops->xfer_get_init(ph, POWER_STATE_SET, sizeof(*st), 0, &t);
 	if (ret)
