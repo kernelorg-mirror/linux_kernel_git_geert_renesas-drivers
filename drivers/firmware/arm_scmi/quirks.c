@@ -176,6 +176,8 @@ DEFINE_SCMI_QUIRK(clock_rcar_x5h_4_28, "Renesas", NULL, "0x10a0000",
 DEFINE_SCMI_QUIRK(clock_rcar_x5h_4_31, "Renesas", NULL, "0x10d0000-0x10e0000",
 		  "renesas,r8a78000");
 DEFINE_SCMI_QUIRK(perf_level_get_fc_force, "Qualcomm", NULL, "0x20000-");
+DEFINE_SCMI_QUIRK(power_rcar_x5h_4_28, "Renesas", NULL, "0x10a0000-0x10e0000",
+		  "renesas,r8a78000");
 
 /*
  * Quirks Pointers Array
@@ -188,6 +190,7 @@ static struct scmi_quirk *scmi_quirks_table[] = {
 	__DECLARE_SCMI_QUIRK_ENTRY(clock_rcar_x5h_4_28),
 	__DECLARE_SCMI_QUIRK_ENTRY(clock_rcar_x5h_4_31),
 	__DECLARE_SCMI_QUIRK_ENTRY(perf_level_get_fc_force),
+	__DECLARE_SCMI_QUIRK_ENTRY(power_rcar_x5h_4_28),
 	NULL
 };
 
