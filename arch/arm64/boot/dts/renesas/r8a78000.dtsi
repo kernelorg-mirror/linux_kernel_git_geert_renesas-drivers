@@ -673,9 +673,24 @@
 			#size-cells = <0>;
 
 			/* mbox-names, mboxes, shmem must be set per board file */
+
+			scmi_devpd: protocol@11 {
+			    reg = <0x11>;
+			    #power-domain-cells = <1>;
+			};
+
+			scmi_sys: protocol@12 {
+			    reg = <0x12>;
+			};
+
 			scmi_clk: protocol@14 {
 				reg = <0x14>;
 				#clock-cells = <1>;
+			};
+
+			scmi_reset: protocol@16 {
+			    reg = <0x16>;
+			    #reset-cells = <1>;
 			};
 		};
 	};
