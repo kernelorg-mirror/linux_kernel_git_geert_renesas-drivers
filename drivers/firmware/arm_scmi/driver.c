@@ -3512,7 +3512,7 @@ int scmi_inflight_count(const struct scmi_handle *handle)
  *
  * Check if an SCMI device has been instantiated for the passed device node
  * pointer, and, if found, return its base info.
-
+ *
  * Return: 0 on Success or -ENOENT.
  */
 int scmi_get_base_info(struct device_node *of_node,
