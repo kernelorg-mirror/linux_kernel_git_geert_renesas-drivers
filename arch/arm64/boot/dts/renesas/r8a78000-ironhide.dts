@@ -15,6 +15,9 @@
 
 	aliases {
 		serial0 = &hscif0;
+		serial1 = &hscif1;
+		serial2 = &scif0;	// FIXME
+		serial3 = &scif1;	// FIXME
 	};
 
 	chosen {
@@ -138,6 +141,11 @@
 		compatible = "arm,scmi-shmem";
 		reg = <0x61300 0x100>;
 	};
+};
+
+&hscif1 {
+	uart-has-rtscts;
+	status = "okay";
 };
 
 &mdlc_aon {
@@ -275,4 +283,12 @@
 
 &scif_clk {
 	clock-frequency = <26000000>;
+};
+
+&scif0 {
+	status = "okay";	// FIXME
+};
+
+&scif1 {
+	status = "okay";	// FIXME
 };
