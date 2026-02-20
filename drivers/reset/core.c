@@ -999,6 +999,20 @@ static struct reset_controller_dev *__reset_find_rcdev(const struct of_phandle_a
 	return NULL;
 }
 
+struct reset_controller_dev *
+reset_controller_get_provider(struct device_node *np)
+{
+	struct of_phandle_args args = { .np = np };
+	struct reset_controller_dev *rcdev;
+
+	mutex_lock(&reset_list_mutex);
+	rcdev = __reset_find_rcdev(&args, false);
+	mutex_unlock(&reset_list_mutex);
+
+	return rcdev;
+}
+EXPORT_SYMBOL_GPL(reset_controller_get_provider);
+
 struct reset_control *
 __of_reset_control_get(struct device_node *node, const char *id, int index,
 		       enum reset_control_flags flags)
