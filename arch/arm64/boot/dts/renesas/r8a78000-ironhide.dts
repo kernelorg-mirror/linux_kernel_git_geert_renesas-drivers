@@ -30,6 +30,37 @@
 		stdout-path = "serial0:1843200n8";
 	};
 
+	firmware {
+		scmi: scmi {
+			compatible = "arm,scmi";
+			arm,no-completion-irq;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			mboxes = <&mfis_scp 2 MFIS_CHANNEL_TX>, <&mfis_scp 2 MFIS_CHANNEL_RX>;
+			mbox-names = "tx", "rx";
+			shmem = <&scp_lpri0>, <&scp_hpri0>;
+
+			scmi_devpd: protocol@11 {
+			    reg = <0x11>;
+			    #power-domain-cells = <1>;
+			};
+
+			scmi_sys: protocol@12 {
+			    reg = <0x12>;
+			};
+
+			scmi_clk: protocol@14 {
+				reg = <0x14>;
+				#clock-cells = <1>;
+			};
+
+			scmi_reset: protocol@16 {
+			    reg = <0x16>;
+			    #reset-cells = <1>;
+			};
+		};
+	};
+
 	memory@60600000 {
 		device_type = "memory";
 		/* first 518MiB is reserved for other purposes. */
@@ -91,12 +122,6 @@
 			 <&mfis 0 (MFIS_CHANNEL_IICR | MFIS_CHANNEL_RX)>;
 		mbox-names = "tx", "rx";
 	 };
-};
-
-&scmi {
-	mboxes = <&mfis_scp 2 MFIS_CHANNEL_TX>, <&mfis_scp 2 MFIS_CHANNEL_RX>;
-	mbox-names = "tx", "rx";
-	shmem = <&scp_lpri0>, <&scp_hpri0>;
 };
 
 &scp_sram {
