@@ -1232,6 +1232,18 @@ static const struct scmi_protocol_events clk_protocol_events = {
 	.num_events = ARRAY_SIZE(clk_events),
 };
 
+#define QUIRK_RCAR_X5H_NO_ATTRIBUTES					\
+	({								\
+		if (ret == -EREMOTEIO || ret == -EOPNOTSUPP)		\
+			continue;					\
+	})
+
+#define QUIRK_RCAR_X5H_NO_RATES						\
+	({								\
+		if (ret == -EOPNOTSUPP)					\
+			ret = 0;					\
+	})
+
 static int scmi_clock_protocol_init(const struct scmi_protocol_handle *ph)
 {
 	int clkid, ret;
@@ -1256,10 +1268,12 @@ static int scmi_clock_protocol_init(const struct scmi_protocol_handle *ph)
 	for (clkid = 0; clkid < cinfo->num_clocks; clkid++) {
 		cinfo->clkds[clkid].id = clkid;
 		ret = scmi_clock_attributes_get(ph, clkid, cinfo);
+		SCMI_QUIRK(clock_rcar_x5h_no_attributes, QUIRK_RCAR_X5H_NO_ATTRIBUTES);
 		if (ret)
 			return ret;
 
 		ret = scmi_clock_describe_rates_get(ph, clkid, cinfo);
+		SCMI_QUIRK(clock_rcar_x5h_no_attributes, QUIRK_RCAR_X5H_NO_RATES);
 		if (ret)
 			return ret;
 	}
