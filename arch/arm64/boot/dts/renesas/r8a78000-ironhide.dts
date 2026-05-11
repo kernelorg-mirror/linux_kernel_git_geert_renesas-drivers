@@ -15,9 +15,6 @@
 
 	aliases {
 		serial0 = &hscif0;
-		serial1 = &hscif1;
-		serial2 = &scif0;	// FIXME
-		serial3 = &scif1;	// FIXME
 	};
 
 	chosen {
@@ -131,11 +128,6 @@
 };
 
 &hscif0 {
-	uart-has-rtscts;
-	status = "okay";
-};
-
-&hscif1 {
 	uart-has-rtscts;
 	status = "okay";
 };
@@ -262,14 +254,6 @@
 
 &scif_clk {
 	clock-frequency = <26000000>;
-};
-
-&scif0 {
-	status = "okay";	// FIXME
-};
-
-&scif1 {
-	status = "okay";	// FIXME
 };
 
 &scp_sram {
