@@ -351,8 +351,12 @@ static struct amd_iommu *__rlookup_amd_iommu(u16 seg, u16 devid)
 	struct amd_iommu_pci_seg *pci_seg;
 
 	for_each_pci_segment(pci_seg) {
-		if (pci_seg->id == seg)
-			return pci_seg->rlookup_table[devid];
+		if (pci_seg->id != seg)
+			continue;
+		/* IVRS may not describe every device on the bus */
+		if (devid > pci_seg->last_bdf)
+			return NULL;
+		return pci_seg->rlookup_table[devid];
 	}
 	return NULL;
 }
@@ -3082,9 +3086,6 @@ static void amd_iommu_get_resv_regions(struct device *dev,
 			prot |= IOMMU_READ;
 		if (entry->prot & IOMMU_PROT_IW)
 			prot |= IOMMU_WRITE;
-		if (entry->prot & IOMMU_UNITY_MAP_FLAG_EXCL_RANGE)
-			/* Exclusion range */
-			type = IOMMU_RESV_RESERVED;
 
 		region = iommu_alloc_resv_region(entry->address_start,
 						 length, prot, type,
