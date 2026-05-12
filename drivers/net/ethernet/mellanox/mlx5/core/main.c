@@ -597,6 +597,9 @@ static int handle_hca_cap(struct mlx5_core_dev *dev, void *set_ctx)
 	if (MLX5_CAP_GEN_MAX(dev, release_all_pages))
 		MLX5_SET(cmd_hca_cap, set_hca_cap, release_all_pages, 1);
 
+	if (MLX5_CAP_GEN_MAX(dev, icm_mng_function_id_mode))
+		MLX5_SET(cmd_hca_cap, set_hca_cap, icm_mng_function_id_mode, 1);
+
 	if (MLX5_CAP_GEN_MAX(dev, mkey_by_name))
 		MLX5_SET(cmd_hca_cap, set_hca_cap, mkey_by_name, 1);
 
@@ -987,11 +990,12 @@ static int mlx5_init_once(struct mlx5_core_dev *dev)
 		mlx5_core_err(dev, "Failed to init eswitch %d\n", err);
 		goto err_sriov_cleanup;
 	}
+	mlx5_pages_by_func_type_debugfs_init(dev);
 
 	err = mlx5_fpga_init(dev);
 	if (err) {
 		mlx5_core_err(dev, "Failed to init fpga device %d\n", err);
-		goto err_eswitch_cleanup;
+		goto err_page_debugfs_cleanup;
 	}
 
 	err = mlx5_vhca_event_init(dev);
@@ -1034,7 +1038,8 @@ err_sf_hw_table_cleanup:
 	mlx5_vhca_event_cleanup(dev);
 err_fpga_cleanup:
 	mlx5_fpga_cleanup(dev);
-err_eswitch_cleanup:
+err_page_debugfs_cleanup:
+	mlx5_pages_by_func_type_debugfs_cleanup(dev);
 	mlx5_eswitch_cleanup(dev->priv.eswitch);
 err_sriov_cleanup:
 	mlx5_sriov_cleanup(dev);
@@ -1072,6 +1077,7 @@ static void mlx5_cleanup_once(struct mlx5_core_dev *dev)
 	mlx5_sf_hw_table_cleanup(dev);
 	mlx5_vhca_event_cleanup(dev);
 	mlx5_fpga_cleanup(dev);
+	mlx5_pages_by_func_type_debugfs_cleanup(dev);
 	mlx5_eswitch_cleanup(dev->priv.eswitch);
 	mlx5_sriov_cleanup(dev);
 	mlx5_mpfs_cleanup(dev);
@@ -1817,6 +1823,10 @@ int mlx5_mdev_init(struct mlx5_core_dev *dev, int profile_idx)
 	priv->dbg.dbg_root = debugfs_create_dir(dev_name(dev->device),
 						mlx5_debugfs_root);
 
+	err = mlx5_frag_buf_pools_init(dev);
+	if (err)
+		goto err_frag_buf_pools_init;
+
 	INIT_LIST_HEAD(&priv->traps);
 
 	err = mlx5_cmd_init(dev);
@@ -1878,6 +1888,8 @@ err_health_init:
 err_timeout_init:
 	mlx5_cmd_cleanup(dev);
 err_cmd_init:
+	mlx5_frag_buf_pools_cleanup(dev);
+err_frag_buf_pools_init:
 	debugfs_remove(dev->priv.dbg.dbg_root);
 	mutex_destroy(&priv->pgdir_mutex);
 	mutex_destroy(&priv->alloc_mutex);
@@ -1902,6 +1914,7 @@ void mlx5_mdev_uninit(struct mlx5_core_dev *dev)
 	mlx5_health_cleanup(dev);
 	mlx5_tout_cleanup(dev);
 	mlx5_cmd_cleanup(dev);
+	mlx5_frag_buf_pools_cleanup(dev);
 	debugfs_remove_recursive(dev->priv.dbg.dbg_root);
 	mutex_destroy(&priv->pgdir_mutex);
 	mutex_destroy(&priv->alloc_mutex);
