@@ -8,6 +8,7 @@
 #define pr_fmt(fmt) "SCMI Notifications POWER - " fmt
 
 #include <linux/module.h>
+#include <linux/pm_domain.h>
 #include <linux/scmi_protocol.h>
 
 #include "protocols.h"
@@ -147,6 +148,9 @@ scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
 					    domain, NULL, dom_info->info.name,
 					    SCMI_MAX_STR_SIZE);
 	}
+
+	if (!ret && !dom_info->state_set_async && !dom_info->state_set_sync)
+		dom_info->info.genpd_flags |= GENPD_FLAG_ALWAYS_ON;
 
 	return ret;
 }

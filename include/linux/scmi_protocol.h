@@ -193,6 +193,7 @@ struct scmi_perf_proto_ops {
 
 struct scmi_power_domain_info {
 	char name[SCMI_MAX_STR_SIZE];
+	unsigned int genpd_flags;
 };
 
 /**
