@@ -7,6 +7,7 @@
 
 #include <linux/bits.h>
 #include <linux/clk-provider.h>
+#include <linux/clk/scmi.h>
 #include <linux/device.h>
 #include <linux/err.h>
 #include <linux/of.h>
@@ -363,6 +364,14 @@ scmi_clk_ops_select(struct scmi_clk *sclk, bool atomic_capable,
 
 	return ops;
 }
+
+bool scmi_clk_is_pm_clk(struct clk *clk)
+{
+	struct clk_hw *hw = __clk_get_hw(clk);
+
+	return hw && to_scmi_clk(hw)->info->pm_clk;
+}
+EXPORT_SYMBOL_GPL(scmi_clk_is_pm_clk);
 
 static int scmi_clocks_probe(struct scmi_device *sdev)
 {
