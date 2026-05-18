@@ -5,9 +5,12 @@
  * Copyright (C) 2018-2021 ARM Ltd.
  */
 
+#include <linux/clk.h>
+#include <linux/clk/scmi.h>
 #include <linux/err.h>
 #include <linux/io.h>
 #include <linux/module.h>
+#include <linux/pm_clock.h>
 #include <linux/pm_domain.h>
 #include <linux/scmi_protocol.h>
 
@@ -16,6 +19,7 @@ static const struct scmi_power_proto_ops *power_ops;
 struct scmi_pm_domain {
 	struct generic_pm_domain genpd;
 	const struct scmi_protocol_handle *ph;
+	struct device_node *clock_domain;
 	const char *name;
 	u32 domain;
 };
@@ -39,6 +43,67 @@ static int scmi_pd_power_off(struct generic_pm_domain *domain)
 	return scmi_pd_power(domain, SCMI_POWER_STATE_GENERIC_OFF);
 }
 
+static int scmi_pd_attach_dev(struct generic_pm_domain *domain,
+			      struct device *dev)
+{
+	struct scmi_pm_domain *pd = to_scmi_pd(domain);
+	struct device_node *np = dev->of_node;
+	struct of_phandle_args clkspec;
+	bool once = true;
+	struct clk *clk;
+	int ret;
+
+	for (int i = 0;
+	     !of_parse_phandle_with_args(np, "clocks", "#clock-cells", i, &clkspec);
+	     i++) {
+		if (clkspec.np != pd->clock_domain || clkspec.args_count != 1) {
+			of_node_put(clkspec.np);
+			continue;
+		}
+
+		clk = of_clk_get_from_provider(&clkspec);
+		of_node_put(clkspec.np);
+		if (!clk)
+			continue;
+
+		if (IS_ERR(clk)) {
+			ret = PTR_ERR(clk);
+			clk = NULL;
+			goto fail;
+		}
+
+		if (!scmi_clk_is_pm_clk(clk)) {
+			clk_put(clk);
+			continue;
+		}
+
+		if (once) {
+			once = false;
+			ret = pm_clk_create(dev);
+			if (ret)
+				goto fail;
+		}
+
+		ret = pm_clk_add_clk(dev, clk);
+		if (ret)
+			goto fail;
+	}
+
+	return 0;
+
+fail:
+	pm_clk_destroy(dev);
+	clk_put(clk);
+	return ret;
+}
+
+static void scmi_pd_detach_dev(struct generic_pm_domain *domain,
+			       struct device *dev)
+{
+	if (!pm_clk_no_clocks(dev))
+		pm_clk_destroy(dev);
+}
+
 static int scmi_pm_domain_probe(struct scmi_device *sdev)
 {
 	int num_domains, i, ret;
@@ -48,6 +113,7 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 	struct genpd_onecell_data *scmi_pd_data;
 	struct generic_pm_domain **domains;
 	const struct scmi_handle *handle = sdev->handle;
+	struct device_node *clock_domain;
 	struct scmi_protocol_handle *ph;
 
 	if (!handle)
@@ -74,6 +140,8 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 	domains = devm_kcalloc(dev, num_domains, sizeof(*domains), GFP_KERNEL);
 	if (!domains)
 		return -ENOMEM;
+
+	clock_domain = of_parse_phandle(np, "arm,clock-domain", 0);
 
 	for (i = 0; i < num_domains; i++, scmi_pd++) {
 		const struct scmi_power_domain_info *info;
@@ -106,12 +174,20 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 		scmi_pd->genpd.power_on = scmi_pd_power_on;
 		scmi_pd->genpd.flags = GENPD_FLAG_ACTIVE_WAKEUP |
 				       info->genpd_flags;
+		if (clock_domain) {
+			scmi_pd->clock_domain = of_node_get(clock_domain);
+			scmi_pd->genpd.attach_dev = scmi_pd_attach_dev;
+			scmi_pd->genpd.detach_dev = scmi_pd_detach_dev;
+			scmi_pd->genpd.flags |= GENPD_FLAG_PM_CLK;
+		}
 
 		pm_genpd_init(&scmi_pd->genpd, NULL,
 			      state == SCMI_POWER_STATE_GENERIC_OFF);
 
 		domains[i] = &scmi_pd->genpd;
 	}
+
+	of_node_put(clock_domain);
 
 	scmi_pd_data->domains = domains;
 	scmi_pd_data->num_domains = num_domains;
@@ -134,8 +210,10 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 
 	return 0;
 err_rm_genpds:
-	for (i = num_domains - 1; i >= 0; i--)
+	for (i = num_domains - 1; i >= 0; i--) {
 		pm_genpd_remove(domains[i]);
+		of_node_put(to_scmi_pd(domains[i])->clock_domain);
+	}
 
 	return ret;
 }
@@ -158,6 +236,7 @@ static void scmi_pm_domain_remove(struct scmi_device *sdev)
 		if (!scmi_pd_data->domains[i])
 			continue;
 		pm_genpd_remove(scmi_pd_data->domains[i]);
+		of_node_put(to_scmi_pd(scmi_pd_data->domains[i])->clock_domain);
 	}
 }
 
