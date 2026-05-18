@@ -76,7 +76,14 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 		return -ENOMEM;
 
 	for (i = 0; i < num_domains; i++, scmi_pd++) {
+		const struct scmi_power_domain_info *info;
 		u32 state;
+
+		info = power_ops->info_get(ph, i);
+		if (!info) {
+			dev_warn(dev, "failed to get info for domain %d\n", i);
+			continue;
+		}
 
 		if (power_ops->state_get(ph, i, &state)) {
 			dev_warn(dev, "failed to get state for domain %d\n", i);
@@ -93,7 +100,7 @@ static int scmi_pm_domain_probe(struct scmi_device *sdev)
 
 		scmi_pd->domain = i;
 		scmi_pd->ph = ph;
-		scmi_pd->name = power_ops->name_get(ph, i);
+		scmi_pd->name = info->name;
 		scmi_pd->genpd.name = scmi_pd->name;
 		scmi_pd->genpd.power_off = scmi_pd_power_off;
 		scmi_pd->genpd.power_on = scmi_pd_power_on;

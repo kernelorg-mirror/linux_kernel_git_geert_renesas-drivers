@@ -191,19 +191,23 @@ struct scmi_perf_proto_ops {
 	enum scmi_power_scale (*power_scale_get)(const struct scmi_protocol_handle *ph);
 };
 
+struct scmi_power_domain_info {
+	char name[SCMI_MAX_STR_SIZE];
+};
+
 /**
  * struct scmi_power_proto_ops - represents the various operations provided
  *	by SCMI Power Protocol
  *
  * @num_domains_get: get the count of power domains provided by SCMI
- * @name_get: gets the name of a power domain
+ * @info_get: gets the information of the specified power domain
  * @state_set: sets the power state of a power domain
  * @state_get: gets the power state of a power domain
  */
 struct scmi_power_proto_ops {
 	int (*num_domains_get)(const struct scmi_protocol_handle *ph);
-	const char *(*name_get)(const struct scmi_protocol_handle *ph,
-				u32 domain);
+	const struct scmi_power_domain_info __must_check *(*info_get)
+		(const struct scmi_protocol_handle *ph, u32 domain);
 #define SCMI_POWER_STATE_TYPE_SHIFT	30
 #define SCMI_POWER_STATE_ID_MASK	(BIT(28) - 1)
 #define SCMI_POWER_STATE_PARAM(type, id) \

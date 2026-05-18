@@ -64,7 +64,7 @@ struct power_dom_info {
 	bool state_set_sync;
 	bool state_set_async;
 	bool state_set_notify;
-	char name[SCMI_MAX_STR_SIZE];
+	struct scmi_power_domain_info info;
 };
 
 struct scmi_power_info {
@@ -133,7 +133,7 @@ scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
 				SUPPORTS_STATE_SET_NOTIFY(flags);
 		dom_info->state_set_async = SUPPORTS_STATE_SET_ASYNC(flags);
 		dom_info->state_set_sync = SUPPORTS_STATE_SET_SYNC(flags);
-		strscpy(dom_info->name, attr->name, SCMI_SHORT_NAME_MAX_SIZE);
+		strscpy(dom_info->info.name, attr->name, SCMI_SHORT_NAME_MAX_SIZE);
 	}
 	ph->xops->xfer_put(ph, t);
 
@@ -144,7 +144,7 @@ scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
 	if (!ret && PROTOCOL_REV_MAJOR(ph->version) >= 0x3 &&
 	    SUPPORTS_EXTENDED_NAMES(flags)) {
 		ph->hops->extended_name_get(ph, POWER_DOMAIN_NAME_GET,
-					    domain, NULL, dom_info->name,
+					    domain, NULL, dom_info->info.name,
 					    SCMI_MAX_STR_SIZE);
 	}
 
@@ -234,23 +234,22 @@ static int scmi_power_num_domains_get(const struct scmi_protocol_handle *ph)
 	return pi->num_domains;
 }
 
-static const char *
-scmi_power_name_get(const struct scmi_protocol_handle *ph,
-		    u32 domain)
+static const struct scmi_power_domain_info *
+scmi_power_info_get(const struct scmi_protocol_handle *ph, u32 domain)
 {
 	struct scmi_power_info *pi = ph->get_priv(ph);
 	struct power_dom_info *dom;
 
 	if (domain >= pi->num_domains)
-		return "unknown";
+		return NULL;
 
 	dom = pi->dom_info + domain;
-	return dom->name;
+	return &dom->info;
 }
 
 static const struct scmi_power_proto_ops power_proto_ops = {
 	.num_domains_get = scmi_power_num_domains_get,
-	.name_get = scmi_power_name_get,
+	.info_get = scmi_power_info_get,
 	.state_set = scmi_power_state_set,
 	.state_get = scmi_power_state_get,
 };
