@@ -55,6 +55,7 @@ struct scmi_clock_info {
 	bool rate_ctrl_forbidden;
 	bool parent_ctrl_forbidden;
 	bool extended_config;
+	bool pm_clk;
 	u64 min_rate;
 	u64 max_rate;
 	int num_parents;
