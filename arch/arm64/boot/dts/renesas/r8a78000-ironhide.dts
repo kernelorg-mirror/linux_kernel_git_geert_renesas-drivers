@@ -9,6 +9,45 @@
 #include <dt-bindings/soc/renesas,r8a78000-mfis.h>
 #include "r8a78000.dtsi"
 
+#define V4_28	4028
+#define V4_31	4031	// Supports v4.31 and v4.32
+
+//#define R_CAR_X5H_SCP_FW_SDK_VERSION	V4_28
+#define R_CAR_X5H_SCP_FW_SDK_VERSION	V4_31
+
+#if R_CAR_X5H_SCP_FW_SDK_VERSION == V4_28
+
+#define CLK_SGD4_PERW_BUS	1661
+#define MDLC_HSCIF0		228
+#define MDLC_HSCIF1		229
+#define MDLC_SCIF0		209
+#define MDLC_SCIF1		210
+#define MDLC_UFS1		203
+#define RESET_HSCIF0		228
+#define RESET_HSCIF1		229
+#define RESET_SCIF0		209
+#define RESET_SCIF1		210
+#define RESET_UFS1		203
+
+#elif R_CAR_X5H_SCP_FW_SDK_VERSION == V4_31
+
+#define CLK_SGD4_PERW_BUS	1657
+#define MDLC_HSCIF0		224
+#define MDLC_HSCIF1		225
+#define MDLC_SCIF0		205
+#define MDLC_SCIF1		206
+#define MDLC_UFS1		199
+#define RESET_HSCIF0		224
+#define RESET_HSCIF1		225
+#define RESET_SCIF0		205
+#define RESET_SCIF1		206
+#define RESET_UFS1		199
+
+#endif
+
+#define PD_APL			257
+#define PD_UFS1			13
+
 / {
 	model = "Renesas Ironhide board based on r8a78000";
 	compatible = "renesas,ironhide", "renesas,r8a78000";
@@ -35,6 +74,7 @@
 			scmi_devpd: protocol@11 {
 				reg = <0x11>;
 				#power-domain-cells = <1>;
+				arm,clock-domain = <&scmi_clk>;
 			};
 
 			scmi_sys: protocol@12 {
@@ -138,6 +178,10 @@
 };
 
 &hscif0 {
+	clocks = <&scmi_clk MDLC_HSCIF0>, <&scmi_clk CLK_SGD4_PERW_BUS>,
+		 <&scif_clk>;
+	power-domains = <&scmi_devpd PD_APL>;
+	resets = <&scmi_reset RESET_HSCIF0>;
 	uart-has-rtscts;
 	status = "okay";
 };
