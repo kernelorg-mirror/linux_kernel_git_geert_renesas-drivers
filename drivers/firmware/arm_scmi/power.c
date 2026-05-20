@@ -76,6 +76,11 @@ struct scmi_power_info {
 	struct power_dom_info *dom_info;
 };
 
+#define QUIRK_RCAR_X5H_4_28_EXTRA_DOMAINS				\
+	({								\
+		pi->num_domains += 4;					\
+	})
+
 static int scmi_power_attributes_get(const struct scmi_protocol_handle *ph,
 				     struct scmi_power_info *pi)
 {
@@ -96,6 +101,8 @@ static int scmi_power_attributes_get(const struct scmi_protocol_handle *ph,
 		pi->stats_addr = le32_to_cpu(attr->stats_addr_low) |
 				(u64)le32_to_cpu(attr->stats_addr_high) << 32;
 		pi->stats_size = le32_to_cpu(attr->stats_size);
+
+		SCMI_QUIRK(power_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_EXTRA_DOMAINS);
 	}
 
 	ph->xops->xfer_put(ph, t);
@@ -106,6 +113,28 @@ static int scmi_power_attributes_get(const struct scmi_protocol_handle *ph,
 
 	return ret;
 }
+
+static const struct quirk_rcar_x5h_always_on {
+	u32 domain;
+	const char *name;
+} quirk_rcar_x5h_4_28_always_on[] = {
+	{ 255,	"PD_AON" },	// -ENOENT
+	{ 256,	"PD_SCP" },	// -ENOENT
+	{ 257,	"PD_APL" },	// -ENOENT
+	{ 258,	"PD_ACL" },	// -ENOENT
+};
+
+#define QUIRK_RCAR_X5H_4_28_ALWAYS_ON								\
+	({											\
+		for (unsigned int i = 0; i < ARRAY_SIZE(quirk_rcar_x5h_4_28_always_on); i++)	\
+			if (domain == quirk_rcar_x5h_4_28_always_on[i].domain) {		\
+				strscpy(dom_info->info.name,					\
+					quirk_rcar_x5h_4_28_always_on[i].name);			\
+				flags = 0;							\
+				ret = 0;							\
+				break;								\
+			}									\
+	})
 
 static int
 scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
@@ -135,6 +164,8 @@ scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
 		dom_info->state_set_async = SUPPORTS_STATE_SET_ASYNC(flags);
 		dom_info->state_set_sync = SUPPORTS_STATE_SET_SYNC(flags);
 		strscpy(dom_info->info.name, attr->name, SCMI_SHORT_NAME_MAX_SIZE);
+	} else {
+		SCMI_QUIRK(power_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_ALWAYS_ON);
 	}
 	ph->xops->xfer_put(ph, t);
 
@@ -156,6 +187,7 @@ scmi_power_domain_attributes_get(const struct scmi_protocol_handle *ph,
 }
 
 static int set_state_deny(u32 state) { return -EPERM; }
+static int set_state_nop(u32 state) { return 0; }
 static int get_state_on(u32 *state) { *state = 0; return 0; }
 
 #define QUIRK_RCAR_X5H_4_28_BAD_DOMAINS					\
@@ -185,6 +217,18 @@ static int get_state_on(u32 *state) { *state = 0; return 0; }
 		}							\
 	})
 
+#define QUIRK_RCAR_X5H_4_28_NO_POWER_STATE							\
+	({											\
+		for (unsigned int i = 0; i < ARRAY_SIZE(quirk_rcar_x5h_4_28_always_on); i++)	\
+			if (domain == quirk_rcar_x5h_4_28_always_on[i].domain) {		\
+				_Generic(state,							\
+					 u32   : set_state_nop,					\
+					 u32 * : get_state_on)(state);				\
+				ret = 0;							\
+				break;								\
+			}									\
+	})
+
 static int scmi_power_state_set(const struct scmi_protocol_handle *ph,
 				u32 domain, u32 state)
 {
@@ -204,6 +248,8 @@ static int scmi_power_state_set(const struct scmi_protocol_handle *ph,
 	st->state = cpu_to_le32(state);
 
 	ret = ph->xops->do_xfer(ph, t);
+	if (ret)
+		SCMI_QUIRK(power_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_NO_POWER_STATE);
 
 	ph->xops->xfer_put(ph, t);
 	return ret;
@@ -226,6 +272,8 @@ static int scmi_power_state_get(const struct scmi_protocol_handle *ph,
 	ret = ph->xops->do_xfer(ph, t);
 	if (!ret)
 		*state = get_unaligned_le32(t->rx.buf);
+	else
+		SCMI_QUIRK(power_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_NO_POWER_STATE);
 
 	ph->xops->xfer_put(ph, t);
 	return ret;
