@@ -2758,6 +2758,18 @@ static void quirk_rcar_x5h_no_attributes_fixup(const struct quirk_rcar_x5h_no_at
 			&attributes, &ret);						\
 	})
 
+#define QUIRK_RCAR_X5H_4_28_PM_CLK					\
+	({								\
+		if (clk_id <= 818 /* Last MDLC clock MDLC_GPIODM3 */)	\
+			clk->pm_clk = true;				\
+	})
+
+#define QUIRK_RCAR_X5H_4_31_PM_CLK					\
+	({								\
+		if (clk_id <= 814 /* Last MDLC clock MDLC_GPIODM3 */)	\
+			clk->pm_clk = true;				\
+	})
+
 static int scmi_clock_attributes_get(const struct scmi_protocol_handle *ph,
 				     u32 clk_id, struct clock_info *cinfo)
 {
@@ -2818,6 +2830,9 @@ static int scmi_clock_attributes_get(const struct scmi_protocol_handle *ph,
 			if (SUPPORTS_EXTENDED_CONFIG(attributes))
 				clk->extended_config = true;
 		}
+
+		SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_PM_CLK);
+		SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_PM_CLK);
 	}
 
 	return ret;
