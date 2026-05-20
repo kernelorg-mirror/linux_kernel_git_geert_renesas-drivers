@@ -3012,6 +3012,61 @@ out:
 	return ret;
 }
 
+struct quirk_rcar_x5h_parent_rate {
+	u32 id;
+	u32 parent;
+};
+
+static const struct quirk_rcar_x5h_parent_rate quirk_rcar_x5h_4_28_parent_rates[] = {
+	// FIXME Add more entries
+	{ 202 /* MDLC_UFS0 */,		1690 /*	CLK_S0D4_PERE_MAIN */ },
+	{ 203 /* MDLC_UFS1 */,		1690 /*	CLK_S0D4_PERE_MAIN */ },
+	{ 209 /* MDLC_SCIF0 */,		1663 /* CLK_SGD16_PERW_BUS */ },
+	{ 210 /* MDLC_SCIF1 */,		1663 /* CLK_SGD16_PERW_BUS */ },
+	{ 211 /* MDLC_SCIF2 */,		1663 /* CLK_SGD16_PERW_BUS */ },
+	{ 212 /* MDLC_SCIF3 */,		1663 /* CLK_SGD16_PERW_BUS */ },
+	{ 228 /* MDLC_HSCIF0 */,	1661 /* CLK_SGD4_PERW_BUS */ },
+	{ 229 /* MDLC_HSCIF1 */,	1661 /* CLK_SGD4_PERW_BUS */ },
+	{ 230 /* MDLC_HSCIF2 */,	1661 /* CLK_SGD4_PERW_BUS */ },
+	{ 231 /* MDLC_HSCIF3 */,	1661 /* CLK_SGD4_PERW_BUS */ },
+};
+
+static const struct quirk_rcar_x5h_parent_rate quirk_rcar_x5h_4_31_parent_rates[] = {
+	// FIXME Add more entries
+	{ 198 /* MDLC_UFS0 */,		1686 /*	CLK_S0D4_PERE_MAIN */ },
+	{ 199 /* MDLC_UFS1 */,		1686 /*	CLK_S0D4_PERE_MAIN */ },
+	{ 205 /* MDLC_SCIF0 */,		1659 /* CLK_SGD16_PERW_BUS */ },
+	{ 206 /* MDLC_SCIF1 */,		1659 /* CLK_SGD16_PERW_BUS */ },
+	{ 207 /* MDLC_SCIF2 */,		1659 /* CLK_SGD16_PERW_BUS */ },
+	{ 208 /* MDLC_SCIF3 */,		1659 /* CLK_SGD16_PERW_BUS */ },
+	{ 224 /* MDLC_HSCIF0 */,	1657 /* CLK_SGD4_PERW_BUS */ },
+	{ 225 /* MDLC_HSCIF1 */,	1657 /* CLK_SGD4_PERW_BUS */ },
+	{ 226 /* MDLC_HSCIF2 */,	1657 /* CLK_SGD4_PERW_BUS */ },
+	{ 227 /* MDLC_HSCIF3 */,	1657 /* CLK_SGD4_PERW_BUS */ },
+};
+
+static void quirk_rcar_x5h_parent_rate_fixup(const struct quirk_rcar_x5h_parent_rate *table,
+					     unsigned int len, u32 *id)
+{
+	for (unsigned int i = 0; i < len; i++)
+		if (*id == table[i].id) {
+			*id = table[i].parent;
+			break;
+		}
+}
+
+#define QUIRK_RCAR_X5H_4_28_PARENT_RATES					   \
+	({									   \
+		quirk_rcar_x5h_parent_rate_fixup(quirk_rcar_x5h_4_28_parent_rates, \
+			ARRAY_SIZE(quirk_rcar_x5h_4_28_parent_rates), &clk_id);	   \
+	})
+
+#define QUIRK_RCAR_X5H_4_31_PARENT_RATES					   \
+	({									   \
+		quirk_rcar_x5h_parent_rate_fixup(quirk_rcar_x5h_4_31_parent_rates, \
+			ARRAY_SIZE(quirk_rcar_x5h_4_31_parent_rates), &clk_id);	   \
+	})
+
 #define QUIRK_RCAR_X5H_4_28_WRONG_RATES(rate)				\
 	({								\
 		switch (clk_id) {					\
@@ -3042,6 +3097,9 @@ scmi_clock_describe_rates_get(const struct scmi_protocol_handle *ph,
 {
 	struct scmi_clock_desc *clkd = &cinfo->clkds[clk_id];
 	int ret;
+
+	SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_PARENT_RATES);
+	SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_PARENT_RATES);
 
 	/*
 	 * Since only after SCMI Clock v1.0 the returned rates are guaranteed to
@@ -3086,6 +3144,9 @@ scmi_clock_rate_get(const struct scmi_protocol_handle *ph,
 				      sizeof(__le32), sizeof(u64), &t);
 	if (ret)
 		return ret;
+
+	SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_PARENT_RATES);
+	SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_PARENT_RATES);
 
 	put_unaligned_le32(clk_id, t->tx.buf);
 
@@ -3214,6 +3275,9 @@ scmi_clock_all_rates_get(const struct scmi_protocol_handle *ph, u32 clk_id)
 	/* Needs full enumeration ? */
 	if (clkd->r.rate_discrete && clkd->tot_rates != clkd->r.num_rates) {
 		int ret;
+
+		SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_PARENT_RATES);
+		SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_PARENT_RATES);
 
 		/* rates[] is already allocated BUT we need to re-enumerate */
 		clkd->r.num_rates = 0;
