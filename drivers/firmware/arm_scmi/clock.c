@@ -239,6 +239,7 @@ scmi_clock_protocol_attributes_get(const struct scmi_protocol_handle *ph,
 }
 
 struct scmi_clk_ipriv {
+	u32 id;		/* Actual ID used instead of clkd->id, for quirks that need an override */
 	struct device *dev;
 	struct scmi_clock_desc *clkd;
 };
@@ -249,7 +250,7 @@ static void iter_clk_possible_parents_prepare_message(void *message, unsigned in
 	struct scmi_msg_clock_possible_parents *msg = message;
 	const struct scmi_clk_ipriv *p = priv;
 
-	msg->id = cpu_to_le32(p->clkd->id);
+	msg->id = cpu_to_le32(p->id);
 	/* Set the number of OPPs to be skipped/already read */
 	msg->skip_parents = cpu_to_le32(desc_index);
 }
@@ -312,6 +313,7 @@ static int scmi_clock_possible_parents(const struct scmi_protocol_handle *ph,
 	};
 	struct scmi_clock_desc *clkd = &cinfo->clkds[clk_id];
 	struct scmi_clk_ipriv ppriv = {
+		.id = clk_id,
 		.clkd = clkd,
 		.dev = ph->dev,
 	};
@@ -2840,7 +2842,7 @@ static void iter_clk_describe_prepare_message(void *message,
 	struct scmi_msg_clock_describe_rates *msg = message;
 	const struct scmi_clk_ipriv *p = priv;
 
-	msg->id = cpu_to_le32(p->clkd->id);
+	msg->id = cpu_to_le32(p->id);
 	/* Set the number of rates to be skipped/already read */
 	msg->rate_index = cpu_to_le32(desc_index);
 }
@@ -2920,7 +2922,7 @@ iter_clk_describe_process_response(const struct scmi_protocol_handle *ph,
 }
 
 static int
-scmi_clock_describe_rates_get_full(const struct scmi_protocol_handle *ph,
+scmi_clock_describe_rates_get_full(const struct scmi_protocol_handle *ph, u32 clk_id,
 				   struct scmi_clock_desc *clkd)
 {
 	int ret;
@@ -2931,6 +2933,7 @@ scmi_clock_describe_rates_get_full(const struct scmi_protocol_handle *ph,
 		.process_response = iter_clk_describe_process_response,
 	};
 	struct scmi_clk_ipriv cpriv = {
+		.id = clk_id,
 		.clkd = clkd,
 		.dev = ph->dev,
 	};
@@ -2963,7 +2966,7 @@ scmi_clock_describe_rates_get_full(const struct scmi_protocol_handle *ph,
 }
 
 static int
-scmi_clock_describe_rates_get_lazy(const struct scmi_protocol_handle *ph,
+scmi_clock_describe_rates_get_lazy(const struct scmi_protocol_handle *ph, u32 clk_id,
 				   struct scmi_clock_desc *clkd)
 {
 	struct scmi_iterator_ops ops = {
@@ -2972,6 +2975,7 @@ scmi_clock_describe_rates_get_lazy(const struct scmi_protocol_handle *ph,
 		.process_response = iter_clk_describe_process_response,
 	};
 	struct scmi_clk_ipriv cpriv = {
+		.id = clk_id,
 		.clkd = clkd,
 		.dev = ph->dev,
 	};
@@ -3045,9 +3049,9 @@ scmi_clock_describe_rates_get(const struct scmi_protocol_handle *ph,
 	 * SCMI Clock v1.0 protocol.
 	 */
 	if (PROTOCOL_REV_MAJOR(ph->version) > 0x1)
-		ret = scmi_clock_describe_rates_get_lazy(ph, clkd);
+		ret = scmi_clock_describe_rates_get_lazy(ph, clk_id, clkd);
 	else
-		ret = scmi_clock_describe_rates_get_full(ph, clkd);
+		ret = scmi_clock_describe_rates_get_full(ph, clk_id, clkd);
 
 	if (ret)
 		return ret;
@@ -3213,7 +3217,7 @@ scmi_clock_all_rates_get(const struct scmi_protocol_handle *ph, u32 clk_id)
 
 		/* rates[] is already allocated BUT we need to re-enumerate */
 		clkd->r.num_rates = 0;
-		ret = scmi_clock_describe_rates_get_full(ph, clkd);
+		ret = scmi_clock_describe_rates_get_full(ph, clk_id, clkd);
 		if (ret)
 			return NULL;
 	}
