@@ -3008,6 +3008,30 @@ out:
 	return ret;
 }
 
+#define QUIRK_RCAR_X5H_4_28_WRONG_RATES(rate)				\
+	({								\
+		switch (clk_id) {					\
+		case 1649: /* CLK_SGD4_PERW_MAIN */			\
+		case 1661: /* CLK_SGD4_PERW_BUS */			\
+		case 1673: /* CLK_SGD4_MP_MAIN */			\
+		case 1680: /* CLK_SGD4_MP_BUS */			\
+			rate /= 2;					\
+			break;						\
+		}							\
+	})
+
+#define QUIRK_RCAR_X5H_4_31_WRONG_RATES(rate)				\
+	({								\
+		switch (clk_id) {					\
+		case 1645: /* CLK_SGD4_PERW_MAIN */			\
+		case 1657: /* CLK_SGD4_PERW_BUS */			\
+		case 1669: /* CLK_SGD4_MP_MAIN */			\
+		case 1676: /* CLK_SGD4_MP_BUS */			\
+			rate /= 2;					\
+			break;						\
+		}							\
+	})
+
 static int
 scmi_clock_describe_rates_get(const struct scmi_protocol_handle *ph,
 			      u32 clk_id, struct clock_info *cinfo)
@@ -3027,6 +3051,9 @@ scmi_clock_describe_rates_get(const struct scmi_protocol_handle *ph,
 
 	if (ret)
 		return ret;
+
+	SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_WRONG_RATES(clkd->r.rates[0]));
+	SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_WRONG_RATES(clkd->r.rates[0]));
 
 	clkd->info.min_rate = clkd->r.rates[RATE_MIN];
 	if (!clkd->r.rate_discrete) {
@@ -3059,8 +3086,12 @@ scmi_clock_rate_get(const struct scmi_protocol_handle *ph,
 	put_unaligned_le32(clk_id, t->tx.buf);
 
 	ret = ph->xops->do_xfer(ph, t);
-	if (!ret)
+	if (!ret) {
 		*value = get_unaligned_le64(t->rx.buf);
+
+		SCMI_QUIRK(clock_rcar_x5h_4_28, QUIRK_RCAR_X5H_4_28_WRONG_RATES(*value));
+		SCMI_QUIRK(clock_rcar_x5h_4_31, QUIRK_RCAR_X5H_4_31_WRONG_RATES(*value));
+	}
 
 	ph->xops->xfer_put(ph, t);
 	return ret;
