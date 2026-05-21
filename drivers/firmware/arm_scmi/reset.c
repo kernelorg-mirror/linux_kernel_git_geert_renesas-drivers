@@ -12,6 +12,7 @@
 
 #include "protocols.h"
 #include "notify.h"
+#include "quirks.h"
 
 /* Updated only after ALL the mandatory features for that version are merged */
 #define SCMI_PROTOCOL_SUPPORTED_VERSION		0x30001
@@ -186,6 +187,12 @@ static int scmi_reset_latency_get(const struct scmi_protocol_handle *ph,
 	return dom_info->latency_us;
 }
 
+#define QUIRK_RCAR_X5H_4_28_HSCIF0			\
+	({						\
+		if (domain == 228 /* RESET_HSCIF0 */)	\
+			ret = 0;			\
+	})
+
 static int scmi_domain_reset(const struct scmi_protocol_handle *ph, u32 domain,
 			     u32 flags, u32 state)
 {
@@ -214,6 +221,8 @@ static int scmi_domain_reset(const struct scmi_protocol_handle *ph, u32 domain,
 		ret = ph->xops->do_xfer_with_response(ph, t);
 	else
 		ret = ph->xops->do_xfer(ph, t);
+
+	SCMI_QUIRK(reset_rcar_x5h_4_28_hscif0, QUIRK_RCAR_X5H_4_28_HSCIF0);
 
 	ph->xops->xfer_put(ph, t);
 	return ret;

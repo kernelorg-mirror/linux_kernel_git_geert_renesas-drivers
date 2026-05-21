@@ -51,5 +51,6 @@ DECLARE_SCMI_QUIRK(clock_rcar_x5h_4_28);
 DECLARE_SCMI_QUIRK(clock_rcar_x5h_4_31);
 DECLARE_SCMI_QUIRK(perf_level_get_fc_force);
 DECLARE_SCMI_QUIRK(power_rcar_x5h_4_28);
+DECLARE_SCMI_QUIRK(reset_rcar_x5h_4_28_hscif0);
 
 #endif /* _SCMI_QUIRKS_H */
