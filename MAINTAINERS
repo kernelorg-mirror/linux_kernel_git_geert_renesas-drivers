@@ -6535,7 +6535,7 @@ F:	include/linux/blk-cgroup.h
 
 CONTROL GROUP - CPUSET
 M:	Waiman Long <longman@redhat.com>
-R:	Chen Ridong <chenridong@huaweicloud.com>
+R:	Ridong Chen <ridong.chen@linux.dev>
 L:	cgroups@vger.kernel.org
 S:	Maintained
 T:	git git://git.kernel.org/pub/scm/linux/kernel/git/tj/cgroup.git
@@ -25925,7 +25925,6 @@ F:	drivers/media/platform/synopsys/hdmirx/*
 SYNOPSYS DESIGNWARE I2C DRIVER
 M:	Mika Westerberg <mika.westerberg@linux.intel.com>
 R:	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-R:	Jan Dabros <jsd@semihalf.com>
 L:	linux-i2c@vger.kernel.org
 S:	Supported
 F:	drivers/i2c/busses/i2c-designware-*
