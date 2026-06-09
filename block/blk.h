@@ -49,6 +49,8 @@ struct blk_flush_queue *blk_alloc_flush_queue(int node, int cmd_size,
 					      gfp_t flags);
 void blk_free_flush_queue(struct blk_flush_queue *q);
 
+const char *blk_status_to_str(blk_status_t status);
+
 bool __blk_mq_unfreeze_queue(struct request_queue *q, bool force_atomic);
 bool blk_queue_start_drain(struct request_queue *q);
 bool __blk_freeze_queue_start(struct request_queue *q,
@@ -754,16 +756,19 @@ static inline void blk_unfreeze_release_lock(struct request_queue *q)
  * reclaim from triggering block I/O.
  */
 static inline void blk_debugfs_lock_nomemsave(struct request_queue *q)
+	__acquires(&q->debugfs_mutex)
 {
 	mutex_lock(&q->debugfs_mutex);
 }
 
 static inline void blk_debugfs_unlock_nomemrestore(struct request_queue *q)
+	__releases(&q->debugfs_mutex)
 {
 	mutex_unlock(&q->debugfs_mutex);
 }
 
 static inline unsigned int __must_check blk_debugfs_lock(struct request_queue *q)
+	__acquires(&q->debugfs_mutex)
 {
 	unsigned int memflags = memalloc_noio_save();
 
@@ -773,6 +778,7 @@ static inline unsigned int __must_check blk_debugfs_lock(struct request_queue *q
 
 static inline void blk_debugfs_unlock(struct request_queue *q,
 				      unsigned int memflags)
+	__releases(&q->debugfs_mutex)
 {
 	blk_debugfs_unlock_nomemrestore(q);
 	memalloc_noio_restore(memflags);
