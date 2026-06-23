@@ -5184,6 +5184,8 @@ static void ibmvfc_fabric_login_nvme_done(struct ibmvfc_event *evt)
 
 	switch (mad_status) {
 	case IBMVFC_MAD_SUCCESS:
+		fc_host_port_id(vhost->host) = be64_to_cpu(rsp->nport_id);
+		ibmvfc_nvme_register(vhost);
 		ibmvfc_dbg(vhost, "NVMe fabric login succeeded\n");
 		break;
 	case IBMVFC_MAD_FAILED:
@@ -5245,6 +5247,7 @@ static void ibmvfc_fabric_login_scsi_done(struct ibmvfc_event *evt)
 
 	switch (mad_status) {
 	case IBMVFC_MAD_SUCCESS:
+		fc_host_port_id(vhost->host) = be64_to_cpu(rsp->nport_id);
 		ibmvfc_dbg(vhost, "SCSI fabric login succeeded\n");
 		break;
 	case IBMVFC_MAD_FAILED:
