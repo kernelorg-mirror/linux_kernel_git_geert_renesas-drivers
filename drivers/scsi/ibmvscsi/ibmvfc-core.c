@@ -1092,20 +1092,28 @@ void ibmvfc_free_event(struct ibmvfc_event *evt)
 }
 
 /**
- * ibmvfc_scsi_eh_done - EH done function for queuecommand commands
+ * ibmvfc_vfc_eh_done - EH done function for queued IO
  * @evt:	ibmvfc event struct
  *
- * This function does not setup any error status, that must be done
- * before this function gets called.
+ * This function does not setup any error status for scsi commands, that must be
+ * done before this function gets called.
  **/
-static void ibmvfc_scsi_eh_done(struct ibmvfc_event *evt)
+static void ibmvfc_vfc_eh_done(struct ibmvfc_event *evt)
 {
 	struct scsi_cmnd *cmnd = evt->cmnd;
+	struct nvmefc_ls_req *ls_req = evt->ls_req;
+	struct nvmefc_fcp_req *fcp_req = evt->fcp_req;
 
 	if (cmnd) {
 		scsi_dma_unmap(cmnd);
 		scsi_done(cmnd);
-	}
+	} else if (fcp_req) {
+		fcp_req->rcv_rsplen = 0;
+		fcp_req->transferred_length = 0;
+		fcp_req->status = NVME_SC_INTERNAL;
+		fcp_req->done(fcp_req);
+	} else if (ls_req)
+		ls_req->done(ls_req, -EIO);
 
 	ibmvfc_free_event(evt);
 }
@@ -1146,8 +1154,10 @@ static void ibmvfc_fail_request(struct ibmvfc_event *evt, int error_code)
 	BUG_ON(!atomic_dec_and_test(&evt->active));
 	if (evt->cmnd) {
 		evt->cmnd->result = (error_code << 16);
-		evt->done = ibmvfc_scsi_eh_done;
-	} else
+		evt->done = ibmvfc_vfc_eh_done;
+	} else if (evt->fcp_req || evt->ls_req)
+		evt->done = ibmvfc_vfc_eh_done;
+	else
 		evt->xfer_iu->mad_common.status = cpu_to_be16(IBMVFC_MAD_DRIVER_FAILED);
 
 	timer_delete(&evt->timer);
@@ -1816,8 +1826,10 @@ int ibmvfc_send_event(struct ibmvfc_event *evt,
 		dev_err(vhost->dev, "Send error (rc=%d)\n", rc);
 		if (evt->cmnd) {
 			evt->cmnd->result = DID_ERROR << 16;
-			evt->done = ibmvfc_scsi_eh_done;
-		} else
+			evt->done = ibmvfc_vfc_eh_done;
+		} else if (evt->fcp_req || evt->ls_req)
+			evt->done = ibmvfc_vfc_eh_done;
+		else
 			evt->xfer_iu->mad_common.status = cpu_to_be16(IBMVFC_MAD_CRQ_ERROR);
 
 		evt->done(evt);
