@@ -1539,7 +1539,7 @@ static void ibmvfc_set_login_info(struct ibmvfc_host *vhost)
 
 	login_info->ostype = cpu_to_be32(IBMVFC_OS_LINUX);
 	login_info->max_dma_len = cpu_to_be64(max_sectors << 9);
-	login_info->max_payload = cpu_to_be32(sizeof(struct ibmvfc_fcp_cmd_iu));
+	login_info->max_payload = cpu_to_be32(sizeof(struct nvme_fc_cmd_iu));
 	login_info->max_response = cpu_to_be32(sizeof(struct ibmvfc_fcp_rsp));
 	login_info->partition_num = cpu_to_be32(vhost->partition_number);
 	login_info->vfc_frame_version = cpu_to_be32(1);
