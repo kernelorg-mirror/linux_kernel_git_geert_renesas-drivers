@@ -402,8 +402,9 @@ int lpfc_sli_hbq_count(void);
 int lpfc_sli_hbqbuf_add_hbqs(struct lpfc_hba *, uint32_t);
 void lpfc_sli_hbqbuf_free_all(struct lpfc_hba *);
 int lpfc_sli_hbq_size(void);
-int lpfc_sli_issue_abort_iotag(struct lpfc_hba *, struct lpfc_sli_ring *,
-			       struct lpfc_iocbq *, void *);
+int lpfc_sli_issue_abort_iotag(struct lpfc_hba *phba,
+			       struct lpfc_sli_ring *pring,
+			       struct lpfc_iocbq *cmdiocb, bool ia, void *cmpl);
 int lpfc_sli_sum_iocb(struct lpfc_vport *, uint16_t, uint64_t, lpfc_ctx_cmd);
 int lpfc_sli_abort_iocb(struct lpfc_vport *vport, u16 tgt_id, u64 lun_id,
 			lpfc_ctx_cmd abort_cmd);
@@ -535,8 +536,11 @@ int lpfc_bsg_timeout(struct bsg_job *);
 int lpfc_bsg_ct_unsol_event(struct lpfc_hba *, struct lpfc_sli_ring *,
 			     struct lpfc_iocbq *);
 int lpfc_bsg_ct_unsol_abort(struct lpfc_hba *, struct hbq_dmabuf *);
-void __lpfc_sli_ringtx_put(struct lpfc_hba *, struct lpfc_sli_ring *,
-	struct lpfc_iocbq *);
+void lpfc_sli4_queue_io_for_retry(struct lpfc_hba *phba,
+				  struct lpfc_iocbq *iocb,
+				  bool head);
+void __lpfc_sli_ringtx_put(struct lpfc_hba *phba, struct lpfc_sli_ring *ring,
+			   struct lpfc_iocbq *iocb, bool head);
 struct lpfc_iocbq *lpfc_sli_ringtx_get(struct lpfc_hba *,
 	struct lpfc_sli_ring *);
 int __lpfc_sli_issue_iocb(struct lpfc_hba *, uint32_t,
