@@ -9,6 +9,7 @@
 
 #include <linux/clk.h>
 #include <linux/console.h>
+#include <linux/dma-mapping.h>
 #include <linux/io.h>
 #include <linux/iopoll.h>
 #include <linux/irq.h>
@@ -143,6 +144,7 @@ struct qcom_geni_serial_port {
 
 	unsigned int tx_remaining;
 	unsigned int tx_queued;
+	bool tx_dma_stale;
 	int wakeup_irq;
 	bool rx_tx_swap;
 	bool cts_rts_swap;
@@ -697,6 +699,7 @@ static void qcom_geni_serial_start_tx_dma(struct uart_port *uport)
 	}
 
 	port->tx_remaining = xmit_size;
+	port->tx_dma_stale = false;
 }
 
 static void qcom_geni_serial_start_tx_fifo(struct uart_port *uport)
@@ -863,37 +866,31 @@ static void qcom_geni_serial_stop_rx_dma(struct uart_port *uport)
 				uport->membase + SE_DMA_RX_IRQ_CLR);
 	}
 
-	if (port->rx_dma_addr) {
-		geni_se_rx_dma_unprep(&port->se, port->rx_dma_addr,
-				      DMA_RX_BUF_SIZE);
-		port->rx_dma_addr = 0;
-	}
 }
 
 static void qcom_geni_serial_start_rx_dma(struct uart_port *uport)
 {
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
-	int ret;
 
 	if (qcom_geni_serial_secondary_active(uport))
 		qcom_geni_serial_stop_rx_dma(uport);
 
 	geni_se_setup_s_cmd(&port->se, UART_START_READ, UART_PARAM_RFR_OPEN);
 
-	ret = geni_se_rx_dma_prep(&port->se, port->rx_buf,
-				  DMA_RX_BUF_SIZE,
-				  &port->rx_dma_addr);
-	if (ret) {
-		dev_err(uport->dev, "unable to start RX SE DMA: %d\n", ret);
-		qcom_geni_serial_stop_rx_dma(uport);
+	if (!port->rx_dma_addr) {
+		dev_err(uport->dev, "RX DMA buffer not mapped\n");
+		return;
 	}
+
+	dma_sync_single_for_device(uport->dev->parent, port->rx_dma_addr,
+				   DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
+	geni_se_rx_init_dma(&port->se, port->rx_dma_addr, DMA_RX_BUF_SIZE);
 }
 
 static void qcom_geni_serial_handle_rx_dma(struct uart_port *uport, bool drop)
 {
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
 	u32 rx_in;
-	int ret;
 
 	if (!qcom_geni_serial_secondary_active(uport))
 		return;
@@ -901,8 +898,8 @@ static void qcom_geni_serial_handle_rx_dma(struct uart_port *uport, bool drop)
 	if (!port->rx_dma_addr)
 		return;
 
-	geni_se_rx_dma_unprep(&port->se, port->rx_dma_addr, DMA_RX_BUF_SIZE);
-	port->rx_dma_addr = 0;
+	dma_sync_single_for_cpu(uport->dev->parent, port->rx_dma_addr,
+				DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
 
 	rx_in = readl(uport->membase + SE_DMA_RX_LEN_IN);
 	if (!rx_in)
@@ -910,13 +907,9 @@ static void qcom_geni_serial_handle_rx_dma(struct uart_port *uport, bool drop)
 	else if (!drop)
 		handle_rx_uart(uport, rx_in);
 
-	ret = geni_se_rx_dma_prep(&port->se, port->rx_buf,
-				  DMA_RX_BUF_SIZE,
-				  &port->rx_dma_addr);
-	if (ret) {
-		dev_err(uport->dev, "unable to start RX SE DMA: %d\n", ret);
-		qcom_geni_serial_stop_rx_dma(uport);
-	}
+	dma_sync_single_for_device(uport->dev->parent, port->rx_dma_addr,
+				   DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
+	geni_se_rx_init_dma(&port->se, port->rx_dma_addr, DMA_RX_BUF_SIZE);
 }
 
 static void qcom_geni_serial_start_rx(struct uart_port *uport)
@@ -1029,6 +1022,7 @@ static void qcom_geni_serial_handle_tx_dma(struct uart_port *uport)
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
 	struct tty_port *tport = &uport->state->port;
 	unsigned int fifo_len = kfifo_len(&tport->xmit_fifo);
+	bool tx_dma_stale = port->tx_dma_stale;
 
 	/*
 	 * Only advance the kfifo if it still contains the bytes that were
@@ -1039,12 +1033,13 @@ static void qcom_geni_serial_handle_tx_dma(struct uart_port *uport)
 	 * kfifo->in, making kfifo_len() wrap to UART_XMIT_SIZE - tx_remaining
 	 * and triggering a spurious large DMA transfer of stale data.
 	 */
-	if (fifo_len >= port->tx_remaining)
+	if (!tx_dma_stale && fifo_len >= port->tx_remaining)
 		uart_xmit_advance(uport, port->tx_remaining);
 
 	geni_se_tx_dma_unprep(&port->se, port->tx_dma_addr, port->tx_remaining);
 	port->tx_dma_addr = 0;
 	port->tx_remaining = 0;
+	port->tx_dma_stale = false;
 
 	if (!kfifo_is_empty(&tport->xmit_fifo))
 		qcom_geni_serial_start_tx_dma(uport);
@@ -1178,10 +1173,16 @@ static void qcom_geni_serial_shutdown(struct uart_port *uport)
 
 	qcom_geni_serial_cancel_tx_cmd(uport);
 	uart_port_unlock_irq(uport);
+
+	pm_runtime_put_sync(uport->dev);
 }
 
 static void qcom_geni_serial_flush_buffer(struct uart_port *uport)
 {
+	struct qcom_geni_serial_port *port = to_dev_port(uport);
+
+	if (port->tx_dma_addr)
+		port->tx_dma_stale = true;
 	qcom_geni_serial_cancel_tx_cmd(uport);
 }
 
@@ -1245,12 +1246,28 @@ static int qcom_geni_serial_startup(struct uart_port *uport)
 {
 	int ret;
 	struct qcom_geni_serial_port *port = to_dev_port(uport);
+	struct tty_port *tport = &uport->state->port;
+
+	ret = pm_runtime_resume_and_get(uport->dev);
+	if (ret < 0) {
+		dev_err(uport->dev, "Failed to resume and get %d\n", ret);
+		return ret;
+	}
 
 	if (!port->setup) {
 		ret = qcom_geni_serial_port_setup(uport);
-		if (ret)
+		if (ret) {
+			pm_runtime_put_sync(uport->dev);
 			return ret;
+		}
 	}
+
+	/*
+	 * Skip the close-time transmit drain for console ports so that
+	 * shutdown can proceed without waiting for pending TX completion.
+	 */
+	if (uart_console(uport))
+		tport->closing_wait = ASYNC_CLOSING_WAIT_NONE;
 
 	uart_port_lock_irq(uport);
 	qcom_geni_serial_start_rx(uport);
@@ -1724,22 +1741,6 @@ static int geni_serial_resource_init(struct uart_port *uport)
 	return 0;
 }
 
-static void qcom_geni_serial_pm(struct uart_port *uport,
-		unsigned int new_state, unsigned int old_state)
-{
-
-	/* If we've never been called, treat it as off */
-	if (old_state == UART_PM_STATE_UNDEFINED)
-		old_state = UART_PM_STATE_OFF;
-
-	if (new_state == UART_PM_STATE_ON && old_state == UART_PM_STATE_OFF)
-		pm_runtime_resume_and_get(uport->dev);
-	else if (new_state == UART_PM_STATE_OFF &&
-		 old_state == UART_PM_STATE_ON)
-		pm_runtime_put_sync(uport->dev);
-
-}
-
 /**
  * qcom_geni_rs485_config - Configure RS485 settings for the UART port
  * @uport: Pointer to the UART port structure
@@ -1778,7 +1779,6 @@ static const struct uart_ops qcom_geni_console_pops = {
 	.poll_put_char	= qcom_geni_serial_poll_put_char,
 	.poll_init = qcom_geni_serial_poll_init,
 #endif
-	.pm = qcom_geni_serial_pm,
 };
 
 static const struct uart_ops qcom_geni_uart_pops = {
@@ -1795,7 +1795,6 @@ static const struct uart_ops qcom_geni_uart_pops = {
 	.type = qcom_geni_serial_get_type,
 	.set_mctrl = qcom_geni_serial_set_mctrl,
 	.get_mctrl = qcom_geni_serial_get_mctrl,
-	.pm = qcom_geni_serial_pm,
 };
 
 static int qcom_geni_serial_probe(struct platform_device *pdev)
@@ -1864,6 +1863,14 @@ static int qcom_geni_serial_probe(struct platform_device *pdev)
 			ret = -ENOMEM;
 			goto error;
 		}
+
+		port->rx_dma_addr = dma_map_single(pdev->dev.parent, port->rx_buf,
+						   DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
+		if (dma_mapping_error(pdev->dev.parent, port->rx_dma_addr)) {
+			ret = -EIO;
+			dev_err(&pdev->dev, "Failed to map RX DMA buffer: %d\n", ret);
+			goto error;
+		}
 	}
 
 	port->name = devm_kasprintf(uport->dev, GFP_KERNEL,
@@ -1921,6 +1928,13 @@ static int qcom_geni_serial_probe(struct platform_device *pdev)
 
 	devm_pm_runtime_enable(port->se.dev);
 
+	PM_RUNTIME_ACQUIRE_IF_ENABLED(uport->dev, pm);
+	ret = PM_RUNTIME_ACQUIRE_ERR(&pm);
+	if (ret < 0) {
+		dev_err(uport->dev, "Failed to resume and get %d\n", ret);
+		goto error;
+	}
+
 	ret = uart_add_one_port(drv, uport);
 	if (ret)
 		goto error;
@@ -1928,6 +1942,11 @@ static int qcom_geni_serial_probe(struct platform_device *pdev)
 	return 0;
 
 error:
+	if (port->rx_dma_addr) {
+		dma_unmap_single(pdev->dev.parent, port->rx_dma_addr,
+				 DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
+		port->rx_dma_addr = 0;
+	}
 	dev_pm_domain_detach_list(port->pd_list);
 	return ret;
 }
@@ -1942,6 +1961,13 @@ static void qcom_geni_serial_remove(struct platform_device *pdev)
 	device_init_wakeup(&pdev->dev, false);
 	ida_free(&port_ida, uport->line);
 	uart_remove_one_port(drv, &port->uport);
+
+	if (port->rx_dma_addr) {
+		dma_unmap_single(pdev->dev.parent, port->rx_dma_addr,
+				 DMA_RX_BUF_SIZE, DMA_FROM_DEVICE);
+		port->rx_dma_addr = 0;
+	}
+
 	dev_pm_domain_detach_list(port->pd_list);
 }
 
@@ -1974,6 +2000,7 @@ static int qcom_geni_serial_suspend(struct device *dev)
 	struct qcom_geni_serial_port *port = dev_get_drvdata(dev);
 	struct uart_port *uport = &port->uport;
 	struct qcom_geni_private_data *private_data = uport->private_data;
+	int ret;
 
 	/*
 	 * This is done so we can hit the lowest possible state in suspend
@@ -1983,7 +2010,19 @@ static int qcom_geni_serial_suspend(struct device *dev)
 		geni_icc_set_tag(&port->se, QCOM_ICC_TAG_ACTIVE_ONLY);
 		geni_icc_set_bw(&port->se);
 	}
-	return uart_suspend_port(private_data->drv, uport);
+
+	ret = uart_suspend_port(private_data->drv, uport);
+	if (ret)
+		return ret;
+
+	/*
+	 * When no_console_suspend is set the console must remain active
+	 * across system sleep, so skip the force suspend path.
+	 */
+	if (!console_suspend_enabled && uart_console(uport))
+		return 0;
+
+	return pm_runtime_force_suspend(dev);
 }
 
 static int qcom_geni_serial_resume(struct device *dev)
@@ -1992,6 +2031,10 @@ static int qcom_geni_serial_resume(struct device *dev)
 	struct qcom_geni_serial_port *port = dev_get_drvdata(dev);
 	struct uart_port *uport = &port->uport;
 	struct qcom_geni_private_data *private_data = uport->private_data;
+
+	ret = pm_runtime_force_resume(dev);
+	if (ret)
+		return ret;
 
 	ret = uart_resume_port(private_data->drv, uport);
 	if (uart_console(uport)) {
