@@ -5,6 +5,7 @@
  * Copyright (C) 2026 Glider bv
  */
 
+#include <linux/cleanup.h>
 #include <linux/clk.h>
 #include <linux/clk-provider.h>
 #include <linux/dev_printk.h>
@@ -35,10 +36,9 @@ enum fixed_clk {
 	FIXED_CLK_66M,
 	FIXED_CLK_133M,
 	FIXED_CLK_266M,
-	NUM_FIXED_CLKS
 };
 
-static const unsigned long fixed_clk_rates[NUM_FIXED_CLKS] = {
+static const unsigned long fixed_clk_rates[] = {
 	[FIXED_CLK_66M] = 66666000,
 	[FIXED_CLK_133M] = 133330000,
 	[FIXED_CLK_266M] = 266660000,
@@ -51,31 +51,30 @@ static const unsigned long fixed_clk_rates[NUM_FIXED_CLKS] = {
  *
  * @dev: CPG device
  * @map: Mapping from DT clock IDs to fixed-rate clock IDs
- * @fixed_hws: Fixed rate clocks
+ * @hws: Clocks, indexed by @map entry index
  */
 struct r8a78000_cpg_priv {
 	struct device *dev;
 	const struct clk_id_map *map;
-	struct clk_hw *fixed_hws[NUM_FIXED_CLKS];
+	struct clk_hw **hws;
 };
 
-static const struct clk_id_map_entry *clk_id_map_find(const struct clk_id_map *map,
-						u32 dt_id)
+static int clk_id_map_find(const struct clk_id_map *map, u32 dt_id)
 {
 	for (unsigned int i = 0; i < map->size; i++) {
 		if (map->entries[i].dt_id == dt_id)
-			return &map->entries[i];
+			return i;
 	}
 
-	return NULL;
+	return -1;
 }
 
 static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 {
 	struct r8a78000_cpg_priv *priv = data;
-	const struct clk_id_map_entry *entry;
 	struct device *dev = priv->dev;
 	struct clk_hw *hw;
+	int idx;
 	u32 id;
 
 	if (spec->args_count != 1)
@@ -83,13 +82,13 @@ static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 
 	id = spec->args[0];
 
-	entry = clk_id_map_find(priv->map, id);
-	if (!entry) {
+	idx = clk_id_map_find(priv->map, id);
+	if (idx < 0) {
 		dev_err(dev, "Unknown clock %u\n", id);
 		return ERR_PTR(-ENOENT);
 	}
 
-	hw = priv->fixed_hws[entry->fw_id];
+	hw = priv->hws[idx];
 
 	dev_dbg(dev, "Mapping DT clock %u to %s at %lu Hz\n", id,
 		clk_hw_get_name(hw), clk_hw_get_rate(hw));
@@ -97,27 +96,54 @@ static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 	return hw;
 }
 
-static int register_fixed_clks(struct r8a78000_cpg_priv *priv)
+static struct clk_hw **register_fixed_clks(struct device *dev)
 {
-	struct device *dev = priv->dev;
+	unsigned int n = ARRAY_SIZE(fixed_clk_rates);
 	unsigned long rate;
 	struct clk_hw *hw;
 	const char *name;
 
-	for (unsigned int i = 0; i < ARRAY_SIZE(fixed_clk_rates); i++) {
+	struct clk_hw **hws __free(kfree) = kzalloc_objs(*hws, n);
+	if (!hws)
+		return ERR_PTR(-ENOMEM);
+
+	for (unsigned int i = 0; i < n; i++) {
 		rate = fixed_clk_rates[i];
 		name = devm_kasprintf(dev, GFP_KERNEL, "cpg-%lu", rate);
 		if (!name)
-			return -ENOMEM;
+			return ERR_PTR(-ENOMEM);
 
 		hw = devm_clk_hw_register_fixed_rate(dev, name, NULL, 0, rate);
 		if (IS_ERR(hw))
-			return PTR_ERR(hw);
+			return ERR_CAST(hw);
 
-		priv->fixed_hws[i] = hw;
+		hws[i] = hw;
 	}
 
-	return 0;
+	return_ptr(hws);
+}
+
+static struct clk_hw **get_hws(struct r8a78000_cpg_priv *priv)
+{
+	const struct clk_id_map *map = priv->map;
+	struct device *dev = priv->dev;
+	struct clk_hw **hws;
+	u16 fw_id;
+
+	struct clk_hw **fixed_hws __free(kfree) = register_fixed_clks(dev);
+	if (IS_ERR(fixed_hws))
+		return ERR_CAST(fixed_hws);
+
+	hws = devm_kzalloc_objs(dev, *hws, map->size);
+	if (!hws)
+		return ERR_PTR(-ENOMEM);
+
+	for (unsigned int i = 0; i < map->size; i++) {
+		fw_id = map->entries[i].fw_id;
+		hws[i] = fixed_hws[fw_id];
+	}
+
+	return hws;
 }
 
 static int r8a78000_cpg_probe(struct platform_device *pdev)
@@ -125,7 +151,6 @@ static int r8a78000_cpg_probe(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct r8a78000_cpg_priv *priv;
 	const struct clk_id_map *map;
-	int ret;
 
 	map = of_device_get_match_data(dev);
 	if (!map)
@@ -138,9 +163,9 @@ static int r8a78000_cpg_probe(struct platform_device *pdev)
 	priv->dev = dev;
 	priv->map = map;
 
-	ret = register_fixed_clks(priv);
-	if (ret)
-		return ret;
+	priv->hws = get_hws(priv);
+	if (IS_ERR(priv->hws))
+		return PTR_ERR(priv->hws);
 
 	return devm_of_clk_add_hw_provider(dev, r8a78000_clk_get, priv);
 }
