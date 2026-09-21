@@ -2024,6 +2024,9 @@
 			reg = <0 0xc1700000 0 0x100>;
 			interrupts = <GIC_ESPI 744 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&cpg R8A78000_CPG_MSO_SCP_MAIN>;
+			//dmas = <&scp_dmac0 0x41>, <&scp_dmac0 0x40>,
+			//       <&scp_dmac1 0x41>, <&scp_dmac1 0x40>;
+			//dma-names = "tx", "rx", "tx", "rx";
 			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x50>;
 			resets = <&mdlc_scp 0x50>;
 			#address-cells = <1>;
@@ -2037,6 +2040,9 @@
 			reg = <0 0xc1710000 0 0x100>;
 			interrupts = <GIC_ESPI 745 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&cpg R8A78000_CPG_MSO_SCP_MAIN>;
+			//dmas = <&scp_dmac0 0x43>, <&scp_dmac0 0x42>,
+			//       <&scp_dmac1 0x43>, <&scp_dmac1 0x42>;
+			//dma-names = "tx", "rx", "tx", "rx";
 			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x51>;
 			resets = <&mdlc_scp 0x51>;
 			#address-cells = <1>;
@@ -2050,6 +2056,9 @@
 			reg = <0 0xc1720000 0 0x100>;
 			interrupts = <GIC_ESPI 746 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&cpg R8A78000_CPG_MSO_SCP_MAIN>;
+			//dmas = <&scp_dmac0 0x45>, <&scp_dmac0 0x44>,
+			//       <&scp_dmac1 0x45>, <&scp_dmac1 0x44>;
+			//dma-names = "tx", "rx", "tx", "rx";
 			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x52>;
 			resets = <&mdlc_scp 0x52>;
 			#address-cells = <1>;
@@ -2063,6 +2072,9 @@
 			reg = <0 0xc1730000 0 0x100>;
 			interrupts = <GIC_ESPI 747 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&cpg R8A78000_CPG_MSO_SCP_MAIN>;
+			//dmas = <&scp_dmac0 0x47>, <&scp_dmac0 0x46>,
+			//       <&scp_dmac1 0x47>, <&scp_dmac1 0x46>;
+			//dma-names = "tx", "rx", "tx", "rx";
 			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x53>;
 			resets = <&mdlc_scp 0x53>;
 			#address-cells = <1>;
