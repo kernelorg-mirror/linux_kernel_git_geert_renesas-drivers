@@ -652,8 +652,13 @@ static const struct mod_id_map_entry r8a78000_mdlc_hscn_mod_fw[] = {
 	{ 0x50, 332, -1 },	/* PFC_HSCN_GPIODM0 */
 };
 
+static const struct power_id_map_entry r8a78000_mdlc_pere_power_fw[] = {
+	{ 1, 13 },		/* PD_UFS1 */
+};
+
 static const struct mod_id_map_entry r8a78000_mdlc_pere_mod_fw[] = {
 	{ 0x30, 193, -1 },	/* PFC_PERE_GPIODM0 */
+	{ 0x61, 199, -1 },	/* UFS1 */
 };
 
 static const struct mod_id_map_entry r8a78000_mdlc_perw_mod_fw[] = {
@@ -700,6 +705,7 @@ static const struct mdlc_info r8a78000_mdlc_fw[] = {
 		MOD_ID_MAP(r8a78000_mdlc_hscn_mod_fw),
 	}, {
 		.base = 0xc08f0000,
+		POWER_ID_MAP(r8a78000_mdlc_pere_power_fw),
 		MOD_ID_MAP(r8a78000_mdlc_pere_mod_fw),
 	}, {
 		.base = 0xc05d0000,
