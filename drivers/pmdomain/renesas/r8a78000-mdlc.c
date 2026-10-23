@@ -606,13 +606,38 @@ fallback:
 	return 0;
 }
 
+static const struct mod_map_in r8a78000_mdlc_aon_mod_default[] = {
+	{ 0x20, 0, -1 },	/* GPIODM0 */
+	{ -1 }
+};
+
+static const struct mod_map_in r8a78000_mdlc_hscn_mod_default[] = {
+	{ 0x50, 0, -1 },	/* PFC_HSCN_GPIODM0 */
+	{ -1 }
+};
+
+static const struct mod_map_in r8a78000_mdlc_pere_mod_default[] = {
+	{ 0x30, 0, -1 },	/* PFC_PERE_GPIODM0 */
+	{ -1 }
+};
+
 static const struct mod_map_in r8a78000_mdlc_perw_mod_default[] = {
+	{ 0x30, 0, -1 },	/* PFC_PERW_GPIODM0 */
 	{ 0x54, 0, -1 },	/* HSCIF0 */
 	{ -1 }
 };
 
 static const struct mdlc_info r8a78000_mdlc_default[] = {
 	{
+		.base = 0xc1338000 /* mdlc_aon */,
+		.mod_map = r8a78000_mdlc_aon_mod_default,
+	}, {
+		.base = 0xc9c90000 /* mdlc_hscn */,
+		.mod_map = r8a78000_mdlc_hscn_mod_default,
+	}, {
+		.base = 0xc08f0000 /* mdlc_pere */,
+		.mod_map = r8a78000_mdlc_pere_mod_default,
+	}, {
 		.base = 0xc05d0000 /* mdlc_perw */,
 		.mod_map = r8a78000_mdlc_perw_mod_default,
 	},
