@@ -241,10 +241,87 @@
 		function = "msiof6";
 	};
 
+	pwm0_pins: pwm0 {
+		groups = "pwm0_a";
+		function = "pwm0";
+	};
+
+	pwm1_pins: pwm1 {
+		groups = "pwm1";
+		function = "pwm1";
+	};
+
+	pwm2_pins: pwm2 {
+		groups = "pwm2";
+		function = "pwm2";
+	};
+
+	pwm3_pins: pwm3 {
+		groups = "pwm3";
+		function = "pwm3";
+	};
+
+	pwm4_pins: pwm4 {
+		groups = "pwm4";
+		function = "pwm4";
+	};
+
+	pwm5_pins: pwm5 {
+		groups = "pwm5";
+		function = "pwm5";
+	};
+
 	scif_clk_pins: scif-clk {
 		groups = "scif_clk";
 		function = "scif_clk";
 	};
+
+	tpu_pins: tpu {
+		groups = "tpu_to0", "tpu_to1";
+		function = "tpu";
+	};
+};
+
+&pwm0 {
+	pinctrl-0 = <&pwm0_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm1 {
+	pinctrl-0 = <&pwm1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm2 {
+	pinctrl-0 = <&pwm2_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm3 {
+	pinctrl-0 = <&pwm3_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm4 {
+	pinctrl-0 = <&pwm4_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
+&pwm5 {
+	pinctrl-0 = <&pwm5_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
 };
 
 &scif_clk {
@@ -261,4 +338,11 @@
 		compatible = "arm,scmi-shmem";
 		reg = <0x1300 0x100>;
 	};
+};
+
+&tpu {
+	pinctrl-0 = <&tpu_pins>;
+	pinctrl-names = "default";
+
+	//status = "okay";	// Mutually-exclusive with pwm4 and pwm5
 };
