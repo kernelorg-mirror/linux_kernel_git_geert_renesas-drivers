@@ -644,7 +644,20 @@ static const struct mdlc_info r8a78000_mdlc_default[] = {
 	{ /* sentinel */ }
 };
 
+static const struct mod_id_map_entry r8a78000_mdlc_aon_mod_fw[] = {
+	{ 0x20, 811, -1 },	/* GPIODM0 */
+};
+
+static const struct mod_id_map_entry r8a78000_mdlc_hscn_mod_fw[] = {
+	{ 0x50, 332, -1 },	/* PFC_HSCN_GPIODM0 */
+};
+
+static const struct mod_id_map_entry r8a78000_mdlc_pere_mod_fw[] = {
+	{ 0x30, 193, -1 },	/* PFC_PERE_GPIODM0 */
+};
+
 static const struct mod_id_map_entry r8a78000_mdlc_perw_mod_fw[] = {
+	{ 0x30, 201, -1 },	/* PFC_PERW_GPIODM0 */
 	{ 0x40, 205, -1 },	/* SCIF0 */
 	{ 0x41, 206, -1 },	/* SCIF1 */
 	{ 0x42, 207, -1 },	/* SCIF3 */
@@ -676,6 +689,15 @@ static const struct mod_id_map_entry r8a78000_mdlc_scp_mod_fw[] = {
 
 static const struct mdlc_info r8a78000_mdlc_fw[] = {
 	{
+		.base = 0xc1338000,
+		MOD_ID_MAP(r8a78000_mdlc_aon_mod_fw),
+	}, {
+		.base = 0xc9c90000,
+		MOD_ID_MAP(r8a78000_mdlc_hscn_mod_fw),
+	}, {
+		.base = 0xc08f0000,
+		MOD_ID_MAP(r8a78000_mdlc_pere_mod_fw),
+	}, {
 		.base = 0xc05d0000,
 		MOD_ID_MAP(r8a78000_mdlc_perw_mod_fw),
 	}, {
