@@ -1086,6 +1086,127 @@
 			status = "disabled";
 		};
 
+		tpu: pwm@c0720000 {
+			compatible = "renesas,tpu-r8a78000", "renesas,tpu";
+			reg = <0 0xc0720000 0 0x200>;
+			interrupts = <GIC_ESPI 23 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&cpg R8A78000_CPG_SGASYNCD16_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x76>;
+			resets = <&mdlc_perw 0x76>;
+			#pwm-cells = <3>;
+			status = "disabled";
+		};
+
+		pwm0: pwm@c0740000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0740000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_SGASYNCD16_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm1: pwm@c0741000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0741000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_SGASYNCD16_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm2: pwm@c0742000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0742000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_SGASYNCD16_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm3: pwm@c0743000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0743000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_SGASYNCD16_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm4: pwm@c0780000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0780000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm5: pwm@c0781000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0781000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm6: pwm@c0782000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0782000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm7: pwm@c0783000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0783000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm8: pwm@c0784000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0784000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
+		pwm9: pwm@c0785000 {
+			compatible = "renesas,pwm-r8a78000",
+				     "renesas,rcar-gen5-pwm";
+			reg = <0 0xc0785000 0 0x10>;
+			#pwm-cells = <2>;
+			clocks = <&cpg R8A78000_CPG_S0ASYNCD8_PERW_MAIN>;
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x70>;
+			resets = <&mdlc_perw 0x70>;
+			status = "disabled";
+		};
+
 		stcm_transport: sram@c1060000 {
 			compatible = "mmio-sram";
 			reg = <0x0 0xc1060000 0x0 0x1c00>;
