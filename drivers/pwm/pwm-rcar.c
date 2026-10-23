@@ -25,8 +25,7 @@
 #define RCAR_PWM_MAX_CYCLE	1023
 
 #define RCAR_PWMCR		0x00
-#define  RCAR_PWMCR_CC0_MASK	0x000f0000
-#define  RCAR_PWMCR_CC0_SHIFT	16
+#define  RCAR_PWMCR_CC0_MASK	GENMASK(19, 16)
 #define  RCAR_PWMCR_CCMD	BIT(15)
 #define  RCAR_PWMCR_SYNC	BIT(11)
 #define  RCAR_PWMCR_SS0		BIT(4)
@@ -99,7 +98,7 @@ static void rcar_pwm_set_clock_control(struct rcar_pwm_chip *rp,
 
 	div >>= 1;
 
-	value |= div << RCAR_PWMCR_CC0_SHIFT;
+	value |= FIELD_PREP(RCAR_PWMCR_CC0_MASK, div);
 	rcar_pwm_write(rp, value, RCAR_PWMCR);
 }
 
