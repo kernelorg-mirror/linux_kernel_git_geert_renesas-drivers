@@ -202,11 +202,12 @@ static const struct pwm_ops rcar_pwm_ops = {
 
 static int rcar_pwm_probe(struct platform_device *pdev)
 {
-	struct pwm_chip *chip;
+	struct device *dev = &pdev->dev;
 	struct rcar_pwm_chip *rcar_pwm;
+	struct pwm_chip *chip;
 	int ret;
 
-	chip = devm_pwmchip_alloc(&pdev->dev, 1, sizeof(*rcar_pwm));
+	chip = devm_pwmchip_alloc(dev, 1, sizeof(*rcar_pwm));
 	if (IS_ERR(chip))
 		return PTR_ERR(chip);
 	rcar_pwm = to_rcar_pwm_chip(chip);
@@ -215,9 +216,9 @@ static int rcar_pwm_probe(struct platform_device *pdev)
 	if (IS_ERR(rcar_pwm->base))
 		return PTR_ERR(rcar_pwm->base);
 
-	rcar_pwm->clk = devm_clk_get(&pdev->dev, NULL);
+	rcar_pwm->clk = devm_clk_get(dev, NULL);
 	if (IS_ERR(rcar_pwm->clk)) {
-		dev_err(&pdev->dev, "cannot get clock\n");
+		dev_err(dev, "cannot get clock\n");
 		return PTR_ERR(rcar_pwm->clk);
 	}
 
@@ -225,12 +226,12 @@ static int rcar_pwm_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, chip);
 
-	pm_runtime_enable(&pdev->dev);
+	pm_runtime_enable(dev);
 
 	ret = pwmchip_add(chip);
 	if (ret < 0) {
-		dev_err(&pdev->dev, "failed to register PWM chip: %d\n", ret);
-		pm_runtime_disable(&pdev->dev);
+		dev_err(dev, "failed to register PWM chip: %d\n", ret);
+		pm_runtime_disable(dev);
 		return ret;
 	}
 
