@@ -299,7 +299,7 @@ static const struct mod_map r8a78000_mdlc_perw_mod_default[] = {
 
 static const struct mdlc_info r8a78000_mdlc_default[] = {
 	{
-		.base = 0xc05d0000 /* mdlc_perw */,
+		.base = 0xc05d0000,
 		.mod_map = r8a78000_mdlc_perw_mod_default,
 	},
 	{ /* sentinel */ }
