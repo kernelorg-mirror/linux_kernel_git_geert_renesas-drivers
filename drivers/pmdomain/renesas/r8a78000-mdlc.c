@@ -681,6 +681,8 @@ static const struct mod_map_in r8a78000_mdlc_perw_mod_fw[] = {
 	{ 0x55, 225, -1 },	/* HSCIF1 */
 	{ 0x56, 226, -1 },	/* HSCIF2 */
 	{ 0x57, 227, -1 },	/* HSCIF3 */
+	{ 0x70, 244, -1 },	/* PWM0 */
+	{ 0x76, 249, -1 },	/* TPU0 */
 	{ -1 }
 };
 
