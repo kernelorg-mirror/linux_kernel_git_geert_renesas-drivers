@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 
 #define RCAR_PWM_MAX_DIVISION	24
-#define RCAR_PWM_MAX_CYCLE	1023
+#define RCAR_PWM_MAX_CYCLE(rp)	GENMASK(rp->cycle_bits - 1, 0)
 
 #define RCAR_PWMCR		0x00
 #define  RCAR_PWMCR_CC0_MASK	GENMASK(19, 16)
@@ -32,14 +32,17 @@
 #define  RCAR_PWMCR_EN0		BIT(0)
 
 #define RCAR_PWMCNT		0x04
-#define  RCAR_PWMCNT_CYC0_MASK	0x03ff0000
-#define  RCAR_PWMCNT_CYC0_SHIFT	16
-#define  RCAR_PWMCNT_PH0_MASK	0x000003ff
-#define  RCAR_PWMCNT_PH0_SHIFT	0
+#define  RCAR_PWMCNT_CYC0_MASK	GENMASK(31, 16)
+#define  RCAR_PWMCNT_PH0_MASK	GENMASK(15, 0)
 
 struct rcar_pwm_chip {
 	void __iomem *base;
 	struct clk *clk;
+	unsigned int cycle_bits;
+};
+
+struct rcar_pwm_info {
+	unsigned int cycle_bits;
 };
 
 static inline struct rcar_pwm_chip *to_rcar_pwm_chip(struct pwm_chip *chip)
@@ -77,7 +80,7 @@ static int rcar_pwm_get_clock_division(struct rcar_pwm_chip *rp, int period_ns)
 	if (clk_rate == 0)
 		return -EINVAL;
 
-	div = (u64)NSEC_PER_SEC * RCAR_PWM_MAX_CYCLE;
+	div = mul_u32_u32(NSEC_PER_SEC, RCAR_PWM_MAX_CYCLE(rp));
 	tmp = (u64)period_ns * clk_rate + div - 1;
 	tmp = div64_u64(tmp, div);
 	div = ilog2(tmp - 1) + 1;
@@ -111,21 +114,19 @@ static int rcar_pwm_set_counter(struct rcar_pwm_chip *rp, int div, u64 duty_ns,
 
 	/* div <= 24 == RCAR_PWM_MAX_DIVISION, so the shift doesn't overflow. */
 	tmp = mul_u64_u64_div_u64(period_ns, clk_rate, (u64)NSEC_PER_SEC << div);
-	if (tmp > FIELD_MAX(RCAR_PWMCNT_CYC0_MASK))
-		tmp = FIELD_MAX(RCAR_PWMCNT_CYC0_MASK);
-
-	cyc = FIELD_PREP(RCAR_PWMCNT_CYC0_MASK, tmp);
+	cyc = min(tmp, RCAR_PWM_MAX_CYCLE(rp));
 
 	tmp = mul_u64_u64_div_u64(duty_ns, clk_rate, (u64)NSEC_PER_SEC << div);
-	if (tmp > FIELD_MAX(RCAR_PWMCNT_PH0_MASK))
-		tmp = FIELD_MAX(RCAR_PWMCNT_PH0_MASK);
-	ph = FIELD_PREP(RCAR_PWMCNT_PH0_MASK, tmp);
+	ph = min(tmp, RCAR_PWM_MAX_CYCLE(rp));
 
 	/* Avoid prohibited setting */
 	if (cyc == 0 || ph == 0)
 		return -EINVAL;
 
-	rcar_pwm_write(rp, cyc | ph, RCAR_PWMCNT);
+	rcar_pwm_write(rp,
+		       FIELD_PREP(RCAR_PWMCNT_CYC0_MASK, cyc) |
+		       FIELD_PREP(RCAR_PWMCNT_PH0_MASK, ph),
+		       RCAR_PWMCNT);
 
 	return 0;
 }
@@ -142,12 +143,15 @@ static void rcar_pwm_free(struct pwm_chip *chip, struct pwm_device *pwm)
 
 static int rcar_pwm_enable(struct rcar_pwm_chip *rp)
 {
-	u32 value;
+	u32 value, cyc, ph;
 
 	/* Don't enable the PWM device if CYC0 or PH0 is 0 */
 	value = rcar_pwm_read(rp, RCAR_PWMCNT);
-	if ((value & RCAR_PWMCNT_CYC0_MASK) == 0 ||
-	    (value & RCAR_PWMCNT_PH0_MASK) == 0)
+	cyc = FIELD_GET(RCAR_PWMCNT_CYC0_MASK, value);
+	ph = FIELD_GET(RCAR_PWMCNT_PH0_MASK, value);
+
+	if ((cyc & RCAR_PWM_MAX_CYCLE(rp)) == 0 ||
+	    (ph & RCAR_PWM_MAX_CYCLE(rp)) == 0)
 		return -EINVAL;
 
 	rcar_pwm_update(rp, RCAR_PWMCR_EN0, RCAR_PWMCR_EN0, RCAR_PWMCR);
@@ -202,10 +206,15 @@ static const struct pwm_ops rcar_pwm_ops = {
 
 static int rcar_pwm_probe(struct platform_device *pdev)
 {
+	const struct rcar_pwm_info *info;
 	struct device *dev = &pdev->dev;
 	struct rcar_pwm_chip *rcar_pwm;
 	struct pwm_chip *chip;
 	int ret;
+
+	info = of_device_get_match_data(dev);
+	if (!info)
+		return -ENODEV;
 
 	chip = devm_pwmchip_alloc(dev, 1, sizeof(*rcar_pwm));
 	if (IS_ERR(chip))
@@ -221,6 +230,8 @@ static int rcar_pwm_probe(struct platform_device *pdev)
 		dev_err(dev, "cannot get clock\n");
 		return PTR_ERR(rcar_pwm->clk);
 	}
+
+	rcar_pwm->cycle_bits = info->cycle_bits;
 
 	chip->ops = &rcar_pwm_ops;
 
@@ -247,8 +258,12 @@ static void rcar_pwm_remove(struct platform_device *pdev)
 	pm_runtime_disable(&pdev->dev);
 }
 
+static const struct rcar_pwm_info rcar_pwm_info = {
+	.cycle_bits = 10,
+};
+
 static const struct of_device_id rcar_pwm_of_table[] = {
-	{ .compatible = "renesas,pwm-rcar" },
+	{ .compatible = "renesas,pwm-rcar", .data = &rcar_pwm_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, rcar_pwm_of_table);
