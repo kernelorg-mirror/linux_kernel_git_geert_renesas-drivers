@@ -31,7 +31,8 @@
 #define  RCAR_PWMCR_SS0		BIT(4)
 #define  RCAR_PWMCR_EN0		BIT(0)
 
-#define RCAR_PWMCNT		0x04
+#define RCAR_PWMCNTA		0x04		/* Low part */
+#define RCAR_PWMCNTB		0x08		/* High part (R-Car Gen5) */
 #define  RCAR_PWMCNT_CYC0_MASK	GENMASK(31, 16)
 #define  RCAR_PWMCNT_PH0_MASK	GENMASK(15, 0)
 
@@ -124,9 +125,15 @@ static int rcar_pwm_set_counter(struct rcar_pwm_chip *rp, int div, u64 duty_ns,
 		return -EINVAL;
 
 	rcar_pwm_write(rp,
-		       FIELD_PREP(RCAR_PWMCNT_CYC0_MASK, cyc) |
-		       FIELD_PREP(RCAR_PWMCNT_PH0_MASK, ph),
-		       RCAR_PWMCNT);
+		       FIELD_PREP(RCAR_PWMCNT_CYC0_MASK, lower_16_bits(cyc)) |
+		       FIELD_PREP(RCAR_PWMCNT_PH0_MASK, lower_16_bits(ph)),
+		       RCAR_PWMCNTA);
+
+	if (rp->cycle_bits >= 16)
+		rcar_pwm_write(rp,
+		       FIELD_PREP(RCAR_PWMCNT_CYC0_MASK, upper_16_bits(cyc)) |
+		       FIELD_PREP(RCAR_PWMCNT_PH0_MASK, upper_16_bits(ph)),
+		       RCAR_PWMCNTB);
 
 	return 0;
 }
@@ -146,9 +153,14 @@ static int rcar_pwm_enable(struct rcar_pwm_chip *rp)
 	u32 value, cyc, ph;
 
 	/* Don't enable the PWM device if CYC0 or PH0 is 0 */
-	value = rcar_pwm_read(rp, RCAR_PWMCNT);
+	value = rcar_pwm_read(rp, RCAR_PWMCNTA);
 	cyc = FIELD_GET(RCAR_PWMCNT_CYC0_MASK, value);
 	ph = FIELD_GET(RCAR_PWMCNT_PH0_MASK, value);
+	if (rp->cycle_bits >= 16) {
+		value = rcar_pwm_read(rp, RCAR_PWMCNTB);
+		cyc |= FIELD_GET(RCAR_PWMCNT_CYC0_MASK, value) << 16;
+		ph |= FIELD_GET(RCAR_PWMCNT_PH0_MASK, value) << 16;
+	}
 
 	if ((cyc & RCAR_PWM_MAX_CYCLE(rp)) == 0 ||
 	    (ph & RCAR_PWM_MAX_CYCLE(rp)) == 0)
@@ -262,8 +274,13 @@ static const struct rcar_pwm_info rcar_pwm_info = {
 	.cycle_bits = 10,
 };
 
+static const struct rcar_pwm_info rcar_gen5_pwm_info = {
+	.cycle_bits = 24,
+};
+
 static const struct of_device_id rcar_pwm_of_table[] = {
 	{ .compatible = "renesas,pwm-rcar", .data = &rcar_pwm_info },
+	{ .compatible = "renesas,rcar-gen5-pwm", .data = &rcar_gen5_pwm_info },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, rcar_pwm_of_table);
