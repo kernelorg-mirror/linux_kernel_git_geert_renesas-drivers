@@ -687,6 +687,8 @@ static const struct mod_id_map_entry r8a78000_mdlc_scp_mod_fw[] = {
 	{ 0x51, 777, 1459 },	/* MSI1 / MSO_SCP_MAIN */
 	{ 0x52, 778, 1459 },	/* MSI2 / MSO_SCP_MAIN */
 	{ 0x53, 779, 1459 },	/* MSI3 / MSO_SCP_MAIN */
+	{ 0x72, 799, -1 },	/* CANFD0 */
+	{ 0x73, 800, -1 },	/* CANFD1 */
 };
 
 static const struct mdlc_info r8a78000_mdlc_fw[] = {
