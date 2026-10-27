@@ -15,6 +15,13 @@
 	#size-cells = <2>;
 	interrupt-parent = <&gic>;
 
+	/* External CAN clock - to be overridden by boards that provide it */
+	can_clk: can-clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <0>;
+	};
+
 	cpus {
 		#address-cells = <2>;
 		#size-cells = <0>;
@@ -1602,6 +1609,234 @@
 			#power-domain-cells = <2>;
 			#reset-cells = <1>;
 			bootph-all;
+		};
+
+		canfd0: can@c1420000 {
+			compatible = "renesas,r8a78000-canfd",
+				     "renesas,rcar-gen5-canfd";
+			reg = <0 0xc1420000 0 0x8500>;
+			interrupts = <GIC_ESPI 610 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 611 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 612 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 613 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 614 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 615 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 616 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 617 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 618 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 619 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 620 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 621 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 622 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 623 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 624 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 625 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 626 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 627 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 628 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 629 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 630 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 631 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 632 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 633 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 634 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 635 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 636 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 637 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 638 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 639 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 640 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 641 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 642 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 643 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 644 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 645 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 646 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 647 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 648 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 649 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 650 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 651 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 652 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 653 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 654 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 655 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 656 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 657 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 658 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 659 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "g_err", "g_recc",
+					  "ch0_err", "ch0_rec", "ch0_trx",
+					  "ch1_err", "ch1_rec", "ch1_trx",
+					  "ch2_err", "ch2_rec", "ch2_trx",
+					  "ch3_err", "ch3_rec", "ch3_trx",
+					  "ch4_err", "ch4_rec", "ch4_trx",
+					  "ch5_err", "ch5_rec", "ch5_trx",
+					  "ch6_err", "ch6_rec", "ch6_trx",
+					  "ch7_err", "ch7_rec", "ch7_trx",
+					  "vm0_tx", "vm0_rx", "vm0_err",
+					  "vm1_tx", "vm1_rx", "vm1_err",
+					  "vm2_tx", "vm2_rx", "vm2_err",
+					  "vm3_tx", "vm3_rx", "vm3_err",
+					  "vm4_tx", "vm4_rx", "vm4_err",
+					  "vm5_tx", "vm5_rx", "vm5_err",
+					  "vm6_tx", "vm6_rx", "vm6_err",
+					  "vm7_tx", "vm7_rx", "vm7_err";
+			clocks = <&cpg R8A78000_CPG_SCPBUSD4_SCP_MAIN>,
+				 <&cpg R8A78000_CPG_CANFD_SCP_MAIN>,
+				 <&can_clk>;
+			clock-names = "fck", "canfd", "can_clk";
+			assigned-clocks = <&cpg R8A78000_CPG_CANFD_SCP_MAIN>;
+			assigned-clock-rates = <80000000>;
+			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x72>;
+			resets = <&mdlc_scp 0x72>;
+			status = "disabled";
+
+			channel0 {
+				status = "disabled";
+			};
+
+			channel1 {
+				status = "disabled";
+			};
+
+			channel2 {
+				status = "disabled";
+			};
+
+			channel3 {
+				status = "disabled";
+			};
+
+			channel4 {
+				status = "disabled";
+			};
+
+			channel5 {
+				status = "disabled";
+			};
+
+			channel6 {
+				status = "disabled";
+			};
+
+			channel7 {
+				status = "disabled";
+			};
+		};
+
+		canfd1: can@c1520000 {
+			compatible = "renesas,r8a78000-canfd",
+				     "renesas,rcar-gen5-canfd";
+			reg = <0 0xc1520000 0 0x8500>;
+			interrupts = <GIC_ESPI 660 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 661 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 662 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 663 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 664 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 665 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 666 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 667 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 668 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 669 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 670 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 671 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 672 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 673 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 674 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 675 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 676 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 677 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 678 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 679 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 680 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 681 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 682 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 683 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 684 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 685 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 686 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 687 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 688 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 689 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 690 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 691 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 692 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 693 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 694 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 695 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 696 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 697 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 698 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 699 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 700 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 701 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 702 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 703 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 704 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 705 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 706 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 707 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 708 IRQ_TYPE_LEVEL_HIGH>,
+				     <GIC_ESPI 709 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "g_err", "g_recc",
+					  "ch0_err", "ch0_rec", "ch0_trx",
+					  "ch1_err", "ch1_rec", "ch1_trx",
+					  "ch2_err", "ch2_rec", "ch2_trx",
+					  "ch3_err", "ch3_rec", "ch3_trx",
+					  "ch4_err", "ch4_rec", "ch4_trx",
+					  "ch5_err", "ch5_rec", "ch5_trx",
+					  "ch6_err", "ch6_rec", "ch6_trx",
+					  "ch7_err", "ch7_rec", "ch7_trx",
+					  "vm0_tx", "vm0_rx", "vm0_err",
+					  "vm1_tx", "vm1_rx", "vm1_err",
+					  "vm2_tx", "vm2_rx", "vm2_err",
+					  "vm3_tx", "vm3_rx", "vm3_err",
+					  "vm4_tx", "vm4_rx", "vm4_err",
+					  "vm5_tx", "vm5_rx", "vm5_err",
+					  "vm6_tx", "vm6_rx", "vm6_err",
+					  "vm7_tx", "vm7_rx", "vm7_err";
+			clocks = <&cpg R8A78000_CPG_SCPBUSD4_SCP_MAIN>,
+				 <&cpg R8A78000_CPG_CANFD_SCP_MAIN>,
+				 <&can_clk>;
+			clock-names = "fck", "canfd", "can_clk";
+			assigned-clocks = <&cpg R8A78000_CPG_CANFD_SCP_MAIN>;
+			assigned-clock-rates = <80000000>;
+			power-domains = <&mdlc_scp R8A78000_MDLC_PD_SCP 0x73>;
+			resets = <&mdlc_scp 0x73>;
+			status = "disabled";
+
+			channel0 {
+				status = "disabled";
+			};
+
+			channel1 {
+				status = "disabled";
+			};
+
+			channel2 {
+				status = "disabled";
+			};
+
+			channel3 {
+				status = "disabled";
+			};
+
+			channel4 {
+				status = "disabled";
+			};
+
+			channel5 {
+				status = "disabled";
+			};
+
+			channel6 {
+				status = "disabled";
+			};
+
+			channel7 {
+				status = "disabled";
+			};
 		};
 
 		msiof0: spi@c1700000 {
