@@ -467,7 +467,6 @@ struct rcar_canfd_global {
 	void __iomem *base;		/* Register base address */
 	struct rcar_canfd_f_c __iomem *fcbase;
 	struct platform_device *pdev;	/* Respective platform device */
-	struct clk *clkp;		/* Peripheral clock */
 	struct clk *can_clk;		/* fCAN clock */
 	struct clk *clk_ram;		/* Clock RAM */
 	unsigned long channels_mask;	/* Enabled channels mask */
@@ -2111,6 +2110,7 @@ static int rcar_canfd_probe(struct platform_device *pdev)
 	bool fdmode = true;			/* CAN FD only mode - default */
 	char name[9] = "channelX";
 	u32 ch, fcan_freq;
+	struct clk *clkp;
 	int i;
 
 	info = of_device_get_match_data(dev);
@@ -2181,9 +2181,9 @@ static int rcar_canfd_probe(struct platform_device *pdev)
 				     "failed to get rstc_n\n");
 
 	/* Peripheral clock */
-	gpriv->clkp = devm_clk_get(dev, "fck");
-	if (IS_ERR(gpriv->clkp))
-		return dev_err_probe(dev, PTR_ERR(gpriv->clkp),
+	clkp = devm_clk_get(dev, "fck");
+	if (IS_ERR(clkp))
+		return dev_err_probe(dev, PTR_ERR(clkp),
 				     "cannot get peripheral clock\n");
 
 	/* fCAN clock: Pick External clock. If not available fallback to
