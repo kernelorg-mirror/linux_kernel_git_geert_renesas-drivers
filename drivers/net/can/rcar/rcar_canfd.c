@@ -37,6 +37,7 @@
 #include <linux/of.h>
 #include <linux/phy/phy.h>
 #include <linux/platform_device.h>
+#include <linux/pm_runtime.h>
 #include <linux/reset.h>
 #include <linux/types.h>
 
@@ -2004,9 +2005,9 @@ static int rcar_canfd_global_init(struct rcar_canfd_global *gpriv)
 	int err;
 
 	/* Enable peripheral clock for register access */
-	err = clk_prepare_enable(gpriv->clkp);
+	err = pm_runtime_resume_and_get(dev);
 	if (err) {
-		dev_err(dev, "failed to enable peripheral clock: %pe\n",
+		dev_err(dev, "pm_runtime_resume_and_get() failed: %pe\n",
 			ERR_PTR(err));
 		return err;
 	}
@@ -2016,7 +2017,7 @@ static int rcar_canfd_global_init(struct rcar_canfd_global *gpriv)
 	if (err) {
 		dev_err(dev,
 			"failed to enable RAM clock, error %d\n", err);
-		goto fail_clk;
+		goto fail_rpm;
 	}
 
 	err = reset_control_reset(gpriv->rstc1);
@@ -2074,8 +2075,8 @@ fail_reset1:
 	reset_control_assert(gpriv->rstc1);
 fail_ram_clk:
 	clk_disable_unprepare(gpriv->clk_ram);
-fail_clk:
-	clk_disable_unprepare(gpriv->clkp);
+fail_rpm:
+	pm_runtime_put(dev);
 	return err;
 }
 
@@ -2093,7 +2094,7 @@ static void rcar_canfd_global_deinit(struct rcar_canfd_global *gpriv, bool full)
 	reset_control_assert(gpriv->rstc2);
 	reset_control_assert(gpriv->rstc1);
 	clk_disable_unprepare(gpriv->clk_ram);
-	clk_disable_unprepare(gpriv->clkp);
+	pm_runtime_put(&gpriv->pdev->dev);
 }
 
 static int rcar_canfd_probe(struct platform_device *pdev)
@@ -2253,6 +2254,10 @@ static int rcar_canfd_probe(struct platform_device *pdev)
 			goto fail_dev;
 		}
 	}
+
+	err = devm_pm_runtime_enable(dev);
+	if (err)
+		goto fail_dev;
 
 	err = rcar_canfd_global_init(gpriv);
 	if (err)
