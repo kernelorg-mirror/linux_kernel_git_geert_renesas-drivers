@@ -41,6 +41,11 @@ properties:
 
       - items:
           - enum:
+              - renesas,r8a78000-canfd     # R-Car X5H
+          - const: renesas,rcar-gen5-canfd # R-Car Gen5
+
+      - items:
+          - enum:
               - renesas,r9a07g043-canfd    # RZ/G2UL and RZ/Five
               - renesas,r9a07g044-canfd    # RZ/G2{L,LC}
               - renesas,r9a07g054-canfd    # RZ/V2L
@@ -85,6 +90,36 @@ properties:
           - description: CAN5 error interrupt
           - description: CAN5 transmit interrupt
           - description: CAN5 transmit/receive FIFO receive completion interrupt
+          - description: CAN6 error interrupt
+          - description: CAN6 transmit interrupt
+          - description: CAN6 transmit/receive FIFO receive completion interrupt
+          - description: CAN7 error interrupt
+          - description: CAN7 transmit interrupt
+          - description: CAN7 transmit/receive FIFO receive completion interrupt
+          - description: Virtual Machine 0 transmit interrupt
+          - description: Virtual Machine 0 receive interrupt
+          - description: Virtual Machine 0 error interrupt
+          - description: Virtual Machine 1 transmit interrupt
+          - description: Virtual Machine 1 receive interrupt
+          - description: Virtual Machine 1 error interrupt
+          - description: Virtual Machine 2 transmit interrupt
+          - description: Virtual Machine 2 receive interrupt
+          - description: Virtual Machine 2 error interrupt
+          - description: Virtual Machine 3 transmit interrupt
+          - description: Virtual Machine 3 receive interrupt
+          - description: Virtual Machine 3 error interrupt
+          - description: Virtual Machine 4 transmit interrupt
+          - description: Virtual Machine 4 receive interrupt
+          - description: Virtual Machine 4 error interrupt
+          - description: Virtual Machine 5 transmit interrupt
+          - description: Virtual Machine 5 receive interrupt
+          - description: Virtual Machine 5 error interrupt
+          - description: Virtual Machine 6 transmit interrupt
+          - description: Virtual Machine 6 receive interrupt
+          - description: Virtual Machine 6 error interrupt
+          - description: Virtual Machine 7 transmit interrupt
+          - description: Virtual Machine 7 receive interrupt
+          - description: Virtual Machine 7 error interrupt
         minItems: 8
 
   interrupt-names:
@@ -113,6 +148,36 @@ properties:
           - const: ch5_err
           - const: ch5_rec
           - const: ch5_trx
+          - const: ch6_err
+          - const: ch6_rec
+          - const: ch6_trx
+          - const: ch7_err
+          - const: ch7_rec
+          - const: ch7_trx
+          - const: vm0_tx
+          - const: vm0_rx
+          - const: vm0_err
+          - const: vm1_tx
+          - const: vm1_rx
+          - const: vm1_err
+          - const: vm2_tx
+          - const: vm2_rx
+          - const: vm2_err
+          - const: vm3_tx
+          - const: vm3_rx
+          - const: vm3_err
+          - const: vm4_tx
+          - const: vm4_rx
+          - const: vm4_err
+          - const: vm5_tx
+          - const: vm5_rx
+          - const: vm5_err
+          - const: vm6_tx
+          - const: vm6_rx
+          - const: vm6_err
+          - const: vm7_tx
+          - const: vm7_rx
+          - const: vm7_err
         minItems: 8
 
   clocks:
@@ -235,14 +300,32 @@ allOf:
       properties:
         compatible:
           contains:
+            const: renesas,rcar-gen5-canfd
+    then:
+      properties:
+        interrupts:
+          minItems: 50
+
+        interrupt-names:
+          minItems: 50
+
+        resets:
+          maxItems: 1
+
+  - if:
+      properties:
+        compatible:
+          contains:
             const: renesas,r9a09g047-canfd
     then:
       properties:
         interrupts:
           minItems: 20
+          maxItems: 20
 
         interrupt-names:
           minItems: 20
+          maxItems: 20
 
         resets:
           minItems: 2
@@ -344,6 +427,7 @@ allOf:
             enum:
               - renesas,rcar-gen3-canfd
               - renesas,rcar-gen4-canfd
+              - renesas,rcar-gen5-canfd
     then:
       required:
         - resets
