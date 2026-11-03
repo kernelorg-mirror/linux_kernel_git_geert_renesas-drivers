@@ -871,8 +871,7 @@
 
 		sys_dmac10: dma-controller@c05c4000 {
 			compatible = "renesas,dmac-r8a78000", "renesas,rcar-gen5-dmac";
-			reg = <0 0xc05c4000 0 0x1000>,
-			      <0 0xc0480000 0 0x10000>;
+			reg = <0 0xc05c4000 0 0x1000>, <0 0xc0480000 0 0x10000>;
 			interrupts = <GIC_SPI 388 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 409 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 410 IRQ_TYPE_LEVEL_HIGH>,
@@ -895,16 +894,18 @@
 					  "ch5", "ch6", "ch7", "ch8", "ch9",
 					  "ch10", "ch11", "ch12", "ch13",
 					  "ch14", "ch15";
-			//FIXME: clocks, clock-names, power-doimains, resets
+			clocks = <&cpg R8A78000_CPG_SGD4_PERW_MAIN>;
+			clock-names = "fck";
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x80>;
+			resets = <&mdlc_perw 0x80>;
 			#dma-cells = <1>;
 			dma-channels = <16>;
 		};
 
 		sys_dmac11: dma-controller@c05c5000 {
 			compatible = "renesas,dmac-r8a78000", "renesas,rcar-gen5-dmac";
-			reg = <0 0xc05c5000 0 0x1000>,
-			      <0 0xc0490000 0 0x10000>;
-			interrupts = <GIC_SPI 358 IRQ_TYPE_LEVEL_HIGH>,
+			reg = <0 0xc05c5000 0 0x1000>, <0 0xc0490000 0 0x10000>;
+			interrupts = <GIC_SPI 390 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 425 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 426 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 427 IRQ_TYPE_LEVEL_HIGH>,
@@ -926,16 +927,18 @@
 					  "ch5", "ch6", "ch7", "ch8", "ch9",
 					  "ch10", "ch11", "ch12", "ch13",
 					  "ch14", "ch15";
-			//FIXME: clocks, clock-names, power-doimains, resets
+			clocks = <&cpg R8A78000_CPG_SGD4_PERW_MAIN>;
+			clock-names = "fck";
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x81>;
+			resets = <&mdlc_perw 0x81>;
 			#dma-cells = <1>;
 			dma-channels = <16>;
 		};
 
 		sys_dmac12: dma-controller@c05c6000 {
 			compatible = "renesas,dmac-r8a78000", "renesas,rcar-gen5-dmac";
-			reg = <0 0xc05c6000 0 0x1000>,
-			      <0 0xc04a0000 0 0x10000>;
-			interrupts = <GIC_SPI 360 IRQ_TYPE_LEVEL_HIGH>,
+			reg = <0 0xc05c6000 0 0x1000>, <0 0xc04a0000 0 0x10000>;
+			interrupts = <GIC_SPI 392 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 441 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 442 IRQ_TYPE_LEVEL_HIGH>,
 				     <GIC_SPI 443 IRQ_TYPE_LEVEL_HIGH>,
@@ -957,7 +960,10 @@
 					  "ch5", "ch6", "ch7", "ch8", "ch9",
 					  "ch10", "ch11", "ch12", "ch13",
 					  "ch14", "ch15";
-			//FIXME: clocks, clock-names, power-doimains, resets
+			clocks = <&cpg R8A78000_CPG_SGD4_PERW_MAIN>;
+			clock-names = "fck";
+			power-domains = <&mdlc_perw R8A78000_MDLC_PD_APL 0x82>;
+			resets = <&mdlc_perw 0x82>;
 			#dma-cells = <1>;
 			dma-channels = <16>;
 		};
