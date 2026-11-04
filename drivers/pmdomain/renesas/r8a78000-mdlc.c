@@ -685,6 +685,9 @@ static const struct mod_id_map_entry r8a78000_mdlc_perw_mod_fw[] = {
 	{ 0x57, 227, -1 },	/* HSCIF3 */
 	{ 0x70, 244, -1 },	/* PWM0 */
 	{ 0x76, 249, -1 },	/* TPU0 */
+	{ 0x80, -1, -1 },	/* SYS-DMAC PERW0 */
+	{ 0x81, -1, -1 },	/* SYS-DMAC PERW1 */
+	{ 0x82, -1, -1 },	/* SYS-DMAC PERW2 */
 };
 
 static const struct mod_id_map_entry r8a78000_mdlc_scp_mod_fw[] = {
