@@ -765,7 +765,8 @@ static int vsp1_video_setup_pipeline(struct vsp1_pipeline *pipe)
 	return 0;
 }
 
-static void vsp1_video_release_buffers(struct vsp1_video *video)
+static void vsp1_video_release_buffers(struct vsp1_video *video,
+				       enum vb2_buffer_state state)
 {
 	struct vsp1_vb2_buffer *buffer;
 
@@ -773,7 +774,7 @@ static void vsp1_video_release_buffers(struct vsp1_video *video)
 	guard(spinlock_irqsave)(&video->irqlock);
 
 	list_for_each_entry(buffer, &video->irqqueue, queue)
-		vb2_buffer_done(&buffer->buf.vb2_buf, VB2_BUF_STATE_ERROR);
+		vb2_buffer_done(&buffer->buf.vb2_buf, state);
 	INIT_LIST_HEAD(&video->irqqueue);
 }
 
@@ -802,7 +803,7 @@ static int vsp1_video_start_streaming(struct vb2_queue *vq, unsigned int count)
 		if (pipe->stream_count == pipe->num_inputs) {
 			ret = vsp1_video_setup_pipeline(pipe);
 			if (ret < 0) {
-				vsp1_video_release_buffers(video);
+				vsp1_video_release_buffers(video, VB2_BUF_STATE_QUEUED);
 				vsp1_video_cleanup_pipeline(pipe);
 				return ret;
 			}
@@ -858,7 +859,7 @@ static void vsp1_video_stop_streaming(struct vb2_queue *vq)
 	}
 
 	video_device_pipeline_stop(&video->video);
-	vsp1_video_release_buffers(video);
+	vsp1_video_release_buffers(video, VB2_BUF_STATE_ERROR);
 	vsp1_video_pipeline_put(pipe);
 }
 
