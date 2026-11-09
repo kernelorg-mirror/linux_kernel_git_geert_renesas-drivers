@@ -12,7 +12,8 @@ maintainers:
 description:
   Each instance of the R-Car X5H Module Controller (MODULE CONTROL) provides
   Power Gating for up to 64 Power Domains, and Module Standby and Reset for up
-  to 256 modules in the Power Domain of each Module hierarchy.
+  to 256 modules in the Power Domain of each Module hierarchy. Recent hardware
+  versions have increased the number of supported modules.
 
 properties:
   compatible:
@@ -32,14 +33,14 @@ properties:
         are always on, and for which there are no MPDG bits to control them.
 
       - The second power domain specifier cell is the module standby part, and
-        must be the module number (0x00-0xff), composed of the Module System
+        must be the module number (0x00-0x1ff), composed of the Module System
         Reset (MSRES) register index in the high nibble, and the Module Reset
         Destination bitfield index in the low nibble.
     const: 2
 
   '#reset-cells':
     description:
-      The single reset specifier cell must be the module number (0x00-0xff),
+      The single reset specifier cell must be the module number (0x00-0x1ff),
       and thus identical to the second power domain specifier cell.
     const: 1
 
