@@ -862,12 +862,39 @@ static const struct vsp1_device_info vsp1_device_infos[] = {
 		.num_bru_inputs = 5,
 	}, {
 		.version = VI6_IP_VERSION_MODEL_VSPD_GEN4,
+		.model = "VSP2-D (a)",
+		.soc = VI6_IP_VERSION_SOC_X5H,
+		.gen = 4,
+		.features = VSP1_HAS_BRU | VSP1_HAS_EXT_DL,
+		.lif_count = 1,
+		.rpf_count = 5,
+		/*
+		 * TODO This VSP has 8 UIFs but it is not supported by the
+		 * driver yet, and the driver hardcodes usage of one UIF per
+		 * LIF starting at UIF4. Declare just 2 UIFs here for now until
+		 * the driver supports more.
+		 */
+		.uif_count = 2,
+		.wpf_count = 1,
+		.num_bru_inputs = 5,
+	}, {
+		.version = VI6_IP_VERSION_MODEL_VSPD_GEN4,
 		.model = "VSP2-D",
 		.gen = 4,
 		.features = VSP1_HAS_BRU | VSP1_HAS_EXT_DL,
 		.lif_count = 1,
 		.rpf_count = 5,
 		.uif_count = 2,
+		.wpf_count = 1,
+		.num_bru_inputs = 5,
+	}, {
+		.version = VI6_IP_VERSION_MODEL_VSPDB_GEN5,
+		.model = "VSP2-D (b)",
+		.gen = 4,
+		.features = VSP1_HAS_BRU | VSP1_HAS_EXT_DL,
+		.lif_count = 1,
+		.rpf_count = 5,
+		.uif_count = 1,
 		.wpf_count = 1,
 		.num_bru_inputs = 5,
 	}, {
