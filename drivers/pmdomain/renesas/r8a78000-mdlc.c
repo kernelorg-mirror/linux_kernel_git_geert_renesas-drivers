@@ -696,6 +696,55 @@ static const struct mod_id_map_entry r8a78000_mdlc_scp_mod_fw[] = {
 	{ 0x73, 800, -1 },	/* CANFD1 */
 };
 
+static const struct power_id_map_entry r8a78000_mdlc_vio_power_fw[] = {
+	{ 0, 4 },		/* PD_VIO0 */
+	{ 1, 5 },		/* PD_VIO1 */
+	{ 2, 6 },		/* PD_VIO2 */
+	{ 3, 7 },		/* PD_VIO3 */
+	{ 7, 11 },		/* PD_VIO4 */
+};
+
+static const struct mod_id_map_entry r8a78000_mdlc_vio_mod_fw[] = {
+	{ 0x70, 26, -1 },	/* VSPD0 */
+	{ 0x71, 27, -1 },	/* VSPD1 */
+	{ 0x72, 28, -1 },	/* VSPD2 */
+	{ 0x73, 29, -1 },	/* VSPD3 */
+	{ 0x74, 30, -1 },	/* VSPD4 */
+	{ 0x75, 31, -1 },	/* VSPDB0 */
+	{ 0x76, 32, -1 },	/* VSPDB1 */
+	{ 0x77, 33, -1 },	/* VSPDB2 */
+	{ 0x78, 34, -1 },	/* VSPDB3 */
+	{ 0x79, 35, -1 },	/* VSPDB4 */
+	{ 0x7e, 40, -1 },	/* FCPVD0 */
+	{ 0x7f, 41, -1 },	/* FCPVD1 */
+	{ 0x80, 42, -1 },	/* FCPVD2 */
+	{ 0x81, 43, -1 },	/* FCPVD3 */
+	{ 0x82, 44, -1 },	/* FCPVD4 */
+	{ 0x83, 45, -1 },	/* FCPVD5 */
+	{ 0x84, 46, -1 },	/* FCPVD6 */
+	{ 0x85, 47, -1 },	/* FCPVD7 */
+	{ 0x86, 48, -1 },	/* FCPVD8 */
+	{ 0x87, 49, -1 },	/* FCPVD9 */
+	{ 0xf9, 163, -1 },	/* VSPB0 */
+	{ 0xfa, 164, -1 },	/* VSPB1 */
+	{ 0xfb, 165, -1 },	/* VSPB2 */
+	{ 0xfc, 166, -1 },	/* VSPB3 */
+	{ 0xfd, 167, -1 },	/* VSPB4 */
+	{ 0xfe, 168, -1 },	/* VSPI0 */
+	{ 0xff, 169, -1 },	/* VSPI1 */
+	{ 0x100, 170, -1 },	/* VSPI2 */
+	{ 0x101, 171, -1 },	/* VSPI3 */
+	{ 0x102, 172, -1 },	/* FCPVB0 */
+	{ 0x103, 173, -1 },	/* FCPVB1 */
+	{ 0x104, 174, -1 },	/* FCPVB2 */
+	{ 0x105, 175, -1 },	/* FCPVB3 */
+	{ 0x106, 176, -1 },	/* FCPVB4 */
+	{ 0x107, 177, -1 },	/* FCPVI0 */
+	{ 0x108, 178, -1 },	/* FCPVI1 */
+	{ 0x109, 179, -1 },	/* FCPVI2 */
+	{ 0x10a, 180, -1 },	/* FCPVI3 */
+};
+
 static const struct mdlc_info r8a78000_mdlc_fw[] = {
 	{
 		.base = 0xc1338000,
@@ -713,6 +762,10 @@ static const struct mdlc_info r8a78000_mdlc_fw[] = {
 	}, {
 		.base = 0xc1330000,
 		MOD_ID_MAP(r8a78000_mdlc_scp_mod_fw),
+	}, {
+		.base = 0xc5000000,
+		POWER_ID_MAP(r8a78000_mdlc_vio_power_fw),
+		MOD_ID_MAP(r8a78000_mdlc_vio_mod_fw),
 	},
 	{ /* sentinel */ }
 };
