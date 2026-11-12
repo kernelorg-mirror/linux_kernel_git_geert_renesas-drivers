@@ -1796,6 +1796,16 @@
 			bootph-all;
 		};
 
+		rtca: rtc@c1394000 {
+			compatible = "renesas,r8a78000-rtc";
+			reg = <0 0xc1394000 0 0x100>;
+			clocks = <&cpg R8A78000_CPG_SCPBUSD6_SCP_MAIN>, <&cpg R8A78000_CPG_RTCATCKI>;
+			clock-names = "hclk", "xtal";
+			power-domains = <&mdlc_aon R8A78000_MDLC_PD_AON 0x11>;
+			resets = <&mdlc_aon 0x11>;
+			status = "disabled";
+		};
+
 		canfd0: can@c1420000 {
 			compatible = "renesas,r8a78000-canfd",
 				     "renesas,rcar-gen5-canfd";
