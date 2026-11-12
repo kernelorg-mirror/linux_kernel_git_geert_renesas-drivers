@@ -645,6 +645,7 @@ static const struct mdlc_info r8a78000_mdlc_default[] = {
 };
 
 static const struct mod_id_map_entry r8a78000_mdlc_aon_mod_fw[] = {
+	{ 0x11, 810, -1 },	/* RTCA */
 	{ 0x20, 811, -1 },	/* GPIODM0 */
 };
 
