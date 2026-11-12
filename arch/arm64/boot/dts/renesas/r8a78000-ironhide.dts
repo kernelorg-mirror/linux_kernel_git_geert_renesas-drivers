@@ -523,6 +523,10 @@
 	status = "okay";
 };
 
+&rtca {
+	status = "okay";
+};
+
 &scif_clk {
 	clock-frequency = <26000000>;
 };
