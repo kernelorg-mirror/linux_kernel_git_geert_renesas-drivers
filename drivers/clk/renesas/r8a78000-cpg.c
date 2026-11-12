@@ -39,6 +39,7 @@ struct cpg_data {
 };
 
 enum fixed_clk {
+	FIXED_CLK_240K,
 	FIXED_CLK_33M,
 	FIXED_CLK_37M5,
 	FIXED_CLK_66M,
@@ -50,6 +51,7 @@ enum fixed_clk {
 };
 
 static const unsigned long fixed_clk_rates[] = {
+	[FIXED_CLK_240K] = 240000,
 	[FIXED_CLK_33M] = 33333000,
 	[FIXED_CLK_37M5] = 37500000,
 	[FIXED_CLK_66M] = 66666000,
@@ -290,6 +292,7 @@ static const struct clk_id_map_entry r8a78000_cpg_default[] = {
 	{ R8A78000_CPG_SGASYNCD8_PERW_BUS,	FIXED_CLK(133M) },
 	{ R8A78000_CPG_SGASYNCD16_PERW_BUS,	FIXED_CLK(66M) },
 	{ R8A78000_CPG_SCPBUSD4_SCP_MAIN,	FIXED_CLK(150M) },
+	{ R8A78000_CPG_SCPBUSD6_SCP_MAIN,	FIXED_CLK(100M) },
 	{ R8A78000_CPG_SCPBUSD16_SCP_MAIN,	FIXED_CLK(37M5) },
 	{ R8A78000_CPG_S0D4_PERE_MAIN,		FIXED_CLK(200M) },
 	{ R8A78000_CPG_S0D24_PERE_MAIN,		FIXED_CLK(33M) },
@@ -298,6 +301,7 @@ static const struct clk_id_map_entry r8a78000_cpg_default[] = {
 	{ R8A78000_CPG_SGASYNCD16_PERW_MAIN,	FIXED_CLK(66M) },
 	{ R8A78000_CPG_S0ASYNCD8_PERW_MAIN,	FIXED_CLK(100M) },
 	{ R8A78000_CPG_SGD4_PERW_MAIN,		FIXED_CLK(266M) },
+	{ R8A78000_CPG_RTCATCKI,		FIXED_CLK(240K) },
 };
 
 static const struct clk_id_map_entry r8a78000_cpg_fw[] = {
@@ -307,6 +311,7 @@ static const struct clk_id_map_entry r8a78000_cpg_fw[] = {
 	{ R8A78000_CPG_MSO_SCP_MAIN,		1459 },
 	{ R8A78000_CPG_MSOCK_PERW_BUS,		1667 },
 	{ R8A78000_CPG_SCPBUSD4_SCP_MAIN,	1451 },
+	{ R8A78000_CPG_SCPBUSD6_SCP_MAIN,	1452 },
 	{ R8A78000_CPG_SCPBUSD16_SCP_MAIN,	1454 },
 	{ R8A78000_CPG_S0D4_PERE_MAIN,		1686 },
 	{ R8A78000_CPG_S0D24_PERE_MAIN,		1690 },
@@ -316,6 +321,11 @@ static const struct clk_id_map_entry r8a78000_cpg_fw[] = {
 	{ R8A78000_CPG_S0ASYNCD8_PERW_MAIN,	1653 },
 	{ R8A78000_CPG_CANFD_SCP_MAIN,		1456 },
 	{ R8A78000_CPG_SGD4_PERW_MAIN,		1645 },
+	/*
+	 * FIXME: RTCATCKI is actually a muxed clk selectable by the CKS_ARTCAC
+	 * register (EXTALR / LSIOSC (default)). We use the default for now.
+	 */
+	{ R8A78000_CPG_RTCATCKI,		FIXED_CLK(240K) },
 };
 
 static const struct cpg_data r8a78000_cpg_data = {
