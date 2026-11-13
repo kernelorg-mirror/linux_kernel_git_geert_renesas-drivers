@@ -62,8 +62,7 @@ static const struct clk_map *clk_map_find(const struct clk_map *map, u32 id)
 	return NULL;
 }
 
-static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec,
-				      void *data)
+static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 {
 	struct r8a78000_cpg_priv *priv = data;
 	struct device *dev = priv->dev;
@@ -82,12 +81,10 @@ static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec,
 		return ERR_PTR(-ENOENT);
 	}
 
-	dev_dbg(dev, "Mapping DT clock %u to fixed clock %u\n", id, map->fw_id);
-
 	hw = priv->fixed_hws[map->fw_id];
 
-	dev_dbg(dev, "clock %u is %s at %lu Hz\n", id, clk_hw_get_name(hw),
-		clk_hw_get_rate(hw));
+	dev_dbg(dev, "Mapping DT clock %u to %s at %lu Hz\n", id,
+		clk_hw_get_name(hw), clk_hw_get_rate(hw));
 
 	return hw;
 }
