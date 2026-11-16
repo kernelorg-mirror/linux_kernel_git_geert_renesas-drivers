@@ -16,10 +16,20 @@
 
 #include <dt-bindings/clock/renesas,r8a78000-cpg.h>
 
-struct clk_map {
-	int dt_id;		/* DT binding clock ID or -1 sentinel */
+struct clk_id_map_entry {
+	u32 dt_id;		/* DT binding clock ID */
 	u32 fw_id;		/* FIXED_CLK() ID */
 };
+
+struct clk_id_map {
+	const struct clk_id_map_entry *entries;
+	unsigned int size;
+};
+
+#define CLK_ID_MAP(_entries) &(struct clk_id_map) {	\
+	.entries = _entries,				\
+	.size = ARRAY_SIZE(_entries),			\
+}
 
 enum fixed_clk {
 	FIXED_CLK_66M,
@@ -40,23 +50,21 @@ static const unsigned long fixed_clk_rates[NUM_FIXED_CLKS] = {
  * struct r8a78000_cpg_priv - Clock Pulse Generator Private Data
  *
  * @dev: CPG device
- * @map: Mapping from DT clock IDs to fixed-rate clocks
+ * @map: Mapping from DT clock IDs to fixed-rate clock IDs
  * @fixed_hws: Fixed rate clocks
  */
 struct r8a78000_cpg_priv {
 	struct device *dev;
-	const struct clk_map *map;
+	const struct clk_id_map *map;
 	struct clk_hw *fixed_hws[NUM_FIXED_CLKS];
 };
 
-static const struct clk_map *clk_map_find(const struct clk_map *map, u32 id)
+static const struct clk_id_map_entry *clk_id_map_find(const struct clk_id_map *map,
+						u32 dt_id)
 {
-	if (!map)
-		return NULL;
-
-	for (; map->dt_id >= 0; map++) {
-		if (map->dt_id == id)
-			return map;
+	for (unsigned int i = 0; i < map->size; i++) {
+		if (map->entries[i].dt_id == dt_id)
+			return &map->entries[i];
 	}
 
 	return NULL;
@@ -65,8 +73,8 @@ static const struct clk_map *clk_map_find(const struct clk_map *map, u32 id)
 static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 {
 	struct r8a78000_cpg_priv *priv = data;
+	const struct clk_id_map_entry *entry;
 	struct device *dev = priv->dev;
-	const struct clk_map *map;
 	struct clk_hw *hw;
 	u32 id;
 
@@ -75,13 +83,13 @@ static struct clk_hw *r8a78000_clk_get(struct of_phandle_args *spec, void *data)
 
 	id = spec->args[0];
 
-	map = clk_map_find(priv->map, id);
-	if (!map) {
+	entry = clk_id_map_find(priv->map, id);
+	if (!entry) {
 		dev_err(dev, "Unknown clock %u\n", id);
 		return ERR_PTR(-ENOENT);
 	}
 
-	hw = priv->fixed_hws[map->fw_id];
+	hw = priv->fixed_hws[entry->fw_id];
 
 	dev_dbg(dev, "Mapping DT clock %u to %s at %lu Hz\n", id,
 		clk_hw_get_name(hw), clk_hw_get_rate(hw));
@@ -116,7 +124,7 @@ static int r8a78000_cpg_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	struct r8a78000_cpg_priv *priv;
-	const struct clk_map *map;
+	const struct clk_id_map *map;
 	int ret;
 
 	map = of_device_get_match_data(dev);
@@ -137,17 +145,16 @@ static int r8a78000_cpg_probe(struct platform_device *pdev)
 	return devm_of_clk_add_hw_provider(dev, r8a78000_clk_get, priv);
 }
 
-static const struct clk_map r8a78000_cpg_default[] = {
+static const struct clk_id_map_entry r8a78000_cpg_default[] = {
 	{ R8A78000_CPG_SGASYNCD4_PERW_BUS,	FIXED_CLK(266M) },
 	{ R8A78000_CPG_SGASYNCD8_PERW_BUS,	FIXED_CLK(133M) },
 	{ R8A78000_CPG_SGASYNCD16_PERW_BUS,	FIXED_CLK(66M) },
-	{ -1 }
 };
 
 static const struct of_device_id r8a78000_cpg_match[] = {
 	{
 		.compatible = "renesas,r8a78000-cpg",
-		.data = &r8a78000_cpg_default,
+		.data = CLK_ID_MAP(r8a78000_cpg_default),
 	},
 	{ /* sentinel */ }
 };
