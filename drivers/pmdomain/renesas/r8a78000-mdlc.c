@@ -17,7 +17,7 @@
 #include <dt-bindings/power/renesas,r8a78000-mdlc.h>
 
 struct mod_id_map_entry {
-	u32 hw_id;		/* Hardware module ID */
+	u16 hw_id;		/* Hardware module ID */
 };
 
 struct mod_id_map {
@@ -148,8 +148,8 @@ static int r8a78000_mdlc_attach_dev(struct generic_pm_domain *domain,
 	struct device_node *np = dev->of_node;
 	struct r8a78000_mdlc_priv *priv;
 	struct of_phandle_args pd_spec;
-	unsigned int id;
 	int ret, idx;
+	u32 id;
 
 	ret = of_parse_phandle_with_args(np, "power-domains",
 					 "#power-domain-cells", 0, &pd_spec);
