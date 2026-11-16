@@ -16,13 +16,23 @@
 
 #include <dt-bindings/power/renesas,r8a78000-mdlc.h>
 
-struct mod_map {
-	int hw_id;		/* Hardware module ID or -1 sentinel */
+struct mod_id_map_entry {
+	u32 hw_id;		/* Hardware module ID */
 };
+
+struct mod_id_map {
+	const struct mod_id_map_entry *entries;
+	unsigned int size;
+};
+
+#define MOD_ID_MAP(_entries) .mod_map = &(struct mod_id_map) {		\
+	.entries = _entries,						\
+	.size = ARRAY_SIZE(_entries),					\
+}
 
 struct mdlc_info {
 	u32 base;
-	const struct mod_map *mod_map;
+	const struct mod_id_map *mod_map;
 };
 
 /**
@@ -41,7 +51,7 @@ struct r8a78000_mdlc_priv {
 	struct reset_controller_dev rcdev;
 	struct device *dev;
 	struct device_node *np;
-	const struct mod_map *mod_map;
+	const struct mod_id_map *mod_map;
 };
 
 static struct generic_pm_domain *r8a78000_genpd_always_on;
@@ -77,17 +87,14 @@ static struct generic_pm_domain *r8a78000_genpd_xlate(
 #define rcdev_to_priv(_rcdev)	\
 	container_of(_rcdev, struct r8a78000_mdlc_priv, rcdev)
 
-static const struct mod_map *mod_map_find(const struct mod_map *map, u32 id)
+static int mod_id_map_find(const struct mod_id_map *map, u32 hw_id)
 {
-	if (!map)
-		return NULL;
-
-	for (; map->hw_id >= 0; map++) {
-		if (map->hw_id == id)
-			return map;
+	for (unsigned int i = 0; i < map->size; i++) {
+		if (map->entries[i].hw_id == hw_id)
+			return i;
 	}
 
-	return NULL;
+	return -1;
 }
 
 static int r8a78000_mdlc_reset_xlate(struct reset_controller_dev *rcdev,
@@ -95,7 +102,7 @@ static int r8a78000_mdlc_reset_xlate(struct reset_controller_dev *rcdev,
 {
 	struct r8a78000_mdlc_priv *priv = rcdev_to_priv(rcdev);
 	struct device *dev = priv->dev;
-	const struct mod_map *map;
+	int idx;
 	u32 id;
 
 	if (spec->args_count != 1)
@@ -103,8 +110,8 @@ static int r8a78000_mdlc_reset_xlate(struct reset_controller_dev *rcdev,
 
 	id = spec->args[0];
 
-	map = mod_map_find(priv->mod_map, id);
-	if (!map) {
+	idx = mod_id_map_find(priv->mod_map, id);
+	if (idx < 0) {
 		dev_err(dev, "Unknown reset 0x%x\n", id);
 		return -ENOENT;
 	}
@@ -141,9 +148,8 @@ static int r8a78000_mdlc_attach_dev(struct generic_pm_domain *domain,
 	struct device_node *np = dev->of_node;
 	struct r8a78000_mdlc_priv *priv;
 	struct of_phandle_args pd_spec;
-	const struct mod_map *map;
 	unsigned int id;
-	int ret;
+	int ret, idx;
 
 	ret = of_parse_phandle_with_args(np, "power-domains",
 					 "#power-domain-cells", 0, &pd_spec);
@@ -166,8 +172,8 @@ static int r8a78000_mdlc_attach_dev(struct generic_pm_domain *domain,
 	id = pd_spec.args[1];
 	of_node_put(pd_spec.np);
 
-	map = mod_map_find(priv->mod_map, id);
-	if (!map) {
+	idx = mod_id_map_find(priv->mod_map, id);
+	if (idx < 0) {
 		dev_err(dev, "Unknown module 0x%x\n", id);
 		return -ENOENT;
 	}
@@ -292,15 +298,14 @@ static int r8a78000_mdlc_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static const struct mod_map r8a78000_mdlc_perw_mod_default[] = {
+static const struct mod_id_map_entry r8a78000_mdlc_perw_mod_default[] = {
 	{ 0x54 },	/* HSCIF0 */
-	{ -1 }
 };
 
 static const struct mdlc_info r8a78000_mdlc_default[] = {
 	{
 		.base = 0xc05d0000,
-		.mod_map = r8a78000_mdlc_perw_mod_default,
+		MOD_ID_MAP(r8a78000_mdlc_perw_mod_default),
 	},
 	{ /* sentinel */ }
 };
