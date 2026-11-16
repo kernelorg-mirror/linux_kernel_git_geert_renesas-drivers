@@ -17,8 +17,8 @@
 #include <dt-bindings/clock/renesas,r8a78000-cpg.h>
 
 struct clk_id_map_entry {
-	u32 dt_id;		/* DT binding clock ID */
-	u32 fw_id;		/* FIXED_CLK() ID */
+	u16 dt_id;		/* DT binding clock ID */
+	u16 fw_id;		/* FIXED_CLK() ID */
 };
 
 struct clk_id_map {
